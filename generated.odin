@@ -4,7 +4,7 @@ import "core:bytes"
 
 import "base:intrinsics"
 
-Display_Error :: enum {
+Display_Error :: enum u32 {
 	// server couldn't find object
 	Invalid_Object = 0,
 	// method doesn't exist on the specified interface or malformed request
@@ -14,7 +14,7 @@ Display_Error :: enum {
 	// implementation error in compositor
 	Implementation = 3,
 }
-Shm_Error :: enum {
+Shm_Error :: enum u32 {
 	// buffer format is not known
 	Invalid_Format = 0,
 	// invalid size or stride during pool or buffer creation
@@ -22,7 +22,7 @@ Shm_Error :: enum {
 	// mmapping the file descriptor failed
 	Invalid_Fd = 2,
 }
-Shm_Format :: enum {
+Shm_Format :: enum u32 {
 	// 32-bit ARGB format, [31:0] A:R:G:B 8:8:8:8 little endian
 	Argb8888 = 0,
 	// 32-bit RGB format, [31:0] x:R:G:B 8:8:8:8 little endian
@@ -258,7 +258,7 @@ Shm_Format :: enum {
 	// 2x2 subsampled Cr:Cb plane 10 bits per channel packed
 	P030 = 0x30333050,
 }
-Data_Offer_Error :: enum {
+Data_Offer_Error :: enum u32 {
 	// finish request was called untimely
 	Invalid_Finish = 0,
 	// action mask contains invalid values
@@ -268,19 +268,19 @@ Data_Offer_Error :: enum {
 	// offer doesn't accept this request
 	Invalid_Offer = 3,
 }
-Data_Source_Error :: enum {
+Data_Source_Error :: enum u32 {
 	// action mask contains invalid values
 	Invalid_Action_Mask = 0,
 	// source doesn't accept this request
 	Invalid_Source = 1,
 }
-Data_Device_Error :: enum {
+Data_Device_Error :: enum u32 {
 	// given wl_surface has another role
 	Role = 0,
 	// source has already been used
 	Used_Source = 1,
 }
-Data_Device_Manager_Dnd_Action :: enum {
+Data_Device_Manager_Dnd_Action_Bits :: enum {
 	// copy action
 	Copy = 0,
 	// move action
@@ -288,12 +288,12 @@ Data_Device_Manager_Dnd_Action :: enum {
 	// ask action
 	Ask = 2,
 }
-Data_Device_Manager_Dnd_Actions :: bit_set[Data_Device_Manager_Dnd_Action]
-Shell_Error :: enum {
+Data_Device_Manager_Dnd_Action :: distinct bit_set[Data_Device_Manager_Dnd_Action_Bits; u32]
+Shell_Error :: enum u32 {
 	// given wl_surface has another role
 	Role = 0,
 }
-Shell_Surface_Resize :: enum {
+Shell_Surface_Resize_Bits :: enum {
 	// top edge
 	Top = 0,
 	// bottom edge
@@ -303,13 +303,13 @@ Shell_Surface_Resize :: enum {
 	// right edge
 	Right = 3,
 }
-Shell_Surface_Resizes :: bit_set[Shell_Surface_Resize]
-Shell_Surface_Transient :: enum {
+Shell_Surface_Resize :: distinct bit_set[Shell_Surface_Resize_Bits; u32]
+Shell_Surface_Transient_Bits :: enum {
 	// do not set keyboard focus
 	Inactive = 0,
 }
-Shell_Surface_Transients :: bit_set[Shell_Surface_Transient]
-Shell_Surface_Fullscreen_Method :: enum {
+Shell_Surface_Transient :: distinct bit_set[Shell_Surface_Transient_Bits; u32]
+Shell_Surface_Fullscreen_Method :: enum u32 {
 	// no preference, apply default policy
 	Default = 0,
 	// scale, preserve the surface's aspect ratio and center on output
@@ -319,7 +319,7 @@ Shell_Surface_Fullscreen_Method :: enum {
 	// no upscaling, center on output and add black borders to compensate size mismatch
 	Fill = 3,
 }
-Surface_Error :: enum {
+Surface_Error :: enum u32 {
 	// buffer scale value is invalid
 	Invalid_Scale = 0,
 	// buffer transform value is invalid
@@ -331,7 +331,7 @@ Surface_Error :: enum {
 	// surface was destroyed before its role object
 	Defunct_Role_Object = 4,
 }
-Seat_Capability :: enum {
+Seat_Capability_Bits :: enum {
 	// the seat has pointer devices
 	Pointer = 0,
 	// the seat has one or more keyboards
@@ -339,28 +339,28 @@ Seat_Capability :: enum {
 	// the seat has touch devices
 	Touch = 2,
 }
-Seat_Capabilitys :: bit_set[Seat_Capability]
-Seat_Error :: enum {
+Seat_Capability :: distinct bit_set[Seat_Capability_Bits; u32]
+Seat_Error :: enum u32 {
 	// get_pointer, get_keyboard or get_touch called on seat without the matching capability
 	Missing_Capability = 0,
 }
-Pointer_Error :: enum {
+Pointer_Error :: enum u32 {
 	// given wl_surface has another role
 	Role = 0,
 }
-Pointer_Button_State :: enum {
+Pointer_Button_State :: enum u32 {
 	// the button is not pressed
 	Released = 0,
 	// the button is pressed
 	Pressed = 1,
 }
-Pointer_Axis :: enum {
+Pointer_Axis :: enum u32 {
 	// vertical axis
 	Vertical_Scroll = 0,
 	// horizontal axis
 	Horizontal_Scroll = 1,
 }
-Pointer_Axis_Source :: enum {
+Pointer_Axis_Source :: enum u32 {
 	// a physical wheel rotation
 	Wheel = 0,
 	// finger on a touch surface
@@ -370,19 +370,19 @@ Pointer_Axis_Source :: enum {
 	// a physical wheel tilt
 	Wheel_Tilt = 3,
 }
-Pointer_Axis_Relative_Direction :: enum {
+Pointer_Axis_Relative_Direction :: enum u32 {
 	// physical motion matches axis direction
 	Identical = 0,
 	// physical motion is the inverse of the axis direction
 	Inverted = 1,
 }
-Keyboard_Keymap_Format :: enum {
+Keyboard_Keymap_Format :: enum u32 {
 	// no keymap; client must understand how to interpret the raw keycode
 	No_Keymap = 0,
 	// libxkbcommon compatible, null-terminated string; to determine the xkb keycode, clients must add 8 to the key event keycode
 	Xkb_V1 = 1,
 }
-Keyboard_Key_State :: enum {
+Keyboard_Key_State :: enum u32 {
 	// key is not pressed
 	Released = 0,
 	// key is pressed
@@ -390,7 +390,7 @@ Keyboard_Key_State :: enum {
 	// key was repeated
 	Repeated = 2,
 }
-Output_Subpixel :: enum {
+Output_Subpixel :: enum u32 {
 	// unknown geometry
 	Unknown = 0,
 	// no geometry
@@ -404,7 +404,7 @@ Output_Subpixel :: enum {
 	// vertical BGR
 	Vertical_Bgr = 5,
 }
-Output_Transform :: enum {
+Output_Transform :: enum u32 {
 	// no transform
 	Normal = 0,
 	// 90 degrees counter-clockwise
@@ -422,24 +422,24 @@ Output_Transform :: enum {
 	// flip and rotate 270 degrees counter-clockwise
 	Flipped_270 = 7,
 }
-Output_Mode :: enum {
+Output_Mode_Bits :: enum {
 	// indicates this is the current mode
 	Current = 0,
 	// indicates this is the preferred mode
 	Preferred = 1,
 }
-Output_Modes :: bit_set[Output_Mode]
-Subcompositor_Error :: enum {
+Output_Mode :: distinct bit_set[Output_Mode_Bits; u32]
+Subcompositor_Error :: enum u32 {
 	// the to-be sub-surface is invalid
 	Bad_Surface = 0,
 	// the to-be sub-surface parent is invalid
 	Bad_Parent = 1,
 }
-Subsurface_Error :: enum {
+Subsurface_Error :: enum u32 {
 	// wl_surface is not a sibling or the parent
 	Bad_Surface = 0,
 }
-Zwp_Linux_Buffer_Params_V1_Error :: enum {
+Zwp_Linux_Buffer_Params_V1_Error :: enum u32 {
 	// the dmabuf_batch object has already been used to create a wl_buffer
 	Already_Used = 0,
 	// plane index out of bounds
@@ -457,7 +457,7 @@ Zwp_Linux_Buffer_Params_V1_Error :: enum {
 	// invalid wl_buffer resulted from importing dmabufs via the create_immed request on given buffer_params
 	Invalid_Wl_Buffer = 7,
 }
-Zwp_Linux_Buffer_Params_V1_Flags :: enum {
+Zwp_Linux_Buffer_Params_V1_Flags_Bits :: enum {
 	// contents are y-inverted
 	Y_Invert = 0,
 	// content is interlaced
@@ -465,26 +465,26 @@ Zwp_Linux_Buffer_Params_V1_Flags :: enum {
 	// bottom field first
 	Bottom_First = 2,
 }
-Zwp_Linux_Buffer_Params_V1_Flagss :: bit_set[Zwp_Linux_Buffer_Params_V1_Flags]
-Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags :: enum {
+Zwp_Linux_Buffer_Params_V1_Flags :: distinct bit_set[Zwp_Linux_Buffer_Params_V1_Flags_Bits; u32]
+Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags_Bits :: enum {
 	// direct scan-out tranche
 	Scanout = 0,
 }
-Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flagss :: bit_set[Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags]
-Wp_Presentation_Error :: enum {
+Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags :: distinct bit_set[Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags_Bits; u32]
+Wp_Presentation_Error :: enum u32 {
 	// invalid value in tv_nsec
 	Invalid_Timestamp = 0,
 	// invalid flag
 	Invalid_Flag = 1,
 }
-Wp_Presentation_Feedback_Kind :: enum {
+Wp_Presentation_Feedback_Kind_Bits :: enum {
 	Vsync = 0,
 	Hw_Clock = 1,
 	Hw_Completion = 2,
 	Zero_Copy = 3,
 }
-Wp_Presentation_Feedback_Kinds :: bit_set[Wp_Presentation_Feedback_Kind]
-Zwp_Tablet_Tool_V2_Type :: enum {
+Wp_Presentation_Feedback_Kind :: distinct bit_set[Wp_Presentation_Feedback_Kind_Bits; u32]
+Zwp_Tablet_Tool_V2_Type :: enum u32 {
 	// Pen
 	Pen = 0x140,
 	// Eraser
@@ -502,7 +502,7 @@ Zwp_Tablet_Tool_V2_Type :: enum {
 	// Lens
 	Lens = 0x147,
 }
-Zwp_Tablet_Tool_V2_Capability :: enum {
+Zwp_Tablet_Tool_V2_Capability :: enum u32 {
 	// Tilt axes
 	Tilt = 1,
 	// Pressure axis
@@ -516,17 +516,17 @@ Zwp_Tablet_Tool_V2_Capability :: enum {
 	// Wheel axis
 	Wheel = 6,
 }
-Zwp_Tablet_Tool_V2_Button_State :: enum {
+Zwp_Tablet_Tool_V2_Button_State :: enum u32 {
 	// button is not pressed
 	Released = 0,
 	// button is pressed
 	Pressed = 1,
 }
-Zwp_Tablet_Tool_V2_Error :: enum {
+Zwp_Tablet_Tool_V2_Error :: enum u32 {
 	// given wl_surface has another role
 	Role = 0,
 }
-Zwp_Tablet_V2_Bustype :: enum {
+Zwp_Tablet_V2_Bustype :: enum u32 {
 	// USB
 	Usb = 3,
 	// Bluetooth
@@ -538,25 +538,25 @@ Zwp_Tablet_V2_Bustype :: enum {
 	// I2C
 	I2c = 24,
 }
-Zwp_Tablet_Pad_Ring_V2_Source :: enum {
+Zwp_Tablet_Pad_Ring_V2_Source :: enum u32 {
 	// finger
 	Finger = 1,
 }
-Zwp_Tablet_Pad_Strip_V2_Source :: enum {
+Zwp_Tablet_Pad_Strip_V2_Source :: enum u32 {
 	// finger
 	Finger = 1,
 }
-Zwp_Tablet_Pad_V2_Button_State :: enum {
+Zwp_Tablet_Pad_V2_Button_State :: enum u32 {
 	// the button is not pressed
 	Released = 0,
 	// the button is pressed
 	Pressed = 1,
 }
-Wp_Viewporter_Error :: enum {
+Wp_Viewporter_Error :: enum u32 {
 	// the surface already has a viewport object associated
 	Viewport_Exists = 0,
 }
-Wp_Viewport_Error :: enum {
+Wp_Viewport_Error :: enum u32 {
 	// negative or zero values in width or height
 	Bad_Value = 0,
 	// destination size is not integer
@@ -566,7 +566,7 @@ Wp_Viewport_Error :: enum {
 	// the wl_surface was destroyed
 	No_Surface = 3,
 }
-Xdg_Wm_Base_Error :: enum {
+Xdg_Wm_Base_Error :: enum u32 {
 	// given wl_surface has another role
 	Role = 0,
 	// xdg_wm_base was destroyed before children
@@ -582,11 +582,11 @@ Xdg_Wm_Base_Error :: enum {
 	// the client didn’t respond to a ping event in time
 	Unresponsive = 6,
 }
-Xdg_Positioner_Error :: enum {
+Xdg_Positioner_Error :: enum u32 {
 	// invalid input provided
 	Invalid_Input = 0,
 }
-Xdg_Positioner_Anchor :: enum {
+Xdg_Positioner_Anchor :: enum u32 {
 	None = 0,
 	Top = 1,
 	Bottom = 2,
@@ -597,7 +597,7 @@ Xdg_Positioner_Anchor :: enum {
 	Top_Right = 7,
 	Bottom_Right = 8,
 }
-Xdg_Positioner_Gravity :: enum {
+Xdg_Positioner_Gravity :: enum u32 {
 	None = 0,
 	Top = 1,
 	Bottom = 2,
@@ -608,7 +608,7 @@ Xdg_Positioner_Gravity :: enum {
 	Top_Right = 7,
 	Bottom_Right = 8,
 }
-Xdg_Positioner_Constraint_Adjustment :: enum {
+Xdg_Positioner_Constraint_Adjustment_Bits :: enum {
 	Slide_X = 0,
 	Slide_Y = 1,
 	Flip_X = 2,
@@ -616,8 +616,8 @@ Xdg_Positioner_Constraint_Adjustment :: enum {
 	Resize_X = 4,
 	Resize_Y = 5,
 }
-Xdg_Positioner_Constraint_Adjustments :: bit_set[Xdg_Positioner_Constraint_Adjustment]
-Xdg_Surface_Error :: enum {
+Xdg_Positioner_Constraint_Adjustment :: distinct bit_set[Xdg_Positioner_Constraint_Adjustment_Bits; u32]
+Xdg_Surface_Error :: enum u32 {
 	// Surface was not fully constructed
 	Not_Constructed = 1,
 	// Surface was already constructed
@@ -631,7 +631,7 @@ Xdg_Surface_Error :: enum {
 	// Surface was destroyed before its role object
 	Defunct_Role_Object = 6,
 }
-Xdg_Toplevel_Error :: enum {
+Xdg_Toplevel_Error :: enum u32 {
 	// provided value is not a valid variant of the resize_edge enum
 	Invalid_Resize_Edge = 0,
 	// invalid parent toplevel
@@ -639,7 +639,7 @@ Xdg_Toplevel_Error :: enum {
 	// client provided an invalid min or max size
 	Invalid_Size = 2,
 }
-Xdg_Toplevel_Resize_Edge :: enum {
+Xdg_Toplevel_Resize_Edge :: enum u32 {
 	None = 0,
 	Top = 1,
 	Bottom = 2,
@@ -650,7 +650,7 @@ Xdg_Toplevel_Resize_Edge :: enum {
 	Top_Right = 9,
 	Bottom_Right = 10,
 }
-Xdg_Toplevel_State :: enum {
+Xdg_Toplevel_State :: enum u32 {
 	// the surface is maximized
 	Maximized = 1,
 	// the surface is fullscreen
@@ -669,7 +669,7 @@ Xdg_Toplevel_State :: enum {
 	Constrained_Top = 12,
 	Constrained_Bottom = 13,
 }
-Xdg_Toplevel_Wm_Capabilities :: enum {
+Xdg_Toplevel_Wm_Capabilities :: enum u32 {
 	// show_window_menu is available
 	Window_Menu = 1,
 	// set_maximized and unset_maximized are available
@@ -679,25 +679,25 @@ Xdg_Toplevel_Wm_Capabilities :: enum {
 	// set_minimized is available
 	Minimize = 4,
 }
-Xdg_Popup_Error :: enum {
+Xdg_Popup_Error :: enum u32 {
 	// tried to grab after being mapped
 	Invalid_Grab = 0,
 }
-Wp_Alpha_Modifier_V1_Error :: enum {
+Wp_Alpha_Modifier_V1_Error :: enum u32 {
 	// wl_surface already has a alpha modifier object
 	Already_Constructed = 0,
 }
-Wp_Alpha_Modifier_Surface_V1_Error :: enum {
+Wp_Alpha_Modifier_Surface_V1_Error :: enum u32 {
 	// wl_surface was destroyed
 	No_Surface = 0,
 }
-Wp_Color_Manager_V1_Error :: enum {
+Wp_Color_Manager_V1_Error :: enum u32 {
 	// request not supported
 	Unsupported_Feature = 0,
 	// color management surface exists already
 	Surface_Exists = 1,
 }
-Wp_Color_Manager_V1_Render_Intent :: enum {
+Wp_Color_Manager_V1_Render_Intent :: enum u32 {
 	// perceptual
 	Perceptual = 0,
 	// media-relative colorimetric
@@ -709,7 +709,7 @@ Wp_Color_Manager_V1_Render_Intent :: enum {
 	// media-relative colorimetric + black point compensation
 	Relative_Bpc = 4,
 }
-Wp_Color_Manager_V1_Feature :: enum {
+Wp_Color_Manager_V1_Feature :: enum u32 {
 	// create_icc_creator request
 	Icc_V2_V4 = 0,
 	// create_parametric_creator request
@@ -725,7 +725,7 @@ Wp_Color_Manager_V1_Feature :: enum {
 	// create_windows_scrgb request
 	Windows_Scrgb = 7,
 }
-Wp_Color_Manager_V1_Primaries :: enum {
+Wp_Color_Manager_V1_Primaries :: enum u32 {
 	Srgb = 1,
 	Pal_M = 2,
 	Pal = 3,
@@ -737,7 +737,7 @@ Wp_Color_Manager_V1_Primaries :: enum {
 	Display_P3 = 9,
 	Adobe_Rgb = 10,
 }
-Wp_Color_Manager_V1_Transfer_Function :: enum {
+Wp_Color_Manager_V1_Transfer_Function :: enum u32 {
 	Bt1886 = 1,
 	Gamma22 = 2,
 	Gamma28 = 3,
@@ -752,7 +752,7 @@ Wp_Color_Manager_V1_Transfer_Function :: enum {
 	St428 = 12,
 	Hlg = 13,
 }
-Wp_Color_Management_Surface_V1_Error :: enum {
+Wp_Color_Management_Surface_V1_Error :: enum u32 {
 	// unsupported rendering intent
 	Render_Intent = 0,
 	// invalid image description
@@ -760,13 +760,13 @@ Wp_Color_Management_Surface_V1_Error :: enum {
 	// forbidden request on inert object
 	Inert = 2,
 }
-Wp_Color_Management_Surface_Feedback_V1_Error :: enum {
+Wp_Color_Management_Surface_Feedback_V1_Error :: enum u32 {
 	// forbidden request on inert object
 	Inert = 0,
 	// attempted to use an unsupported feature
 	Unsupported_Feature = 1,
 }
-Wp_Image_Description_Creator_Icc_V1_Error :: enum {
+Wp_Image_Description_Creator_Icc_V1_Error :: enum u32 {
 	// incomplete parameter set
 	Incomplete_Set = 0,
 	// property already set
@@ -778,7 +778,7 @@ Wp_Image_Description_Creator_Icc_V1_Error :: enum {
 	// offset + length exceeds file size
 	Out_Of_File = 4,
 }
-Wp_Image_Description_Creator_Params_V1_Error :: enum {
+Wp_Image_Description_Creator_Params_V1_Error :: enum u32 {
 	// incomplete parameter set
 	Incomplete_Set = 0,
 	// property already set
@@ -792,13 +792,13 @@ Wp_Image_Description_Creator_Params_V1_Error :: enum {
 	// invalid luminance value or range
 	Invalid_Luminance = 5,
 }
-Wp_Image_Description_V1_Error :: enum {
+Wp_Image_Description_V1_Error :: enum u32 {
 	// attempted to use an object which is not ready
 	Not_Ready = 0,
 	// get_information not allowed
 	No_Information = 1,
 }
-Wp_Image_Description_V1_Cause :: enum {
+Wp_Image_Description_V1_Cause :: enum u32 {
 	// interface version too low
 	Low_Version = 0,
 	// unsupported image description data
@@ -808,11 +808,11 @@ Wp_Image_Description_V1_Cause :: enum {
 	// the relevant output no longer exists
 	No_Output = 3,
 }
-Wp_Color_Representation_Manager_V1_Error :: enum {
+Wp_Color_Representation_Manager_V1_Error :: enum u32 {
 	// color representation surface exists already
 	Surface_Exists = 1,
 }
-Wp_Color_Representation_Surface_V1_Error :: enum {
+Wp_Color_Representation_Surface_V1_Error :: enum u32 {
 	// unsupported alpha mode
 	Alpha_Mode = 1,
 	// unsupported coefficients
@@ -824,12 +824,12 @@ Wp_Color_Representation_Surface_V1_Error :: enum {
 	// invalid chroma location
 	Chroma_Location = 5,
 }
-Wp_Color_Representation_Surface_V1_Alpha_Mode :: enum {
+Wp_Color_Representation_Surface_V1_Alpha_Mode :: enum u32 {
 	Premultiplied_Electrical = 0,
 	Premultiplied_Optical = 1,
 	Straight = 2,
 }
-Wp_Color_Representation_Surface_V1_Coefficients :: enum {
+Wp_Color_Representation_Surface_V1_Coefficients :: enum u32 {
 	Identity = 1,
 	Bt709 = 2,
 	Fcc = 3,
@@ -839,13 +839,13 @@ Wp_Color_Representation_Surface_V1_Coefficients :: enum {
 	Bt2020_Cl = 7,
 	Ictcp = 8,
 }
-Wp_Color_Representation_Surface_V1_Range :: enum {
+Wp_Color_Representation_Surface_V1_Range :: enum u32 {
 	// Full color range
 	Full = 1,
 	// Limited color range
 	Limited = 2,
 }
-Wp_Color_Representation_Surface_V1_Chroma_Location :: enum {
+Wp_Color_Representation_Surface_V1_Chroma_Location :: enum u32 {
 	Type_0 = 1,
 	Type_1 = 2,
 	Type_2 = 3,
@@ -853,11 +853,11 @@ Wp_Color_Representation_Surface_V1_Chroma_Location :: enum {
 	Type_4 = 5,
 	Type_5 = 6,
 }
-Wp_Commit_Timing_Manager_V1_Error :: enum {
+Wp_Commit_Timing_Manager_V1_Error :: enum u32 {
 	// commit timer already exists for surface
 	Commit_Timer_Exists = 0,
 }
-Wp_Commit_Timer_V1_Error :: enum {
+Wp_Commit_Timer_V1_Error :: enum u32 {
 	// timestamp contains an invalid value
 	Invalid_Timestamp = 0,
 	// timestamp exists
@@ -865,17 +865,17 @@ Wp_Commit_Timer_V1_Error :: enum {
 	// the associated surface no longer exists
 	Surface_Destroyed = 2,
 }
-Wp_Content_Type_Manager_V1_Error :: enum {
+Wp_Content_Type_Manager_V1_Error :: enum u32 {
 	// wl_surface already has a content type object
 	Already_Constructed = 0,
 }
-Wp_Content_Type_V1_Type :: enum {
+Wp_Content_Type_V1_Type :: enum u32 {
 	None = 0,
 	Photo = 1,
 	Video = 2,
 	Game = 3,
 }
-Wp_Cursor_Shape_Device_V1_Shape :: enum {
+Wp_Cursor_Shape_Device_V1_Shape :: enum u32 {
 	// default cursor
 	Default = 1,
 	// a context menu is available for the object under the cursor
@@ -949,11 +949,11 @@ Wp_Cursor_Shape_Device_V1_Shape :: enum {
 	// resizing: something can be moved or resized in any direction (non-css value)
 	All_Resize = 36,
 }
-Wp_Cursor_Shape_Device_V1_Error :: enum {
+Wp_Cursor_Shape_Device_V1_Error :: enum u32 {
 	// the specified shape value is invalid
 	Invalid_Shape = 1,
 }
-Wp_Drm_Lease_Request_V1_Error :: enum {
+Wp_Drm_Lease_Request_V1_Error :: enum u32 {
 	// requested a connector from a different lease device
 	Wrong_Device = 0,
 	// requested a connector twice
@@ -961,41 +961,41 @@ Wp_Drm_Lease_Request_V1_Error :: enum {
 	// requested a lease without requesting a connector
 	Empty_Lease = 2,
 }
-Ext_Background_Effect_Manager_V1_Error :: enum {
+Ext_Background_Effect_Manager_V1_Error :: enum u32 {
 	// the surface already has a background effect object
 	Background_Effect_Exists = 0,
 }
-Ext_Background_Effect_Manager_V1_Capability :: enum {
+Ext_Background_Effect_Manager_V1_Capability_Bits :: enum {
 	// the compositor supports applying blur
 	Blur = 0,
 }
-Ext_Background_Effect_Manager_V1_Capabilitys :: bit_set[Ext_Background_Effect_Manager_V1_Capability]
-Ext_Background_Effect_Surface_V1_Error :: enum {
+Ext_Background_Effect_Manager_V1_Capability :: distinct bit_set[Ext_Background_Effect_Manager_V1_Capability_Bits; u32]
+Ext_Background_Effect_Surface_V1_Error :: enum u32 {
 	// the associated surface has been destroyed
 	Surface_Destroyed = 0,
 }
-Ext_Data_Control_Device_V1_Error :: enum {
+Ext_Data_Control_Device_V1_Error :: enum u32 {
 	// source given to set_selection or set_primary_selection was already used before
 	Used_Source = 1,
 }
-Ext_Data_Control_Source_V1_Error :: enum {
+Ext_Data_Control_Source_V1_Error :: enum u32 {
 	// offer sent after ext_data_control_device.set_selection
 	Invalid_Offer = 1,
 }
-Ext_Image_Copy_Capture_Manager_V1_Error :: enum {
+Ext_Image_Copy_Capture_Manager_V1_Error :: enum u32 {
 	// invalid option flag
 	Invalid_Option = 1,
 }
-Ext_Image_Copy_Capture_Manager_V1_Options :: enum {
+Ext_Image_Copy_Capture_Manager_V1_Options_Bits :: enum {
 	// paint cursors onto captured frames
 	Paint_Cursors = 0,
 }
-Ext_Image_Copy_Capture_Manager_V1_Optionss :: bit_set[Ext_Image_Copy_Capture_Manager_V1_Options]
-Ext_Image_Copy_Capture_Session_V1_Error :: enum {
+Ext_Image_Copy_Capture_Manager_V1_Options :: distinct bit_set[Ext_Image_Copy_Capture_Manager_V1_Options_Bits; u32]
+Ext_Image_Copy_Capture_Session_V1_Error :: enum u32 {
 	// create_frame sent before destroying previous frame
 	Duplicate_Frame = 1,
 }
-Ext_Image_Copy_Capture_Frame_V1_Error :: enum {
+Ext_Image_Copy_Capture_Frame_V1_Error :: enum u32 {
 	// capture sent without attach_buffer
 	No_Buffer = 1,
 	// invalid buffer damage
@@ -1003,16 +1003,16 @@ Ext_Image_Copy_Capture_Frame_V1_Error :: enum {
 	// capture request has been sent
 	Already_Captured = 3,
 }
-Ext_Image_Copy_Capture_Frame_V1_Failure_Reason :: enum {
+Ext_Image_Copy_Capture_Frame_V1_Failure_Reason :: enum u32 {
 	Unknown = 0,
 	Buffer_Constraints = 1,
 	Stopped = 2,
 }
-Ext_Image_Copy_Capture_Cursor_Session_V1_Error :: enum {
+Ext_Image_Copy_Capture_Cursor_Session_V1_Error :: enum u32 {
 	// get_capture_session sent twice
 	Duplicate_Session = 1,
 }
-Ext_Session_Lock_V1_Error :: enum {
+Ext_Session_Lock_V1_Error :: enum u32 {
 	// attempted to destroy session lock while locked
 	Invalid_Destroy = 0,
 	// unlock requested but locked event was never sent
@@ -1024,7 +1024,7 @@ Ext_Session_Lock_V1_Error :: enum {
 	// given wl_surface has a buffer attached or committed
 	Already_Constructed = 4,
 }
-Ext_Session_Lock_Surface_V1_Error :: enum {
+Ext_Session_Lock_Surface_V1_Error :: enum u32 {
 	// surface committed before first ack_configure request
 	Commit_Before_First_Ack = 0,
 	// surface committed with a null buffer
@@ -1034,20 +1034,20 @@ Ext_Session_Lock_Surface_V1_Error :: enum {
 	// serial provided in ack_configure is invalid
 	Invalid_Serial = 3,
 }
-Ext_Workspace_Group_Handle_V1_Group_Capabilities :: enum {
+Ext_Workspace_Group_Handle_V1_Group_Capabilities_Bits :: enum {
 	// create_workspace request is available
 	Create_Workspace = 0,
 }
-Ext_Workspace_Group_Handle_V1_Group_Capabilitiess :: bit_set[Ext_Workspace_Group_Handle_V1_Group_Capabilities]
-Ext_Workspace_Handle_V1_State :: enum {
+Ext_Workspace_Group_Handle_V1_Group_Capabilities :: distinct bit_set[Ext_Workspace_Group_Handle_V1_Group_Capabilities_Bits; u32]
+Ext_Workspace_Handle_V1_State_Bits :: enum {
 	// the workspace is active
 	Active = 0,
 	// the workspace requests attention
 	Urgent = 1,
 	Hidden = 2,
 }
-Ext_Workspace_Handle_V1_States :: bit_set[Ext_Workspace_Handle_V1_State]
-Ext_Workspace_Handle_V1_Workspace_Capabilities :: enum {
+Ext_Workspace_Handle_V1_State :: distinct bit_set[Ext_Workspace_Handle_V1_State_Bits; u32]
+Ext_Workspace_Handle_V1_Workspace_Capabilities_Bits :: enum {
 	// activate request is available
 	Activate = 0,
 	// deactivate request is available
@@ -1057,26 +1057,26 @@ Ext_Workspace_Handle_V1_Workspace_Capabilities :: enum {
 	// assign request is available
 	Assign = 3,
 }
-Ext_Workspace_Handle_V1_Workspace_Capabilitiess :: bit_set[Ext_Workspace_Handle_V1_Workspace_Capabilities]
-Wp_Fifo_Manager_V1_Error :: enum {
+Ext_Workspace_Handle_V1_Workspace_Capabilities :: distinct bit_set[Ext_Workspace_Handle_V1_Workspace_Capabilities_Bits; u32]
+Wp_Fifo_Manager_V1_Error :: enum u32 {
 	// fifo manager already exists for surface
 	Already_Exists = 0,
 }
-Wp_Fifo_V1_Error :: enum {
+Wp_Fifo_V1_Error :: enum u32 {
 	// the associated surface no longer exists
 	Surface_Destroyed = 0,
 }
-Wp_Fractional_Scale_Manager_V1_Error :: enum {
+Wp_Fractional_Scale_Manager_V1_Error :: enum u32 {
 	// the surface already has a fractional_scale object associated
 	Fractional_Scale_Exists = 0,
 }
-Wp_Linux_Drm_Syncobj_Manager_V1_Error :: enum {
+Wp_Linux_Drm_Syncobj_Manager_V1_Error :: enum u32 {
 	// the surface already has a synchronization object associated
 	Surface_Exists = 0,
 	// the timeline object could not be imported
 	Invalid_Timeline = 1,
 }
-Wp_Linux_Drm_Syncobj_Surface_V1_Error :: enum {
+Wp_Linux_Drm_Syncobj_Surface_V1_Error :: enum u32 {
 	// the associated wl_surface was destroyed
 	No_Surface = 1,
 	// the buffer does not support explicit synchronization
@@ -1090,13 +1090,13 @@ Wp_Linux_Drm_Syncobj_Surface_V1_Error :: enum {
 	// acquire and release timeline points are in conflict
 	Conflicting_Points = 6,
 }
-Wp_Security_Context_Manager_V1_Error :: enum {
+Wp_Security_Context_Manager_V1_Error :: enum u32 {
 	// listening socket FD is invalid
 	Invalid_Listen_Fd = 1,
 	// nested security contexts are forbidden
 	Nested = 2,
 }
-Wp_Security_Context_V1_Error :: enum {
+Wp_Security_Context_V1_Error :: enum u32 {
 	// security context has already been committed
 	Already_Used = 1,
 	// metadata has already been set
@@ -1104,33 +1104,33 @@ Wp_Security_Context_V1_Error :: enum {
 	// metadata is invalid
 	Invalid_Metadata = 3,
 }
-Wp_Tearing_Control_Manager_V1_Error :: enum {
+Wp_Tearing_Control_Manager_V1_Error :: enum u32 {
 	// the surface already has a tearing object associated
 	Tearing_Control_Exists = 0,
 }
-Wp_Tearing_Control_V1_Presentation_Hint :: enum {
+Wp_Tearing_Control_V1_Presentation_Hint :: enum u32 {
 	Vsync = 0,
 	Async = 1,
 }
-Xdg_Activation_Token_V1_Error :: enum {
+Xdg_Activation_Token_V1_Error :: enum u32 {
 	// The token has already been used previously
 	Already_Used = 0,
 }
-Xdg_Wm_Dialog_V1_Error :: enum {
+Xdg_Wm_Dialog_V1_Error :: enum u32 {
 	// the xdg_toplevel object has already been used to create a xdg_dialog_v1
 	Already_Used = 0,
 }
-Xdg_Toplevel_Drag_Manager_V1_Error :: enum {
+Xdg_Toplevel_Drag_Manager_V1_Error :: enum u32 {
 	// data_source already used for toplevel drag
 	Invalid_Source = 0,
 }
-Xdg_Toplevel_Drag_V1_Error :: enum {
+Xdg_Toplevel_Drag_V1_Error :: enum u32 {
 	// valid toplevel already attached
 	Toplevel_Attached = 0,
 	// drag has not ended
 	Ongoing_Drag = 1,
 }
-Xdg_Toplevel_Icon_V1_Error :: enum {
+Xdg_Toplevel_Icon_V1_Error :: enum u32 {
 	// the provided buffer does not satisfy requirements
 	Invalid_Buffer = 1,
 	// the icon has already been assigned to a toplevel and must not be changed
@@ -1138,11 +1138,11 @@ Xdg_Toplevel_Icon_V1_Error :: enum {
 	// the provided buffer has been destroyed before the toplevel icon
 	No_Buffer = 3,
 }
-Xwayland_Shell_V1_Error :: enum {
+Xwayland_Shell_V1_Error :: enum u32 {
 	// given wl_surface has another role
 	Role = 0,
 }
-Xwayland_Surface_V1_Error :: enum {
+Xwayland_Surface_V1_Error :: enum u32 {
 	// given wl_surface is already associated with an X11 window
 	Already_Associated = 0,
 	// serial was not valid

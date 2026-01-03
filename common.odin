@@ -114,11 +114,11 @@ read_fd :: proc(connection: ^Connection, data: ^Fd) -> bool {
 	return true
 }
 
-read_int :: proc(connection: ^Connection, data: ^$T) -> bool where intrinsics.type_is_integer(T) || intrinsics.type_is_enum(T) {
-	value: i32
+read_int :: proc(connection: ^Connection, data: ^$T) -> bool where intrinsics.type_is_integer(T) || intrinsics.type_is_enum(T) || intrinsics.type_is_bit_set(T) {
+	value: u32
 	intrinsics.mem_copy(&value, &connection.data[connection.data_cursor], size_of(value))
 	connection.data_cursor += 4
-	data^ = T(value);
+	data^ = transmute(T)value
 	return true
 }
 

@@ -220,7 +220,11 @@ main :: proc() {
 		}
 
 		generate_enum :: proc(ctx: ^Context, element: xml.Element, type_name: string, bitfield: bool) -> (ok: bool) {
-			fmt.wprintfln(ctx.enums_writer, "%v :: enum {{", type_name)
+			if bitfield {
+				fmt.wprintfln(ctx.enums_writer, "%v_Bits :: enum {{", type_name)
+			} else {
+				fmt.wprintfln(ctx.enums_writer, "%v :: enum u32 {{", type_name)
+			}
 			for child_id in element.value {
 				child := ctx.document.elements[child_id.(u32) or_continue]
 				if child.ident != "entry" {
@@ -256,7 +260,7 @@ main :: proc() {
 			}
 			fmt.wprintln(ctx.enums_writer, "}")
 			if bitfield {
-				fmt.wprintfln(ctx.enums_writer, "%vs :: bit_set[%v]", type_name, type_name)
+				fmt.wprintfln(ctx.enums_writer, "%v :: distinct bit_set[%v_Bits; u32]", type_name, type_name)
 			}
 
 			return true
