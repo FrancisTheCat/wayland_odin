@@ -63,10 +63,11 @@ connection_flush :: proc(connection: ^Connection) {
 @(require_results)
 display_connect :: proc(socket: linux.Fd, allocator := context.allocator) -> (connection: Connection, display: Display) {
 	connection.socket                 = socket
-	connection.object_types.allocator = allocator
 	connection.fds_in.allocator       = allocator
 	connection.fds_out.allocator      = allocator
 	connection.free_ids.allocator     = allocator
+	connection.object_types           = make([dynamic]Object_Type, 2, allocator)
+	connection.object_types[1]        = .Display
 	display                           = 1
 	return
 }

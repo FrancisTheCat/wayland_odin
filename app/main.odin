@@ -16,9 +16,7 @@ main :: proc() {
 	errno := linux.connect(socket, &addr)
 	assert(errno == {})
 
-	connection, display       := wl.display_connect(socket)
-	connection.object_types    = make([dynamic]wl.Object_Type, 2)
-	connection.object_types[1] = .Display
+	connection, display := wl.display_connect(socket)
 
 	registry := wl.display_get_registry(&connection, display)
 	wl.display_sync(&connection, display)
