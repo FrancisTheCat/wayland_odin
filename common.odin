@@ -22,6 +22,7 @@ Connection :: struct {
 	socket:       linux.Fd,
 }
 
+@(require_results)
 generate_id :: proc(connection: ^Connection, type: Object_Type) -> u32 {
 	id: u32
 	if len(connection.free_ids) != 0 {
@@ -59,8 +60,15 @@ connection_flush :: proc(connection: ^Connection) {
 	connection.data_cursor = 0
 }
 
-display_connect :: proc(socket: linux.Fd, allocator := context.allocator) -> (Connection, Display) {
-	return { socket = socket, }, 1
+@(require_results)
+display_connect :: proc(socket: linux.Fd, allocator := context.allocator) -> (connection: Connection, display: Display) {
+	connection.socket                 = socket
+	connection.object_types.allocator = allocator
+	connection.fds_in.allocator       = allocator
+	connection.fds_out.allocator      = allocator
+	connection.free_ids.allocator     = allocator
+	display                           = 1
+	return
 }
 
 connection_poll :: proc(connection: ^Connection, buffer: []byte) {
@@ -72,6 +80,7 @@ connection_poll :: proc(connection: ^Connection, buffer: []byte) {
 	assert(errno == .NONE || errno == .EAGAIN)
 }
 
+@(require_results)
 peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: bool) {
 	for {
 		object, event, ok = _peek_event(connection)
@@ -86,6 +95,7 @@ peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: b
 	}
 }
 
+@(require_results)
 _peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: bool) {
 	if len(connection.data) - connection.data_cursor < 8 {
 		return
