@@ -39,12 +39,45 @@ main :: proc() {
 			type = xml.find_attribute_val_by_key(ctx.document, element, "type") or_return
 
 			switch name {
-			case "map":
-				name = "map_"
-			case "context":
-				name = "context_"
-			case "matrix":
-				name = "matrix_"
+			case "import":      name = "import_"
+			case "foreign":     name = "foreign_"
+			case "package":     name = "package_"
+			case "typeid":      name = "typeid_"
+			case "when":        name = "when_"
+			case "where":       name = "where_"
+			case "if":          name = "if_"
+			case "else":        name = "else_"
+			case "for":         name = "for_"
+			case "switch":      name = "switch_"
+			case "in":          name = "in_"
+			case "not_in":      name = "not_in_"
+			case "do":          name = "do_"
+			case "case":        name = "case_"
+			case "break":       name = "break_"
+			case "continue":    name = "continue_"
+			case "fallthrough": name = "fallthrough_"
+			case "defer":       name = "defer_"
+			case "return":      name = "return_"
+			case "proc":        name = "proc_"
+			case "struct":      name = "struct_"
+			case "union":       name = "union_"
+			case "enum":        name = "enum_"
+			case "bit_set":     name = "bit_set_"
+			case "bit_field":   name = "bit_field_"
+			case "map":         name = "map_"
+			case "dynamic":     name = "dynamic_"
+			case "auto_cast":   name = "auto_cast_"
+			case "cast":        name = "cast_"
+			case "transmute":   name = "transmute_"
+			case "distinct":    name = "distinct_"
+			case "using":       name = "using_"
+			case "context":     name = "context_"
+			case "or_else":     name = "or_else_"
+			case "or_return":   name = "or_return_"
+			case "or_break":    name = "or_break_"
+			case "or_continue": name = "or_continue_"
+			case "asm":         name = "asm_"
+			case "matrix":      name = "matrix_"
 			}
 
 			if type == "new_id" {
