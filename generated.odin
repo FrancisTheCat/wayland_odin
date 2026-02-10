@@ -257,6 +257,46 @@ Shm_Format :: enum u32 {
 	Xvuy8888 = 0x59555658,
 	// 2x2 subsampled Cr:Cb plane 10 bits per channel packed
 	P030 = 0x30333050,
+	// [47:0] R:G:B 16:16:16 little endian
+	Rgb161616 = 0x38344752,
+	// [47:0] B:G:R 16:16:16 little endian
+	Bgr161616 = 0x38344742,
+	// [15:0] R 16 little endian
+	R16f = 0x48202052,
+	// [31:0] G:R 16:16 little endian
+	Gr1616f = 0x48205247,
+	// [47:0] B:G:R 16:16:16 little endian
+	Bgr161616f = 0x48524742,
+	// [31:0] R 32 little endian
+	R32f = 0x46202052,
+	// [63:0] R:G 32:32 little endian
+	Gr3232f = 0x46205247,
+	// [95:0] R:G:B 32:32:32 little endian
+	Bgr323232f = 0x46524742,
+	// [127:0] R:G:B:A 32:32:32:32 little endian
+	Abgr32323232f = 0x46384241,
+	// 2x1 subsampled Cr:Cb plane
+	Nv20 = 0x3032564e,
+	// non-subsampled Cr:Cb plane
+	Nv30 = 0x3033564e,
+	// 2x2 subsampled Cb (1) and Cr (2) planes 10 bits per channel
+	S010 = 0x30313053,
+	// 2x1 subsampled Cb (1) and Cr (2) planes 10 bits per channel
+	S210 = 0x30313253,
+	// non-subsampled Cb (1) and Cr (2) planes 10 bits per channel
+	S410 = 0x30313453,
+	// 2x2 subsampled Cb (1) and Cr (2) planes 12 bits per channel
+	S012 = 0x32313053,
+	// 2x1 subsampled Cb (1) and Cr (2) planes 12 bits per channel
+	S212 = 0x32313253,
+	// non-subsampled Cb (1) and Cr (2) planes 12 bits per channel
+	S412 = 0x32313453,
+	// 2x2 subsampled Cb (1) and Cr (2) planes 16 bits per channel
+	S016 = 0x36313053,
+	// 2x1 subsampled Cb (1) and Cr (2) planes 16 bits per channel
+	S216 = 0x36313253,
+	// non-subsampled Cb (1) and Cr (2) planes 16 bits per channel
+	S416 = 0x36313453,
 }
 Data_Offer_Error :: enum u32 {
 	// finish request was called untimely
@@ -708,6 +748,7 @@ Wp_Color_Manager_V1_Render_Intent :: enum u32 {
 	Absolute = 3,
 	// media-relative colorimetric + black point compensation
 	Relative_Bpc = 4,
+	Absolute_No_Adaptation = 5,
 }
 Wp_Color_Manager_V1_Feature :: enum u32 {
 	// create_icc_creator request
@@ -751,6 +792,7 @@ Wp_Color_Manager_V1_Transfer_Function :: enum u32 {
 	St2084_Pq = 11,
 	St428 = 12,
 	Hlg = 13,
+	Compound_Power_2_4 = 14,
 }
 Wp_Color_Management_Surface_V1_Error :: enum u32 {
 	// unsupported rendering intent
@@ -2904,6 +2946,19 @@ wp_color_manager_v1_create_windows_scrgb :: proc(connection: ^Connection, wp_col
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	return
 }
+wp_color_manager_v1_get_image_description :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, reference: Wp_Image_Description_Reference_V1) -> (image_description: Wp_Image_Description_V1) {
+	_size: u16 = 8 + size_of(image_description) + size_of(reference)
+	wp_color_manager_v1 := wp_color_manager_v1
+	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	opcode: u16 = 7
+	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
+	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	reference := reference
+	bytes.buffer_write_ptr(&connection.buffer, &reference, size_of(reference))
+	return
+}
 wp_color_management_output_v1_destroy :: proc(connection: ^Connection, wp_color_management_output_v1: Wp_Color_Management_Output_V1) {
 	_size: u16 = 8
 	wp_color_management_output_v1 := wp_color_management_output_v1
@@ -3173,6 +3228,15 @@ wp_image_description_v1_get_information :: proc(connection: ^Connection, wp_imag
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	information = auto_cast generate_id(connection, .Wp_Image_Description_Info_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &information, size_of(information))
+	return
+}
+wp_image_description_reference_v1_destroy :: proc(connection: ^Connection, wp_image_description_reference_v1: Wp_Image_Description_Reference_V1) {
+	_size: u16 = 8
+	wp_image_description_reference_v1 := wp_image_description_reference_v1
+	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_reference_v1, size_of(wp_image_description_reference_v1))
+	opcode: u16 = 0
+	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	return
 }
 wp_color_representation_manager_v1_destroy :: proc(connection: ^Connection, wp_color_representation_manager_v1: Wp_Color_Representation_Manager_V1) {
@@ -4892,8 +4956,10 @@ Event :: union {
 	Event_Wp_Color_Manager_V1_Done,
 	Event_Wp_Color_Management_Output_V1_Image_Description_Changed,
 	Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed,
+	Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2,
 	Event_Wp_Image_Description_V1_Failed,
 	Event_Wp_Image_Description_V1_Ready,
+	Event_Wp_Image_Description_V1_Ready2,
 	Event_Wp_Image_Description_Info_V1_Done,
 	Event_Wp_Image_Description_Info_V1_Icc_File,
 	Event_Wp_Image_Description_Info_V1_Primaries,
@@ -5479,12 +5545,20 @@ Event_Wp_Color_Management_Output_V1_Image_Description_Changed :: struct {
 Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed :: struct {
 	identity: u32,
 }
+Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2 :: struct {
+	identity_hi: u32,
+	identity_lo: u32,
+}
 Event_Wp_Image_Description_V1_Failed :: struct {
 	cause: Wp_Image_Description_V1_Cause,
 	msg: string,
 }
 Event_Wp_Image_Description_V1_Ready :: struct {
 	identity: u32,
+}
+Event_Wp_Image_Description_V1_Ready2 :: struct {
+	identity_hi: u32,
+	identity_lo: u32,
 }
 Event_Wp_Image_Description_Info_V1_Done :: struct {
 }
@@ -6528,6 +6602,12 @@ parse_wp_color_management_surface_feedback_v1_preferred_changed :: proc(connecti
 	ok = true
 	return
 }
+parse_wp_color_management_surface_feedback_v1_preferred_changed2 :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2, ok: bool) {
+	read(connection, &event.identity_hi) or_return
+	read(connection, &event.identity_lo) or_return
+	ok = true
+	return
+}
 parse_wp_image_description_v1_failed :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_V1_Failed, ok: bool) {
 	read(connection, &event.cause) or_return
 	read(connection, &event.msg) or_return
@@ -6536,6 +6616,12 @@ parse_wp_image_description_v1_failed :: proc(connection: ^Connection) -> (event:
 }
 parse_wp_image_description_v1_ready :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_V1_Ready, ok: bool) {
 	read(connection, &event.identity) or_return
+	ok = true
+	return
+}
+parse_wp_image_description_v1_ready2 :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_V1_Ready2, ok: bool) {
+	read(connection, &event.identity_hi) or_return
+	read(connection, &event.identity_lo) or_return
 	ok = true
 	return
 }
@@ -7493,6 +7579,8 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 		switch opcode {
 		case 0:
 			return parse_wp_color_management_surface_feedback_v1_preferred_changed(connection)
+		case 1:
+			return parse_wp_color_management_surface_feedback_v1_preferred_changed2(connection)
 		case:
 			return
 		}
@@ -7512,6 +7600,8 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 			return parse_wp_image_description_v1_failed(connection)
 		case 1:
 			return parse_wp_image_description_v1_ready(connection)
+		case 2:
+			return parse_wp_image_description_v1_ready2(connection)
 		case:
 			return
 		}
@@ -7539,6 +7629,11 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 			return parse_wp_image_description_info_v1_target_max_cll(connection)
 		case 10:
 			return parse_wp_image_description_info_v1_target_max_fall(connection)
+		case:
+			return
+		}
+	case .Wp_Image_Description_Reference_V1:
+		switch opcode {
 		case:
 			return
 		}
@@ -8054,6 +8149,7 @@ Object_Type :: enum {
 	Wp_Image_Description_Creator_Params_V1,
 	Wp_Image_Description_V1,
 	Wp_Image_Description_Info_V1,
+	Wp_Image_Description_Reference_V1,
 	Wp_Color_Representation_Manager_V1,
 	Wp_Color_Representation_Surface_V1,
 	Wp_Commit_Timing_Manager_V1,
@@ -8172,6 +8268,7 @@ Wp_Image_Description_Creator_Icc_V1 :: distinct u32
 Wp_Image_Description_Creator_Params_V1 :: distinct u32
 Wp_Image_Description_V1 :: distinct u32
 Wp_Image_Description_Info_V1 :: distinct u32
+Wp_Image_Description_Reference_V1 :: distinct u32
 Wp_Color_Representation_Manager_V1 :: distinct u32
 Wp_Color_Representation_Surface_V1 :: distinct u32
 Wp_Commit_Timing_Manager_V1 :: distinct u32
@@ -8399,6 +8496,9 @@ resolve_type :: proc($T: typeid, interface: string, location := #caller_location
 	case Wp_Image_Description_Info_V1:
 		assert(interface == "wp_image_description_info_v1")
 		return .Wp_Image_Description_Info_V1
+	case Wp_Image_Description_Reference_V1:
+		assert(interface == "wp_image_description_reference_v1")
+		return .Wp_Image_Description_Reference_V1
 	case Wp_Color_Representation_Manager_V1:
 		assert(interface == "wp_color_representation_manager_v1")
 		return .Wp_Color_Representation_Manager_V1

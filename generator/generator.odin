@@ -43,6 +43,8 @@ main :: proc() {
 				name = "map_"
 			case "context":
 				name = "context_"
+			case "matrix":
+				name = "matrix_"
 			}
 
 			if type == "new_id" {
