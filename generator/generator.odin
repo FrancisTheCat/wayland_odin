@@ -125,7 +125,7 @@ main :: proc() {
 			ok = true
 			return
 		}
-		
+
 		generate_request :: proc(ctx: ^Context, element: xml.Element, request_name: string, opcode: int) -> (ok: bool) {
 			request_name := strings.trim_prefix(request_name, "wl_")
 			fmt.wprintf(ctx.requests_writer, "%v :: proc(connection: ^Connection, %v: %v", request_name, ctx.request_prefix, ctx.event_prefix)
@@ -136,7 +136,7 @@ main :: proc() {
 			has_new_id := false
 
 			fmt.sbprint(&sizes, "\t_size: u16 = 8")
-			
+
 			fmt.sbprintfln(&body, "\t%v := %v", ctx.request_prefix, ctx.request_prefix)
 			fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", ctx.request_prefix, ctx.request_prefix)
 			fmt.sbprintfln(&body, "\topcode: u16 = %d", opcode)
@@ -225,13 +225,8 @@ main :: proc() {
 		}
 
 		generate_event :: proc(ctx: ^Context, element: xml.Element, event_name, event_type_name: string, opcode: int) -> (ok: bool) {
-			fmt.wprintf(ctx.event_parser_writer, "parse_%v :: proc(connection: ^Connection", event_name)
 			fmt.wprintf(ctx.event_types_writer, "Event_%v :: struct {{\n", event_type_name)
-
-			fmt.wprintfln(ctx.parser_writer, "\t\tcase %d:", opcode)
-			fmt.wprintfln(ctx.parser_writer, "\t\t\treturn parse_%v(connection)", event_name)
-
-			body: strings.Builder
+			fmt.wprintf(ctx.event_parser_writer, "parse_%v :: proc(connection: ^Connection) -> (event: Event_%v, ok: bool) {{\n", event_name, event_type_name)
 
 			for child_id in element.value {
 				child := ctx.document.elements[child_id.(u32) or_continue]
@@ -239,18 +234,22 @@ main :: proc() {
 					continue
 				}
 
-				name, type, _ := parse_field(ctx, child_id.(u32)) or_return
+				name, type, new_id := parse_field(ctx, child_id.(u32)) or_return
 				type = strings.trim_prefix(type, "Wl_")
+
 				fmt.wprintf(ctx.event_types_writer, "\t%v: %v,\n", name, type)
-
-				fmt.sbprintfln(&body, "\tread(connection, &event.%v) or_return", name)
+				fmt.wprintf(ctx.event_parser_writer, "\tread(connection, &event.%v) or_return\n", name)
+				if new_id {
+					fmt.wprintf(ctx.event_parser_writer, "\tconnection.object_types[u32(event.%v)] = Object_Type.%v\n", name, type)
+				}
 			}
-			fmt.wprint(ctx.event_types_writer, "}\n")
 
-			fmt.wprint(ctx.event_parser_writer, ")")
-			fmt.wprintfln(ctx.event_parser_writer, " -> (event: Event_%v, ok: bool) {{", event_type_name)
-			fmt.wprint(ctx.event_parser_writer, strings.to_string(body))
-			fmt.wprintln(ctx.event_parser_writer, "\tok = true\n\treturn\n}")
+			fmt.wprint(ctx.event_types_writer, "}\n")
+			fmt.wprint(ctx.event_parser_writer, "\tok = true\n\treturn\n}\n")
+
+			fmt.wprintf(ctx.parser_writer, "\t\tcase %d:\n", opcode)
+			fmt.wprintf(ctx.parser_writer, "\t\t\treturn parse_%v(connection)\n", event_name)
+
 			return true
 		}
 
@@ -420,4 +419,3 @@ import "base:intrinsics"
 	fmt.wprintln(output_writer, strings.to_string(objects_builder))
 	fmt.wprintln(output_writer, strings.to_string(resolution_builder))
 }
-
