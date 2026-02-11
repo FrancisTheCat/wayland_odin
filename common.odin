@@ -15,24 +15,25 @@ Connection :: struct {
 	buffer:       bytes.Buffer,
 	data:         []byte,
 	data_cursor:  int,
-	object_types: [dynamic]Object_Type,
+	object_types: map[u32]Object_Type,
 	fds_in:       [dynamic]Fd,
 	fds_out:      [dynamic]Fd,
 	free_ids:     [dynamic]u32,
+	next_id:      u32,
 	socket:       linux.Fd,
 }
 
 @(require_results)
-generate_id :: proc(connection: ^Connection, type: Object_Type) -> u32 {
-	id: u32
-	if len(connection.free_ids) != 0 {
+generate_id :: proc(connection: ^Connection, type: Object_Type) -> (id: u32) {
+	if len(connection.free_ids) > 0 {
 		id = pop(&connection.free_ids)
 		connection.object_types[id] = type
 	} else {
-		id = u32(len(connection.object_types))
-		append(&connection.object_types, type)
+		id = connection.next_id
+		connection.object_types[id] = type
+		connection.next_id += 1
 	}
-	return id
+	return
 }
 
 connection_flush :: proc(connection: ^Connection) {
@@ -66,9 +67,12 @@ display_connect :: proc(socket: linux.Fd, allocator := context.allocator) -> (co
 	connection.fds_in.allocator       = allocator
 	connection.fds_out.allocator      = allocator
 	connection.free_ids.allocator     = allocator
-	connection.object_types           = make([dynamic]Object_Type, 2, allocator)
+
+	connection.object_types.allocator = allocator
 	connection.object_types[1]        = .Display
+	connection.next_id                = 2
 	display                           = 1
+
 	return
 }
 
@@ -89,6 +93,7 @@ peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: b
 			return
 		}
 		if deleted, ok := event.(Event_Display_Delete_Id); ok {
+			delete_key(&connection.object_types, deleted.id)
 			append(&connection.free_ids, deleted.id)
 		} else {
 			return
@@ -105,7 +110,7 @@ _peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: 
 	opcode, size: u16
 	intrinsics.mem_copy(&opcode, &connection.data[connection.data_cursor + 4], 2)
 	intrinsics.mem_copy(&size,   &connection.data[connection.data_cursor + 6], 2)
-	if len(connection.data) - connection.data_cursor < int(size) || int(object) >= len(connection.object_types) {
+	if len(connection.data) - connection.data_cursor < int(size) {
 		return
 	}
 	connection.data_cursor += 8
@@ -161,4 +166,3 @@ read_string :: proc(connection: ^Connection, data: ^string) -> bool {
 	connection.data_cursor = (connection.data_cursor + int(length) + 3) & -4
 	return true
 }
-
