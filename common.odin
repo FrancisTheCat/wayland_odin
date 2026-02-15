@@ -5,10 +5,9 @@ import "base:intrinsics"
 import "core:sys/linux"
 
 import "core:bytes"
-import "core:os"
 import "core:slice"
 
-Fd     :: os.Handle
+Fd     :: linux.Fd
 Object :: distinct u32
 
 Connection :: struct {
@@ -161,4 +160,3 @@ read_string :: proc(connection: ^Connection, data: ^string) -> bool {
 	connection.data_cursor = (connection.data_cursor + int(length) + 3) & -4
 	return true
 }
-

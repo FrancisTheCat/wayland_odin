@@ -401,7 +401,7 @@ main :: proc() {
 	fmt.wprintln(ctx.resolution_writer,  "\t}")
 	fmt.wprintln(ctx.resolution_writer,  "}")
 
-	output_writer := os.stream_from_handle(os.open("generated.odin", os.O_RDWR | os.O_CREATE | os.O_TRUNC, 0o666) or_else panic(""))
+	output_writer := os.to_stream(os.open("generated.odin", os.O_RDWR | os.O_CREATE | os.O_TRUNC, {.Read_User, .Write_User, .Read_Group, .Read_Other}) or_else panic(""))
 
 	fmt.wprintln(output_writer,
 `package wayland
