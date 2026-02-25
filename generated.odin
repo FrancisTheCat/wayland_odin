@@ -5894,6 +5894,8 @@ parse_wl_data_source_action :: proc(connection: ^Connection) -> (event: Event_Da
 }
 parse_wl_data_device_data_offer :: proc(connection: ^Connection) -> (event: Event_Data_Device_Data_Offer, ok: bool) {
 	read(connection, &event.id) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START))
+	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Data_Offer
 	ok = true
 	return
 }
@@ -6183,6 +6185,8 @@ parse_zwp_linux_dmabuf_v1_modifier :: proc(connection: ^Connection) -> (event: E
 }
 parse_zwp_linux_buffer_params_v1_created :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Buffer_Params_V1_Created, ok: bool) {
 	read(connection, &event.buffer) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.buffer) - SERVER_ID_START))
+	connection.server_object_types[u32(event.buffer) - SERVER_ID_START] = .Buffer
 	ok = true
 	return
 }
@@ -6251,16 +6255,22 @@ parse_wp_presentation_feedback_discarded :: proc(connection: ^Connection) -> (ev
 }
 parse_zwp_tablet_seat_v2_tablet_added :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Seat_V2_Tablet_Added, ok: bool) {
 	read(connection, &event.id) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START))
+	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_V2
 	ok = true
 	return
 }
 parse_zwp_tablet_seat_v2_tool_added :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Seat_V2_Tool_Added, ok: bool) {
 	read(connection, &event.id) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START))
+	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_Tool_V2
 	ok = true
 	return
 }
 parse_zwp_tablet_seat_v2_pad_added :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Seat_V2_Pad_Added, ok: bool) {
 	read(connection, &event.id) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START))
+	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_Pad_V2
 	ok = true
 	return
 }
@@ -6438,11 +6448,15 @@ parse_zwp_tablet_pad_group_v2_buttons :: proc(connection: ^Connection) -> (event
 }
 parse_zwp_tablet_pad_group_v2_ring :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Ring, ok: bool) {
 	read(connection, &event.ring) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.ring) - SERVER_ID_START))
+	connection.server_object_types[u32(event.ring) - SERVER_ID_START] = .Zwp_Tablet_Pad_Ring_V2
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_group_v2_strip :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Strip, ok: bool) {
 	read(connection, &event.strip) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.strip) - SERVER_ID_START))
+	connection.server_object_types[u32(event.strip) - SERVER_ID_START] = .Zwp_Tablet_Pad_Strip_V2
 	ok = true
 	return
 }
@@ -6464,11 +6478,15 @@ parse_zwp_tablet_pad_group_v2_mode_switch :: proc(connection: ^Connection) -> (e
 }
 parse_zwp_tablet_pad_group_v2_dial :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Dial, ok: bool) {
 	read(connection, &event.dial) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.dial) - SERVER_ID_START))
+	connection.server_object_types[u32(event.dial) - SERVER_ID_START] = .Zwp_Tablet_Pad_Dial_V2
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_v2_group :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Group, ok: bool) {
 	read(connection, &event.pad_group) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.pad_group) - SERVER_ID_START))
+	connection.server_object_types[u32(event.pad_group) - SERVER_ID_START] = .Zwp_Tablet_Pad_Group_V2
 	ok = true
 	return
 }
@@ -6719,6 +6737,8 @@ parse_wp_drm_lease_device_v1_drm_fd :: proc(connection: ^Connection) -> (event: 
 }
 parse_wp_drm_lease_device_v1_connector :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Device_V1_Connector, ok: bool) {
 	read(connection, &event.id) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START))
+	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Wp_Drm_Lease_Connector_V1
 	ok = true
 	return
 }
@@ -6769,6 +6789,8 @@ parse_ext_background_effect_manager_v1_capabilities :: proc(connection: ^Connect
 }
 parse_ext_data_control_device_v1_data_offer :: proc(connection: ^Connection) -> (event: Event_Ext_Data_Control_Device_V1_Data_Offer, ok: bool) {
 	read(connection, &event.id) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START))
+	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Ext_Data_Control_Offer_V1
 	ok = true
 	return
 }
@@ -6803,6 +6825,8 @@ parse_ext_data_control_offer_v1_offer :: proc(connection: ^Connection) -> (event
 }
 parse_ext_foreign_toplevel_list_v1_toplevel :: proc(connection: ^Connection) -> (event: Event_Ext_Foreign_Toplevel_List_V1_Toplevel, ok: bool) {
 	read(connection, &event.toplevel) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.toplevel) - SERVER_ID_START))
+	connection.server_object_types[u32(event.toplevel) - SERVER_ID_START] = .Ext_Foreign_Toplevel_Handle_V1
 	ok = true
 	return
 }
@@ -6946,11 +6970,15 @@ parse_ext_transient_seat_v1_denied :: proc(connection: ^Connection) -> (event: E
 }
 parse_ext_workspace_manager_v1_workspace_group :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Manager_V1_Workspace_Group, ok: bool) {
 	read(connection, &event.workspace_group) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.workspace_group) - SERVER_ID_START))
+	connection.server_object_types[u32(event.workspace_group) - SERVER_ID_START] = .Ext_Workspace_Group_Handle_V1
 	ok = true
 	return
 }
 parse_ext_workspace_manager_v1_workspace :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Manager_V1_Workspace, ok: bool) {
 	read(connection, &event.workspace) or_return
+	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.workspace) - SERVER_ID_START))
+	connection.server_object_types[u32(event.workspace) - SERVER_ID_START] = .Ext_Workspace_Handle_V1
 	ok = true
 	return
 }

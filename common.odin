@@ -10,15 +10,18 @@ import "core:slice"
 Fd     :: linux.Fd
 Object :: distinct u32
 
+SERVER_ID_START :: 0xFF000000
+
 Connection :: struct {
-	buffer:       bytes.Buffer,
-	data:         []byte,
-	data_cursor:  int,
-	object_types: [dynamic]Object_Type,
-	fds_in:       [dynamic]Fd,
-	fds_out:      [dynamic]Fd,
-	free_ids:     [dynamic]u32,
-	socket:       linux.Fd,
+	buffer:              bytes.Buffer,
+	data:                []byte,
+	data_cursor:         int,
+	client_object_types: [dynamic]Object_Type,
+	server_object_types: [dynamic]Object_Type,
+	fds_in:              [dynamic]Fd,
+	fds_out:             [dynamic]Fd,
+	free_ids:            [dynamic]u32,
+	socket:              linux.Fd,
 }
 
 @(require_results)
@@ -26,10 +29,10 @@ generate_id :: proc(connection: ^Connection, type: Object_Type) -> u32 {
 	id: u32
 	if len(connection.free_ids) != 0 {
 		id = pop(&connection.free_ids)
-		connection.object_types[id] = type
+		connection.client_object_types[id] = type
 	} else {
-		id = u32(len(connection.object_types))
-		append(&connection.object_types, type)
+		id = u32(len(connection.client_object_types))
+		append(&connection.client_object_types, type)
 	}
 	return id
 }
@@ -52,7 +55,7 @@ connection_flush :: proc(connection: ^Connection) {
 
 	copy(msg.control[16:], slice.to_bytes(connection.fds_out[:]))
 
-	n, errno := linux.sendmsg(connection.socket, &msg, { .CMSG_CLOEXEC, .NOSIGNAL, })
+	_, errno := linux.sendmsg(connection.socket, &msg, { .CMSG_CLOEXEC, .NOSIGNAL, })
 	assert(errno == .NONE)
 
 	bytes.buffer_reset(&connection.buffer)
@@ -62,11 +65,12 @@ connection_flush :: proc(connection: ^Connection) {
 @(require_results)
 display_connect :: proc(socket: linux.Fd, allocator := context.allocator) -> (connection: Connection, display: Display) {
 	connection.socket                 = socket
-	connection.fds_in.allocator       = allocator
-	connection.fds_out.allocator      = allocator
-	connection.free_ids.allocator     = allocator
-	connection.object_types           = make([dynamic]Object_Type, 2, allocator)
-	connection.object_types[1]        = .Display
+	connection.fds_in                 = make([dynamic]linux.Fd,       allocator)
+	connection.fds_out                = make([dynamic]linux.Fd,       allocator)
+	connection.free_ids               = make([dynamic]u32,            allocator)
+	connection.server_object_types    = make([dynamic]Object_Type,    allocator)
+	connection.client_object_types    = make([dynamic]Object_Type, 2, allocator)
+	connection.client_object_types[1] = .Display
 	display                           = 1
 	return
 }
@@ -104,11 +108,27 @@ _peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: 
 	opcode, size: u16
 	intrinsics.mem_copy(&opcode, &connection.data[connection.data_cursor + 4], 2)
 	intrinsics.mem_copy(&size,   &connection.data[connection.data_cursor + 6], 2)
-	if len(connection.data) - connection.data_cursor < int(size) || int(object) >= len(connection.object_types) {
+
+	if len(connection.data) - connection.data_cursor < int(size) {
 		return
 	}
+
+	object_type: Object_Type
+	if int(object) >= SERVER_ID_START {
+		object := object - SERVER_ID_START
+		if int(object) >= len(connection.server_object_types) {
+			return
+		}
+		object_type = connection.server_object_types[object]
+	} else {
+		if int(object) >= len(connection.client_object_types) {
+			return
+		}
+		object_type = connection.client_object_types[object]
+	}
+
 	connection.data_cursor += 8
-	return object, parse_event(connection, connection.object_types[object], u32(opcode))
+	return object, parse_event(connection, object_type, u32(opcode))
 }
 
 read :: proc {

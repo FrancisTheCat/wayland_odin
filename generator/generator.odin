@@ -239,11 +239,16 @@ main :: proc() {
 					continue
 				}
 
-				name, type, _ := parse_field(ctx, child_id.(u32)) or_return
+				name, type, new_id := parse_field(ctx, child_id.(u32)) or_return
 				type = strings.trim_prefix(type, "Wl_")
 				fmt.wprintf(ctx.event_types_writer, "\t%v: %v,\n", name, type)
 
 				fmt.sbprintfln(&body, "\tread(connection, &event.%v) or_return", name)
+
+				if new_id {
+					fmt.sbprintfln(&body, "\tresize(&connection.server_object_types, max(len(connection.server_object_types), int(event.%v) - SERVER_ID_START))", name)
+					fmt.sbprintfln(&body, "\tconnection.server_object_types[u32(event.%v) - SERVER_ID_START] = .%v", name, type)
+				}
 			}
 			fmt.wprint(ctx.event_types_writer, "}\n")
 
