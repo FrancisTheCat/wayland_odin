@@ -246,7 +246,7 @@ main :: proc() {
 				fmt.sbprintfln(&body, "\tread(connection, &event.%v) or_return", name)
 
 				if new_id {
-					fmt.sbprintfln(&body, "\tresize(&connection.server_object_types, max(len(connection.server_object_types), int(event.%v) - SERVER_ID_START))", name)
+					fmt.sbprintfln(&body, "\tresize(&connection.server_object_types, max(len(connection.server_object_types), int(event.%v) - SERVER_ID_START + 1))", name)
 					fmt.sbprintfln(&body, "\tconnection.server_object_types[u32(event.%v) - SERVER_ID_START] = .%v", name, type)
 				}
 			}
