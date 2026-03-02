@@ -40,6 +40,8 @@ main :: proc() {
 
 	enter_serial: u32
 	cursor_set:   bool
+	configured:   bool
+	attached:     bool
 
 	WIDTH  :: 512
 	HEIGHT :: 512
@@ -100,6 +102,7 @@ main :: proc() {
 				return
 			case wl.Event_Xdg_Surface_Configure:
 				wl.xdg_surface_ack_configure(&connection, wl.Xdg_Surface(object), e.serial)
+				configured = true
 			case wl.Event_Pointer_Enter:
 				enter_serial = e.serial
 			case:
@@ -121,6 +124,10 @@ main :: proc() {
 				xdg_surface  = wl.xdg_wm_base_get_xdg_surface(&connection, xdg_wm_base, wl_surface)
 				xdg_toplevel = wl.xdg_surface_get_toplevel(&connection, xdg_surface)
 
+				wl.surface_commit(&connection, wl_surface)
+			}
+
+			if wl_surface != 0 && configured && !attached {
 				wl.surface_attach(&connection, wl_surface, wl_buffer, 0, 0)
 				wl.surface_commit(&connection, wl_surface)
 				wl.surface_damage_buffer(&connection, wl_surface, 0, 0, WIDTH, HEIGHT)
