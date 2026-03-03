@@ -5045,58 +5045,76 @@ Event :: union {
 }
 
 Event_Display_Error :: struct {
+	object: Display,
 	object_id: Object,
 	code: u32,
 	message: string,
 }
 Event_Display_Delete_Id :: struct {
+	object: Display,
 	id: u32,
 }
 Event_Registry_Global :: struct {
+	object: Registry,
 	name: u32,
 	interface: string,
 	version: u32,
 }
 Event_Registry_Global_Remove :: struct {
+	object: Registry,
 	name: u32,
 }
 Event_Callback_Done :: struct {
+	object: Callback,
 	callback_data: u32,
 }
 Event_Shm_Format :: struct {
+	object: Shm,
 	format: Shm_Format,
 }
 Event_Buffer_Release :: struct {
+	object: Buffer,
 }
 Event_Data_Offer_Offer :: struct {
+	object: Data_Offer,
 	mime_type: string,
 }
 Event_Data_Offer_Source_Actions :: struct {
+	object: Data_Offer,
 	source_actions: Data_Device_Manager_Dnd_Action,
 }
 Event_Data_Offer_Action :: struct {
+	object: Data_Offer,
 	dnd_action: Data_Device_Manager_Dnd_Action,
 }
 Event_Data_Source_Target :: struct {
+	object: Data_Source,
 	mime_type: string,
 }
 Event_Data_Source_Send :: struct {
+	object: Data_Source,
 	mime_type: string,
 	fd: Fd,
 }
 Event_Data_Source_Cancelled :: struct {
+	object: Data_Source,
 }
 Event_Data_Source_Dnd_Drop_Performed :: struct {
+	object: Data_Source,
 }
 Event_Data_Source_Dnd_Finished :: struct {
+	object: Data_Source,
 }
 Event_Data_Source_Action :: struct {
+	object: Data_Source,
 	dnd_action: Data_Device_Manager_Dnd_Action,
 }
 Event_Data_Device_Data_Offer :: struct {
+	object: Data_Device,
 	id: Data_Offer,
 }
 Event_Data_Device_Enter :: struct {
+	object: Data_Device,
 	serial: u32,
 	surface: Surface,
 	x: f64,
@@ -5104,113 +5122,142 @@ Event_Data_Device_Enter :: struct {
 	id: Data_Offer,
 }
 Event_Data_Device_Leave :: struct {
+	object: Data_Device,
 }
 Event_Data_Device_Motion :: struct {
+	object: Data_Device,
 	time: u32,
 	x: f64,
 	y: f64,
 }
 Event_Data_Device_Drop :: struct {
+	object: Data_Device,
 }
 Event_Data_Device_Selection :: struct {
+	object: Data_Device,
 	id: Data_Offer,
 }
 Event_Shell_Surface_Ping :: struct {
+	object: Shell_Surface,
 	serial: u32,
 }
 Event_Shell_Surface_Configure :: struct {
+	object: Shell_Surface,
 	edges: Shell_Surface_Resize,
 	width: i32,
 	height: i32,
 }
 Event_Shell_Surface_Popup_Done :: struct {
+	object: Shell_Surface,
 }
 Event_Surface_Enter :: struct {
+	object: Surface,
 	output: Output,
 }
 Event_Surface_Leave :: struct {
+	object: Surface,
 	output: Output,
 }
 Event_Surface_Preferred_Buffer_Scale :: struct {
+	object: Surface,
 	factor: i32,
 }
 Event_Surface_Preferred_Buffer_Transform :: struct {
+	object: Surface,
 	transform: Output_Transform,
 }
 Event_Seat_Capabilities :: struct {
+	object: Seat,
 	capabilities: Seat_Capability,
 }
 Event_Seat_Name :: struct {
+	object: Seat,
 	name: string,
 }
 Event_Pointer_Enter :: struct {
+	object: Pointer,
 	serial: u32,
 	surface: Surface,
 	surface_x: f64,
 	surface_y: f64,
 }
 Event_Pointer_Leave :: struct {
+	object: Pointer,
 	serial: u32,
 	surface: Surface,
 }
 Event_Pointer_Motion :: struct {
+	object: Pointer,
 	time: u32,
 	surface_x: f64,
 	surface_y: f64,
 }
 Event_Pointer_Button :: struct {
+	object: Pointer,
 	serial: u32,
 	time: u32,
 	button: u32,
 	state: Pointer_Button_State,
 }
 Event_Pointer_Axis :: struct {
+	object: Pointer,
 	time: u32,
 	axis: Pointer_Axis,
 	value: f64,
 }
 Event_Pointer_Frame :: struct {
+	object: Pointer,
 }
 Event_Pointer_Axis_Source :: struct {
+	object: Pointer,
 	axis_source: Pointer_Axis_Source,
 }
 Event_Pointer_Axis_Stop :: struct {
+	object: Pointer,
 	time: u32,
 	axis: Pointer_Axis,
 }
 Event_Pointer_Axis_Discrete :: struct {
+	object: Pointer,
 	axis: Pointer_Axis,
 	discrete: i32,
 }
 Event_Pointer_Axis_Value120 :: struct {
+	object: Pointer,
 	axis: Pointer_Axis,
 	value120: i32,
 }
 Event_Pointer_Axis_Relative_Direction :: struct {
+	object: Pointer,
 	axis: Pointer_Axis,
 	direction: Pointer_Axis_Relative_Direction,
 }
 Event_Keyboard_Keymap :: struct {
+	object: Keyboard,
 	format: Keyboard_Keymap_Format,
 	fd: Fd,
 	size: u32,
 }
 Event_Keyboard_Enter :: struct {
+	object: Keyboard,
 	serial: u32,
 	surface: Surface,
 	keys: []byte,
 }
 Event_Keyboard_Leave :: struct {
+	object: Keyboard,
 	serial: u32,
 	surface: Surface,
 }
 Event_Keyboard_Key :: struct {
+	object: Keyboard,
 	serial: u32,
 	time: u32,
 	key: u32,
 	state: Keyboard_Key_State,
 }
 Event_Keyboard_Modifiers :: struct {
+	object: Keyboard,
 	serial: u32,
 	mods_depressed: u32,
 	mods_latched: u32,
@@ -5218,10 +5265,12 @@ Event_Keyboard_Modifiers :: struct {
 	group: u32,
 }
 Event_Keyboard_Repeat_Info :: struct {
+	object: Keyboard,
 	rate: i32,
 	delay: i32,
 }
 Event_Touch_Down :: struct {
+	object: Touch,
 	serial: u32,
 	time: u32,
 	surface: Surface,
@@ -5230,30 +5279,37 @@ Event_Touch_Down :: struct {
 	y: f64,
 }
 Event_Touch_Up :: struct {
+	object: Touch,
 	serial: u32,
 	time: u32,
 	id: i32,
 }
 Event_Touch_Motion :: struct {
+	object: Touch,
 	time: u32,
 	id: i32,
 	x: f64,
 	y: f64,
 }
 Event_Touch_Frame :: struct {
+	object: Touch,
 }
 Event_Touch_Cancel :: struct {
+	object: Touch,
 }
 Event_Touch_Shape :: struct {
+	object: Touch,
 	id: i32,
 	major: f64,
 	minor: f64,
 }
 Event_Touch_Orientation :: struct {
+	object: Touch,
 	id: i32,
 	orientation: f64,
 }
 Event_Output_Geometry :: struct {
+	object: Output,
 	x: i32,
 	y: i32,
 	physical_width: i32,
@@ -5264,62 +5320,81 @@ Event_Output_Geometry :: struct {
 	transform: Output_Transform,
 }
 Event_Output_Mode :: struct {
+	object: Output,
 	flags: Output_Mode,
 	width: i32,
 	height: i32,
 	refresh: i32,
 }
 Event_Output_Done :: struct {
+	object: Output,
 }
 Event_Output_Scale :: struct {
+	object: Output,
 	factor: i32,
 }
 Event_Output_Name :: struct {
+	object: Output,
 	name: string,
 }
 Event_Output_Description :: struct {
+	object: Output,
 	description: string,
 }
 Event_Zwp_Linux_Dmabuf_V1_Format :: struct {
+	object: Zwp_Linux_Dmabuf_V1,
 	format: u32,
 }
 Event_Zwp_Linux_Dmabuf_V1_Modifier :: struct {
+	object: Zwp_Linux_Dmabuf_V1,
 	format: u32,
 	modifier_hi: u32,
 	modifier_lo: u32,
 }
 Event_Zwp_Linux_Buffer_Params_V1_Created :: struct {
+	object: Zwp_Linux_Buffer_Params_V1,
 	buffer: Buffer,
 }
 Event_Zwp_Linux_Buffer_Params_V1_Failed :: struct {
+	object: Zwp_Linux_Buffer_Params_V1,
 }
 Event_Zwp_Linux_Dmabuf_Feedback_V1_Done :: struct {
+	object: Zwp_Linux_Dmabuf_Feedback_V1,
 }
 Event_Zwp_Linux_Dmabuf_Feedback_V1_Format_Table :: struct {
+	object: Zwp_Linux_Dmabuf_Feedback_V1,
 	fd: Fd,
 	size: u32,
 }
 Event_Zwp_Linux_Dmabuf_Feedback_V1_Main_Device :: struct {
+	object: Zwp_Linux_Dmabuf_Feedback_V1,
 	device: []byte,
 }
 Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Done :: struct {
+	object: Zwp_Linux_Dmabuf_Feedback_V1,
 }
 Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Target_Device :: struct {
+	object: Zwp_Linux_Dmabuf_Feedback_V1,
 	device: []byte,
 }
 Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Formats :: struct {
+	object: Zwp_Linux_Dmabuf_Feedback_V1,
 	indices: []byte,
 }
 Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags :: struct {
+	object: Zwp_Linux_Dmabuf_Feedback_V1,
 	flags: Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags,
 }
 Event_Wp_Presentation_Clock_Id :: struct {
+	object: Wp_Presentation,
 	clk_id: u32,
 }
 Event_Wp_Presentation_Feedback_Sync_Output :: struct {
+	object: Wp_Presentation_Feedback,
 	output: Output,
 }
 Event_Wp_Presentation_Feedback_Presented :: struct {
+	object: Wp_Presentation_Feedback,
 	tv_sec_hi: u32,
 	tv_sec_lo: u32,
 	tv_nsec: u32,
@@ -5329,244 +5404,321 @@ Event_Wp_Presentation_Feedback_Presented :: struct {
 	flags: Wp_Presentation_Feedback_Kind,
 }
 Event_Wp_Presentation_Feedback_Discarded :: struct {
+	object: Wp_Presentation_Feedback,
 }
 Event_Zwp_Tablet_Seat_V2_Tablet_Added :: struct {
+	object: Zwp_Tablet_Seat_V2,
 	id: Zwp_Tablet_V2,
 }
 Event_Zwp_Tablet_Seat_V2_Tool_Added :: struct {
+	object: Zwp_Tablet_Seat_V2,
 	id: Zwp_Tablet_Tool_V2,
 }
 Event_Zwp_Tablet_Seat_V2_Pad_Added :: struct {
+	object: Zwp_Tablet_Seat_V2,
 	id: Zwp_Tablet_Pad_V2,
 }
 Event_Zwp_Tablet_Tool_V2_Type :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	tool_type: Zwp_Tablet_Tool_V2_Type,
 }
 Event_Zwp_Tablet_Tool_V2_Hardware_Serial :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	hardware_serial_hi: u32,
 	hardware_serial_lo: u32,
 }
 Event_Zwp_Tablet_Tool_V2_Hardware_Id_Wacom :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	hardware_id_hi: u32,
 	hardware_id_lo: u32,
 }
 Event_Zwp_Tablet_Tool_V2_Capability :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	capability: Zwp_Tablet_Tool_V2_Capability,
 }
 Event_Zwp_Tablet_Tool_V2_Done :: struct {
+	object: Zwp_Tablet_Tool_V2,
 }
 Event_Zwp_Tablet_Tool_V2_Removed :: struct {
+	object: Zwp_Tablet_Tool_V2,
 }
 Event_Zwp_Tablet_Tool_V2_Proximity_In :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	serial: u32,
 	tablet: Zwp_Tablet_V2,
 	surface: Surface,
 }
 Event_Zwp_Tablet_Tool_V2_Proximity_Out :: struct {
+	object: Zwp_Tablet_Tool_V2,
 }
 Event_Zwp_Tablet_Tool_V2_Down :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	serial: u32,
 }
 Event_Zwp_Tablet_Tool_V2_Up :: struct {
+	object: Zwp_Tablet_Tool_V2,
 }
 Event_Zwp_Tablet_Tool_V2_Motion :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	x: f64,
 	y: f64,
 }
 Event_Zwp_Tablet_Tool_V2_Pressure :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	pressure: u32,
 }
 Event_Zwp_Tablet_Tool_V2_Distance :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	distance: u32,
 }
 Event_Zwp_Tablet_Tool_V2_Tilt :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	tilt_x: f64,
 	tilt_y: f64,
 }
 Event_Zwp_Tablet_Tool_V2_Rotation :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	degrees: f64,
 }
 Event_Zwp_Tablet_Tool_V2_Slider :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	position: i32,
 }
 Event_Zwp_Tablet_Tool_V2_Wheel :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	degrees: f64,
 	clicks: i32,
 }
 Event_Zwp_Tablet_Tool_V2_Button :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	serial: u32,
 	button: u32,
 	state: Zwp_Tablet_Tool_V2_Button_State,
 }
 Event_Zwp_Tablet_Tool_V2_Frame :: struct {
+	object: Zwp_Tablet_Tool_V2,
 	time: u32,
 }
 Event_Zwp_Tablet_V2_Name :: struct {
+	object: Zwp_Tablet_V2,
 	name: string,
 }
 Event_Zwp_Tablet_V2_Id :: struct {
+	object: Zwp_Tablet_V2,
 	vid: u32,
 	pid: u32,
 }
 Event_Zwp_Tablet_V2_Path :: struct {
+	object: Zwp_Tablet_V2,
 	path: string,
 }
 Event_Zwp_Tablet_V2_Done :: struct {
+	object: Zwp_Tablet_V2,
 }
 Event_Zwp_Tablet_V2_Removed :: struct {
+	object: Zwp_Tablet_V2,
 }
 Event_Zwp_Tablet_V2_Bustype :: struct {
+	object: Zwp_Tablet_V2,
 	bustype: Zwp_Tablet_V2_Bustype,
 }
 Event_Zwp_Tablet_Pad_Ring_V2_Source :: struct {
+	object: Zwp_Tablet_Pad_Ring_V2,
 	source: Zwp_Tablet_Pad_Ring_V2_Source,
 }
 Event_Zwp_Tablet_Pad_Ring_V2_Angle :: struct {
+	object: Zwp_Tablet_Pad_Ring_V2,
 	degrees: f64,
 }
 Event_Zwp_Tablet_Pad_Ring_V2_Stop :: struct {
+	object: Zwp_Tablet_Pad_Ring_V2,
 }
 Event_Zwp_Tablet_Pad_Ring_V2_Frame :: struct {
+	object: Zwp_Tablet_Pad_Ring_V2,
 	time: u32,
 }
 Event_Zwp_Tablet_Pad_Strip_V2_Source :: struct {
+	object: Zwp_Tablet_Pad_Strip_V2,
 	source: Zwp_Tablet_Pad_Strip_V2_Source,
 }
 Event_Zwp_Tablet_Pad_Strip_V2_Position :: struct {
+	object: Zwp_Tablet_Pad_Strip_V2,
 	position: u32,
 }
 Event_Zwp_Tablet_Pad_Strip_V2_Stop :: struct {
+	object: Zwp_Tablet_Pad_Strip_V2,
 }
 Event_Zwp_Tablet_Pad_Strip_V2_Frame :: struct {
+	object: Zwp_Tablet_Pad_Strip_V2,
 	time: u32,
 }
 Event_Zwp_Tablet_Pad_Group_V2_Buttons :: struct {
+	object: Zwp_Tablet_Pad_Group_V2,
 	buttons: []byte,
 }
 Event_Zwp_Tablet_Pad_Group_V2_Ring :: struct {
+	object: Zwp_Tablet_Pad_Group_V2,
 	ring: Zwp_Tablet_Pad_Ring_V2,
 }
 Event_Zwp_Tablet_Pad_Group_V2_Strip :: struct {
+	object: Zwp_Tablet_Pad_Group_V2,
 	strip: Zwp_Tablet_Pad_Strip_V2,
 }
 Event_Zwp_Tablet_Pad_Group_V2_Modes :: struct {
+	object: Zwp_Tablet_Pad_Group_V2,
 	modes: u32,
 }
 Event_Zwp_Tablet_Pad_Group_V2_Done :: struct {
+	object: Zwp_Tablet_Pad_Group_V2,
 }
 Event_Zwp_Tablet_Pad_Group_V2_Mode_Switch :: struct {
+	object: Zwp_Tablet_Pad_Group_V2,
 	time: u32,
 	serial: u32,
 	mode: u32,
 }
 Event_Zwp_Tablet_Pad_Group_V2_Dial :: struct {
+	object: Zwp_Tablet_Pad_Group_V2,
 	dial: Zwp_Tablet_Pad_Dial_V2,
 }
 Event_Zwp_Tablet_Pad_V2_Group :: struct {
+	object: Zwp_Tablet_Pad_V2,
 	pad_group: Zwp_Tablet_Pad_Group_V2,
 }
 Event_Zwp_Tablet_Pad_V2_Path :: struct {
+	object: Zwp_Tablet_Pad_V2,
 	path: string,
 }
 Event_Zwp_Tablet_Pad_V2_Buttons :: struct {
+	object: Zwp_Tablet_Pad_V2,
 	buttons: u32,
 }
 Event_Zwp_Tablet_Pad_V2_Done :: struct {
+	object: Zwp_Tablet_Pad_V2,
 }
 Event_Zwp_Tablet_Pad_V2_Button :: struct {
+	object: Zwp_Tablet_Pad_V2,
 	time: u32,
 	button: u32,
 	state: Zwp_Tablet_Pad_V2_Button_State,
 }
 Event_Zwp_Tablet_Pad_V2_Enter :: struct {
+	object: Zwp_Tablet_Pad_V2,
 	serial: u32,
 	tablet: Zwp_Tablet_V2,
 	surface: Surface,
 }
 Event_Zwp_Tablet_Pad_V2_Leave :: struct {
+	object: Zwp_Tablet_Pad_V2,
 	serial: u32,
 	surface: Surface,
 }
 Event_Zwp_Tablet_Pad_V2_Removed :: struct {
+	object: Zwp_Tablet_Pad_V2,
 }
 Event_Zwp_Tablet_Pad_Dial_V2_Delta :: struct {
+	object: Zwp_Tablet_Pad_Dial_V2,
 	value120: i32,
 }
 Event_Zwp_Tablet_Pad_Dial_V2_Frame :: struct {
+	object: Zwp_Tablet_Pad_Dial_V2,
 	time: u32,
 }
 Event_Xdg_Wm_Base_Ping :: struct {
+	object: Xdg_Wm_Base,
 	serial: u32,
 }
 Event_Xdg_Surface_Configure :: struct {
+	object: Xdg_Surface,
 	serial: u32,
 }
 Event_Xdg_Toplevel_Configure :: struct {
+	object: Xdg_Toplevel,
 	width: i32,
 	height: i32,
 	states: []byte,
 }
 Event_Xdg_Toplevel_Close :: struct {
+	object: Xdg_Toplevel,
 }
 Event_Xdg_Toplevel_Configure_Bounds :: struct {
+	object: Xdg_Toplevel,
 	width: i32,
 	height: i32,
 }
 Event_Xdg_Toplevel_Wm_Capabilities :: struct {
+	object: Xdg_Toplevel,
 	capabilities: []byte,
 }
 Event_Xdg_Popup_Configure :: struct {
+	object: Xdg_Popup,
 	x: i32,
 	y: i32,
 	width: i32,
 	height: i32,
 }
 Event_Xdg_Popup_Popup_Done :: struct {
+	object: Xdg_Popup,
 }
 Event_Xdg_Popup_Repositioned :: struct {
+	object: Xdg_Popup,
 	token: u32,
 }
 Event_Wp_Color_Manager_V1_Supported_Intent :: struct {
+	object: Wp_Color_Manager_V1,
 	render_intent: Wp_Color_Manager_V1_Render_Intent,
 }
 Event_Wp_Color_Manager_V1_Supported_Feature :: struct {
+	object: Wp_Color_Manager_V1,
 	feature: Wp_Color_Manager_V1_Feature,
 }
 Event_Wp_Color_Manager_V1_Supported_Tf_Named :: struct {
+	object: Wp_Color_Manager_V1,
 	tf: Wp_Color_Manager_V1_Transfer_Function,
 }
 Event_Wp_Color_Manager_V1_Supported_Primaries_Named :: struct {
+	object: Wp_Color_Manager_V1,
 	primaries: Wp_Color_Manager_V1_Primaries,
 }
 Event_Wp_Color_Manager_V1_Done :: struct {
+	object: Wp_Color_Manager_V1,
 }
 Event_Wp_Color_Management_Output_V1_Image_Description_Changed :: struct {
+	object: Wp_Color_Management_Output_V1,
 }
 Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed :: struct {
+	object: Wp_Color_Management_Surface_Feedback_V1,
 	identity: u32,
 }
 Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2 :: struct {
+	object: Wp_Color_Management_Surface_Feedback_V1,
 	identity_hi: u32,
 	identity_lo: u32,
 }
 Event_Wp_Image_Description_V1_Failed :: struct {
+	object: Wp_Image_Description_V1,
 	cause: Wp_Image_Description_V1_Cause,
 	msg: string,
 }
 Event_Wp_Image_Description_V1_Ready :: struct {
+	object: Wp_Image_Description_V1,
 	identity: u32,
 }
 Event_Wp_Image_Description_V1_Ready2 :: struct {
+	object: Wp_Image_Description_V1,
 	identity_hi: u32,
 	identity_lo: u32,
 }
 Event_Wp_Image_Description_Info_V1_Done :: struct {
+	object: Wp_Image_Description_Info_V1,
 }
 Event_Wp_Image_Description_Info_V1_Icc_File :: struct {
+	object: Wp_Image_Description_Info_V1,
 	icc: Fd,
 	icc_size: u32,
 }
 Event_Wp_Image_Description_Info_V1_Primaries :: struct {
+	object: Wp_Image_Description_Info_V1,
 	r_x: i32,
 	r_y: i32,
 	g_x: i32,
@@ -5577,20 +5729,25 @@ Event_Wp_Image_Description_Info_V1_Primaries :: struct {
 	w_y: i32,
 }
 Event_Wp_Image_Description_Info_V1_Primaries_Named :: struct {
+	object: Wp_Image_Description_Info_V1,
 	primaries: Wp_Color_Manager_V1_Primaries,
 }
 Event_Wp_Image_Description_Info_V1_Tf_Power :: struct {
+	object: Wp_Image_Description_Info_V1,
 	eexp: u32,
 }
 Event_Wp_Image_Description_Info_V1_Tf_Named :: struct {
+	object: Wp_Image_Description_Info_V1,
 	tf: Wp_Color_Manager_V1_Transfer_Function,
 }
 Event_Wp_Image_Description_Info_V1_Luminances :: struct {
+	object: Wp_Image_Description_Info_V1,
 	min_lum: u32,
 	max_lum: u32,
 	reference_lum: u32,
 }
 Event_Wp_Image_Description_Info_V1_Target_Primaries :: struct {
+	object: Wp_Image_Description_Info_V1,
 	r_x: i32,
 	r_y: i32,
 	g_x: i32,
@@ -5601,305 +5758,397 @@ Event_Wp_Image_Description_Info_V1_Target_Primaries :: struct {
 	w_y: i32,
 }
 Event_Wp_Image_Description_Info_V1_Target_Luminance :: struct {
+	object: Wp_Image_Description_Info_V1,
 	min_lum: u32,
 	max_lum: u32,
 }
 Event_Wp_Image_Description_Info_V1_Target_Max_Cll :: struct {
+	object: Wp_Image_Description_Info_V1,
 	max_cll: u32,
 }
 Event_Wp_Image_Description_Info_V1_Target_Max_Fall :: struct {
+	object: Wp_Image_Description_Info_V1,
 	max_fall: u32,
 }
 Event_Wp_Color_Representation_Manager_V1_Supported_Alpha_Mode :: struct {
+	object: Wp_Color_Representation_Manager_V1,
 	alpha_mode: Wp_Color_Representation_Surface_V1_Alpha_Mode,
 }
 Event_Wp_Color_Representation_Manager_V1_Supported_Coefficients_And_Ranges :: struct {
+	object: Wp_Color_Representation_Manager_V1,
 	coefficients: Wp_Color_Representation_Surface_V1_Coefficients,
 	range: Wp_Color_Representation_Surface_V1_Range,
 }
 Event_Wp_Color_Representation_Manager_V1_Done :: struct {
+	object: Wp_Color_Representation_Manager_V1,
 }
 Event_Wp_Drm_Lease_Device_V1_Drm_Fd :: struct {
+	object: Wp_Drm_Lease_Device_V1,
 	fd: Fd,
 }
 Event_Wp_Drm_Lease_Device_V1_Connector :: struct {
+	object: Wp_Drm_Lease_Device_V1,
 	id: Wp_Drm_Lease_Connector_V1,
 }
 Event_Wp_Drm_Lease_Device_V1_Done :: struct {
+	object: Wp_Drm_Lease_Device_V1,
 }
 Event_Wp_Drm_Lease_Device_V1_Released :: struct {
+	object: Wp_Drm_Lease_Device_V1,
 }
 Event_Wp_Drm_Lease_Connector_V1_Name :: struct {
+	object: Wp_Drm_Lease_Connector_V1,
 	name: string,
 }
 Event_Wp_Drm_Lease_Connector_V1_Description :: struct {
+	object: Wp_Drm_Lease_Connector_V1,
 	description: string,
 }
 Event_Wp_Drm_Lease_Connector_V1_Connector_Id :: struct {
+	object: Wp_Drm_Lease_Connector_V1,
 	connector_id: u32,
 }
 Event_Wp_Drm_Lease_Connector_V1_Done :: struct {
+	object: Wp_Drm_Lease_Connector_V1,
 }
 Event_Wp_Drm_Lease_Connector_V1_Withdrawn :: struct {
+	object: Wp_Drm_Lease_Connector_V1,
 }
 Event_Wp_Drm_Lease_V1_Lease_Fd :: struct {
+	object: Wp_Drm_Lease_V1,
 	leased_fd: Fd,
 }
 Event_Wp_Drm_Lease_V1_Finished :: struct {
+	object: Wp_Drm_Lease_V1,
 }
 Event_Ext_Background_Effect_Manager_V1_Capabilities :: struct {
+	object: Ext_Background_Effect_Manager_V1,
 	flags: Ext_Background_Effect_Manager_V1_Capability,
 }
 Event_Ext_Data_Control_Device_V1_Data_Offer :: struct {
+	object: Ext_Data_Control_Device_V1,
 	id: Ext_Data_Control_Offer_V1,
 }
 Event_Ext_Data_Control_Device_V1_Selection :: struct {
+	object: Ext_Data_Control_Device_V1,
 	id: Ext_Data_Control_Offer_V1,
 }
 Event_Ext_Data_Control_Device_V1_Finished :: struct {
+	object: Ext_Data_Control_Device_V1,
 }
 Event_Ext_Data_Control_Device_V1_Primary_Selection :: struct {
+	object: Ext_Data_Control_Device_V1,
 	id: Ext_Data_Control_Offer_V1,
 }
 Event_Ext_Data_Control_Source_V1_Send :: struct {
+	object: Ext_Data_Control_Source_V1,
 	mime_type: string,
 	fd: Fd,
 }
 Event_Ext_Data_Control_Source_V1_Cancelled :: struct {
+	object: Ext_Data_Control_Source_V1,
 }
 Event_Ext_Data_Control_Offer_V1_Offer :: struct {
+	object: Ext_Data_Control_Offer_V1,
 	mime_type: string,
 }
 Event_Ext_Foreign_Toplevel_List_V1_Toplevel :: struct {
+	object: Ext_Foreign_Toplevel_List_V1,
 	toplevel: Ext_Foreign_Toplevel_Handle_V1,
 }
 Event_Ext_Foreign_Toplevel_List_V1_Finished :: struct {
+	object: Ext_Foreign_Toplevel_List_V1,
 }
 Event_Ext_Foreign_Toplevel_Handle_V1_Closed :: struct {
+	object: Ext_Foreign_Toplevel_Handle_V1,
 }
 Event_Ext_Foreign_Toplevel_Handle_V1_Done :: struct {
+	object: Ext_Foreign_Toplevel_Handle_V1,
 }
 Event_Ext_Foreign_Toplevel_Handle_V1_Title :: struct {
+	object: Ext_Foreign_Toplevel_Handle_V1,
 	title: string,
 }
 Event_Ext_Foreign_Toplevel_Handle_V1_App_Id :: struct {
+	object: Ext_Foreign_Toplevel_Handle_V1,
 	app_id: string,
 }
 Event_Ext_Foreign_Toplevel_Handle_V1_Identifier :: struct {
+	object: Ext_Foreign_Toplevel_Handle_V1,
 	identifier: string,
 }
 Event_Ext_Idle_Notification_V1_Idled :: struct {
+	object: Ext_Idle_Notification_V1,
 }
 Event_Ext_Idle_Notification_V1_Resumed :: struct {
+	object: Ext_Idle_Notification_V1,
 }
 Event_Ext_Image_Copy_Capture_Session_V1_Buffer_Size :: struct {
+	object: Ext_Image_Copy_Capture_Session_V1,
 	width: u32,
 	height: u32,
 }
 Event_Ext_Image_Copy_Capture_Session_V1_Shm_Format :: struct {
+	object: Ext_Image_Copy_Capture_Session_V1,
 	format: Shm_Format,
 }
 Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Device :: struct {
+	object: Ext_Image_Copy_Capture_Session_V1,
 	device: []byte,
 }
 Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Format :: struct {
+	object: Ext_Image_Copy_Capture_Session_V1,
 	format: u32,
 	modifiers: []byte,
 }
 Event_Ext_Image_Copy_Capture_Session_V1_Done :: struct {
+	object: Ext_Image_Copy_Capture_Session_V1,
 }
 Event_Ext_Image_Copy_Capture_Session_V1_Stopped :: struct {
+	object: Ext_Image_Copy_Capture_Session_V1,
 }
 Event_Ext_Image_Copy_Capture_Frame_V1_Transform :: struct {
+	object: Ext_Image_Copy_Capture_Frame_V1,
 	transform: Output_Transform,
 }
 Event_Ext_Image_Copy_Capture_Frame_V1_Damage :: struct {
+	object: Ext_Image_Copy_Capture_Frame_V1,
 	x: i32,
 	y: i32,
 	width: i32,
 	height: i32,
 }
 Event_Ext_Image_Copy_Capture_Frame_V1_Presentation_Time :: struct {
+	object: Ext_Image_Copy_Capture_Frame_V1,
 	tv_sec_hi: u32,
 	tv_sec_lo: u32,
 	tv_nsec: u32,
 }
 Event_Ext_Image_Copy_Capture_Frame_V1_Ready :: struct {
+	object: Ext_Image_Copy_Capture_Frame_V1,
 }
 Event_Ext_Image_Copy_Capture_Frame_V1_Failed :: struct {
+	object: Ext_Image_Copy_Capture_Frame_V1,
 	reason: Ext_Image_Copy_Capture_Frame_V1_Failure_Reason,
 }
 Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Enter :: struct {
+	object: Ext_Image_Copy_Capture_Cursor_Session_V1,
 }
 Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Leave :: struct {
+	object: Ext_Image_Copy_Capture_Cursor_Session_V1,
 }
 Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Position :: struct {
+	object: Ext_Image_Copy_Capture_Cursor_Session_V1,
 	x: i32,
 	y: i32,
 }
 Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Hotspot :: struct {
+	object: Ext_Image_Copy_Capture_Cursor_Session_V1,
 	x: i32,
 	y: i32,
 }
 Event_Ext_Session_Lock_V1_Locked :: struct {
+	object: Ext_Session_Lock_V1,
 }
 Event_Ext_Session_Lock_V1_Finished :: struct {
+	object: Ext_Session_Lock_V1,
 }
 Event_Ext_Session_Lock_Surface_V1_Configure :: struct {
+	object: Ext_Session_Lock_Surface_V1,
 	serial: u32,
 	width: u32,
 	height: u32,
 }
 Event_Ext_Transient_Seat_V1_Ready :: struct {
+	object: Ext_Transient_Seat_V1,
 	global_name: u32,
 }
 Event_Ext_Transient_Seat_V1_Denied :: struct {
+	object: Ext_Transient_Seat_V1,
 }
 Event_Ext_Workspace_Manager_V1_Workspace_Group :: struct {
+	object: Ext_Workspace_Manager_V1,
 	workspace_group: Ext_Workspace_Group_Handle_V1,
 }
 Event_Ext_Workspace_Manager_V1_Workspace :: struct {
+	object: Ext_Workspace_Manager_V1,
 	workspace: Ext_Workspace_Handle_V1,
 }
 Event_Ext_Workspace_Manager_V1_Done :: struct {
+	object: Ext_Workspace_Manager_V1,
 }
 Event_Ext_Workspace_Manager_V1_Finished :: struct {
+	object: Ext_Workspace_Manager_V1,
 }
 Event_Ext_Workspace_Group_Handle_V1_Capabilities :: struct {
+	object: Ext_Workspace_Group_Handle_V1,
 	capabilities: Ext_Workspace_Group_Handle_V1_Group_Capabilities,
 }
 Event_Ext_Workspace_Group_Handle_V1_Output_Enter :: struct {
+	object: Ext_Workspace_Group_Handle_V1,
 	output: Output,
 }
 Event_Ext_Workspace_Group_Handle_V1_Output_Leave :: struct {
+	object: Ext_Workspace_Group_Handle_V1,
 	output: Output,
 }
 Event_Ext_Workspace_Group_Handle_V1_Workspace_Enter :: struct {
+	object: Ext_Workspace_Group_Handle_V1,
 	workspace: Ext_Workspace_Handle_V1,
 }
 Event_Ext_Workspace_Group_Handle_V1_Workspace_Leave :: struct {
+	object: Ext_Workspace_Group_Handle_V1,
 	workspace: Ext_Workspace_Handle_V1,
 }
 Event_Ext_Workspace_Group_Handle_V1_Removed :: struct {
+	object: Ext_Workspace_Group_Handle_V1,
 }
 Event_Ext_Workspace_Handle_V1_Id :: struct {
+	object: Ext_Workspace_Handle_V1,
 	id: string,
 }
 Event_Ext_Workspace_Handle_V1_Name :: struct {
+	object: Ext_Workspace_Handle_V1,
 	name: string,
 }
 Event_Ext_Workspace_Handle_V1_Coordinates :: struct {
+	object: Ext_Workspace_Handle_V1,
 	coordinates: []byte,
 }
 Event_Ext_Workspace_Handle_V1_State :: struct {
+	object: Ext_Workspace_Handle_V1,
 	state: Ext_Workspace_Handle_V1_State,
 }
 Event_Ext_Workspace_Handle_V1_Capabilities :: struct {
+	object: Ext_Workspace_Handle_V1,
 	capabilities: Ext_Workspace_Handle_V1_Workspace_Capabilities,
 }
 Event_Ext_Workspace_Handle_V1_Removed :: struct {
+	object: Ext_Workspace_Handle_V1,
 }
 Event_Wp_Fractional_Scale_V1_Preferred_Scale :: struct {
+	object: Wp_Fractional_Scale_V1,
 	scale: u32,
 }
 Event_Xdg_Activation_Token_V1_Done :: struct {
+	object: Xdg_Activation_Token_V1,
 	token: string,
 }
 Event_Xdg_Toplevel_Icon_Manager_V1_Icon_Size :: struct {
+	object: Xdg_Toplevel_Icon_Manager_V1,
 	size: i32,
 }
 Event_Xdg_Toplevel_Icon_Manager_V1_Done :: struct {
+	object: Xdg_Toplevel_Icon_Manager_V1,
 }
 
-parse_wl_display_error :: proc(connection: ^Connection) -> (event: Event_Display_Error, ok: bool) {
+parse_wl_display_error :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Error, ok: bool) {
+	event.object = Display(object)
 	read(connection, &event.object_id) or_return
 	read(connection, &event.code) or_return
 	read(connection, &event.message) or_return
 	ok = true
 	return
 }
-parse_wl_display_delete_id :: proc(connection: ^Connection) -> (event: Event_Display_Delete_Id, ok: bool) {
+parse_wl_display_delete_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Delete_Id, ok: bool) {
+	event.object = Display(object)
 	read(connection, &event.id) or_return
 	ok = true
 	return
 }
-parse_wl_registry_global :: proc(connection: ^Connection) -> (event: Event_Registry_Global, ok: bool) {
+parse_wl_registry_global :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global, ok: bool) {
+	event.object = Registry(object)
 	read(connection, &event.name) or_return
 	read(connection, &event.interface) or_return
 	read(connection, &event.version) or_return
 	ok = true
 	return
 }
-parse_wl_registry_global_remove :: proc(connection: ^Connection) -> (event: Event_Registry_Global_Remove, ok: bool) {
+parse_wl_registry_global_remove :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global_Remove, ok: bool) {
+	event.object = Registry(object)
 	read(connection, &event.name) or_return
 	ok = true
 	return
 }
-parse_wl_callback_done :: proc(connection: ^Connection) -> (event: Event_Callback_Done, ok: bool) {
+parse_wl_callback_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Callback_Done, ok: bool) {
+	event.object = Callback(object)
 	read(connection, &event.callback_data) or_return
 	ok = true
 	return
 }
-parse_wl_shm_format :: proc(connection: ^Connection) -> (event: Event_Shm_Format, ok: bool) {
+parse_wl_shm_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Shm_Format, ok: bool) {
+	event.object = Shm(object)
 	read(connection, &event.format) or_return
 	ok = true
 	return
 }
-parse_wl_buffer_release :: proc(connection: ^Connection) -> (event: Event_Buffer_Release, ok: bool) {
+parse_wl_buffer_release :: proc(connection: ^Connection, object: u32) -> (event: Event_Buffer_Release, ok: bool) {
+	event.object = Buffer(object)
 	ok = true
 	return
 }
-parse_wl_data_offer_offer :: proc(connection: ^Connection) -> (event: Event_Data_Offer_Offer, ok: bool) {
+parse_wl_data_offer_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Offer, ok: bool) {
+	event.object = Data_Offer(object)
 	read(connection, &event.mime_type) or_return
 	ok = true
 	return
 }
-parse_wl_data_offer_source_actions :: proc(connection: ^Connection) -> (event: Event_Data_Offer_Source_Actions, ok: bool) {
+parse_wl_data_offer_source_actions :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Source_Actions, ok: bool) {
+	event.object = Data_Offer(object)
 	read(connection, &event.source_actions) or_return
 	ok = true
 	return
 }
-parse_wl_data_offer_action :: proc(connection: ^Connection) -> (event: Event_Data_Offer_Action, ok: bool) {
+parse_wl_data_offer_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Action, ok: bool) {
+	event.object = Data_Offer(object)
 	read(connection, &event.dnd_action) or_return
 	ok = true
 	return
 }
-parse_wl_data_source_target :: proc(connection: ^Connection) -> (event: Event_Data_Source_Target, ok: bool) {
+parse_wl_data_source_target :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Target, ok: bool) {
+	event.object = Data_Source(object)
 	read(connection, &event.mime_type) or_return
 	ok = true
 	return
 }
-parse_wl_data_source_send :: proc(connection: ^Connection) -> (event: Event_Data_Source_Send, ok: bool) {
+parse_wl_data_source_send :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Send, ok: bool) {
+	event.object = Data_Source(object)
 	read(connection, &event.mime_type) or_return
 	read(connection, &event.fd) or_return
 	ok = true
 	return
 }
-parse_wl_data_source_cancelled :: proc(connection: ^Connection) -> (event: Event_Data_Source_Cancelled, ok: bool) {
+parse_wl_data_source_cancelled :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Cancelled, ok: bool) {
+	event.object = Data_Source(object)
 	ok = true
 	return
 }
-parse_wl_data_source_dnd_drop_performed :: proc(connection: ^Connection) -> (event: Event_Data_Source_Dnd_Drop_Performed, ok: bool) {
+parse_wl_data_source_dnd_drop_performed :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Drop_Performed, ok: bool) {
+	event.object = Data_Source(object)
 	ok = true
 	return
 }
-parse_wl_data_source_dnd_finished :: proc(connection: ^Connection) -> (event: Event_Data_Source_Dnd_Finished, ok: bool) {
+parse_wl_data_source_dnd_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Finished, ok: bool) {
+	event.object = Data_Source(object)
 	ok = true
 	return
 }
-parse_wl_data_source_action :: proc(connection: ^Connection) -> (event: Event_Data_Source_Action, ok: bool) {
+parse_wl_data_source_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Action, ok: bool) {
+	event.object = Data_Source(object)
 	read(connection, &event.dnd_action) or_return
 	ok = true
 	return
 }
-parse_wl_data_device_data_offer :: proc(connection: ^Connection) -> (event: Event_Data_Device_Data_Offer, ok: bool) {
+parse_wl_data_device_data_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Data_Offer, ok: bool) {
+	event.object = Data_Device(object)
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Data_Offer
 	ok = true
 	return
 }
-parse_wl_data_device_enter :: proc(connection: ^Connection) -> (event: Event_Data_Device_Enter, ok: bool) {
+parse_wl_data_device_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Enter, ok: bool) {
+	event.object = Data_Device(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
 	read(connection, &event.x) or_return
@@ -5908,73 +6157,87 @@ parse_wl_data_device_enter :: proc(connection: ^Connection) -> (event: Event_Dat
 	ok = true
 	return
 }
-parse_wl_data_device_leave :: proc(connection: ^Connection) -> (event: Event_Data_Device_Leave, ok: bool) {
+parse_wl_data_device_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Leave, ok: bool) {
+	event.object = Data_Device(object)
 	ok = true
 	return
 }
-parse_wl_data_device_motion :: proc(connection: ^Connection) -> (event: Event_Data_Device_Motion, ok: bool) {
+parse_wl_data_device_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Motion, ok: bool) {
+	event.object = Data_Device(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
 	ok = true
 	return
 }
-parse_wl_data_device_drop :: proc(connection: ^Connection) -> (event: Event_Data_Device_Drop, ok: bool) {
+parse_wl_data_device_drop :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Drop, ok: bool) {
+	event.object = Data_Device(object)
 	ok = true
 	return
 }
-parse_wl_data_device_selection :: proc(connection: ^Connection) -> (event: Event_Data_Device_Selection, ok: bool) {
+parse_wl_data_device_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Selection, ok: bool) {
+	event.object = Data_Device(object)
 	read(connection, &event.id) or_return
 	ok = true
 	return
 }
-parse_wl_shell_surface_ping :: proc(connection: ^Connection) -> (event: Event_Shell_Surface_Ping, ok: bool) {
+parse_wl_shell_surface_ping :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Ping, ok: bool) {
+	event.object = Shell_Surface(object)
 	read(connection, &event.serial) or_return
 	ok = true
 	return
 }
-parse_wl_shell_surface_configure :: proc(connection: ^Connection) -> (event: Event_Shell_Surface_Configure, ok: bool) {
+parse_wl_shell_surface_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Configure, ok: bool) {
+	event.object = Shell_Surface(object)
 	read(connection, &event.edges) or_return
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
 	ok = true
 	return
 }
-parse_wl_shell_surface_popup_done :: proc(connection: ^Connection) -> (event: Event_Shell_Surface_Popup_Done, ok: bool) {
+parse_wl_shell_surface_popup_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Popup_Done, ok: bool) {
+	event.object = Shell_Surface(object)
 	ok = true
 	return
 }
-parse_wl_surface_enter :: proc(connection: ^Connection) -> (event: Event_Surface_Enter, ok: bool) {
+parse_wl_surface_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Enter, ok: bool) {
+	event.object = Surface(object)
 	read(connection, &event.output) or_return
 	ok = true
 	return
 }
-parse_wl_surface_leave :: proc(connection: ^Connection) -> (event: Event_Surface_Leave, ok: bool) {
+parse_wl_surface_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Leave, ok: bool) {
+	event.object = Surface(object)
 	read(connection, &event.output) or_return
 	ok = true
 	return
 }
-parse_wl_surface_preferred_buffer_scale :: proc(connection: ^Connection) -> (event: Event_Surface_Preferred_Buffer_Scale, ok: bool) {
+parse_wl_surface_preferred_buffer_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Scale, ok: bool) {
+	event.object = Surface(object)
 	read(connection, &event.factor) or_return
 	ok = true
 	return
 }
-parse_wl_surface_preferred_buffer_transform :: proc(connection: ^Connection) -> (event: Event_Surface_Preferred_Buffer_Transform, ok: bool) {
+parse_wl_surface_preferred_buffer_transform :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Transform, ok: bool) {
+	event.object = Surface(object)
 	read(connection, &event.transform) or_return
 	ok = true
 	return
 }
-parse_wl_seat_capabilities :: proc(connection: ^Connection) -> (event: Event_Seat_Capabilities, ok: bool) {
+parse_wl_seat_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Capabilities, ok: bool) {
+	event.object = Seat(object)
 	read(connection, &event.capabilities) or_return
 	ok = true
 	return
 }
-parse_wl_seat_name :: proc(connection: ^Connection) -> (event: Event_Seat_Name, ok: bool) {
+parse_wl_seat_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Name, ok: bool) {
+	event.object = Seat(object)
 	read(connection, &event.name) or_return
 	ok = true
 	return
 }
-parse_wl_pointer_enter :: proc(connection: ^Connection) -> (event: Event_Pointer_Enter, ok: bool) {
+parse_wl_pointer_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Enter, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
 	read(connection, &event.surface_x) or_return
@@ -5982,20 +6245,23 @@ parse_wl_pointer_enter :: proc(connection: ^Connection) -> (event: Event_Pointer
 	ok = true
 	return
 }
-parse_wl_pointer_leave :: proc(connection: ^Connection) -> (event: Event_Pointer_Leave, ok: bool) {
+parse_wl_pointer_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Leave, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
 	ok = true
 	return
 }
-parse_wl_pointer_motion :: proc(connection: ^Connection) -> (event: Event_Pointer_Motion, ok: bool) {
+parse_wl_pointer_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Motion, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.surface_x) or_return
 	read(connection, &event.surface_y) or_return
 	ok = true
 	return
 }
-parse_wl_pointer_button :: proc(connection: ^Connection) -> (event: Event_Pointer_Button, ok: bool) {
+parse_wl_pointer_button :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Button, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
 	read(connection, &event.button) or_return
@@ -6003,67 +6269,78 @@ parse_wl_pointer_button :: proc(connection: ^Connection) -> (event: Event_Pointe
 	ok = true
 	return
 }
-parse_wl_pointer_axis :: proc(connection: ^Connection) -> (event: Event_Pointer_Axis, ok: bool) {
+parse_wl_pointer_axis :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.axis) or_return
 	read(connection, &event.value) or_return
 	ok = true
 	return
 }
-parse_wl_pointer_frame :: proc(connection: ^Connection) -> (event: Event_Pointer_Frame, ok: bool) {
+parse_wl_pointer_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Frame, ok: bool) {
+	event.object = Pointer(object)
 	ok = true
 	return
 }
-parse_wl_pointer_axis_source :: proc(connection: ^Connection) -> (event: Event_Pointer_Axis_Source, ok: bool) {
+parse_wl_pointer_axis_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Source, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.axis_source) or_return
 	ok = true
 	return
 }
-parse_wl_pointer_axis_stop :: proc(connection: ^Connection) -> (event: Event_Pointer_Axis_Stop, ok: bool) {
+parse_wl_pointer_axis_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Stop, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.axis) or_return
 	ok = true
 	return
 }
-parse_wl_pointer_axis_discrete :: proc(connection: ^Connection) -> (event: Event_Pointer_Axis_Discrete, ok: bool) {
+parse_wl_pointer_axis_discrete :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Discrete, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.discrete) or_return
 	ok = true
 	return
 }
-parse_wl_pointer_axis_value120 :: proc(connection: ^Connection) -> (event: Event_Pointer_Axis_Value120, ok: bool) {
+parse_wl_pointer_axis_value120 :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Value120, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.value120) or_return
 	ok = true
 	return
 }
-parse_wl_pointer_axis_relative_direction :: proc(connection: ^Connection) -> (event: Event_Pointer_Axis_Relative_Direction, ok: bool) {
+parse_wl_pointer_axis_relative_direction :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Relative_Direction, ok: bool) {
+	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.direction) or_return
 	ok = true
 	return
 }
-parse_wl_keyboard_keymap :: proc(connection: ^Connection) -> (event: Event_Keyboard_Keymap, ok: bool) {
+parse_wl_keyboard_keymap :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Keymap, ok: bool) {
+	event.object = Keyboard(object)
 	read(connection, &event.format) or_return
 	read(connection, &event.fd) or_return
 	read(connection, &event.size) or_return
 	ok = true
 	return
 }
-parse_wl_keyboard_enter :: proc(connection: ^Connection) -> (event: Event_Keyboard_Enter, ok: bool) {
+parse_wl_keyboard_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Enter, ok: bool) {
+	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
 	read(connection, &event.keys) or_return
 	ok = true
 	return
 }
-parse_wl_keyboard_leave :: proc(connection: ^Connection) -> (event: Event_Keyboard_Leave, ok: bool) {
+parse_wl_keyboard_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Leave, ok: bool) {
+	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
 	ok = true
 	return
 }
-parse_wl_keyboard_key :: proc(connection: ^Connection) -> (event: Event_Keyboard_Key, ok: bool) {
+parse_wl_keyboard_key :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Key, ok: bool) {
+	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
 	read(connection, &event.key) or_return
@@ -6071,7 +6348,8 @@ parse_wl_keyboard_key :: proc(connection: ^Connection) -> (event: Event_Keyboard
 	ok = true
 	return
 }
-parse_wl_keyboard_modifiers :: proc(connection: ^Connection) -> (event: Event_Keyboard_Modifiers, ok: bool) {
+parse_wl_keyboard_modifiers :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Modifiers, ok: bool) {
+	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.mods_depressed) or_return
 	read(connection, &event.mods_latched) or_return
@@ -6080,13 +6358,15 @@ parse_wl_keyboard_modifiers :: proc(connection: ^Connection) -> (event: Event_Ke
 	ok = true
 	return
 }
-parse_wl_keyboard_repeat_info :: proc(connection: ^Connection) -> (event: Event_Keyboard_Repeat_Info, ok: bool) {
+parse_wl_keyboard_repeat_info :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Repeat_Info, ok: bool) {
+	event.object = Keyboard(object)
 	read(connection, &event.rate) or_return
 	read(connection, &event.delay) or_return
 	ok = true
 	return
 }
-parse_wl_touch_down :: proc(connection: ^Connection) -> (event: Event_Touch_Down, ok: bool) {
+parse_wl_touch_down :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Down, ok: bool) {
+	event.object = Touch(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
 	read(connection, &event.surface) or_return
@@ -6096,14 +6376,16 @@ parse_wl_touch_down :: proc(connection: ^Connection) -> (event: Event_Touch_Down
 	ok = true
 	return
 }
-parse_wl_touch_up :: proc(connection: ^Connection) -> (event: Event_Touch_Up, ok: bool) {
+parse_wl_touch_up :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Up, ok: bool) {
+	event.object = Touch(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
 	read(connection, &event.id) or_return
 	ok = true
 	return
 }
-parse_wl_touch_motion :: proc(connection: ^Connection) -> (event: Event_Touch_Motion, ok: bool) {
+parse_wl_touch_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Motion, ok: bool) {
+	event.object = Touch(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.id) or_return
 	read(connection, &event.x) or_return
@@ -6111,28 +6393,33 @@ parse_wl_touch_motion :: proc(connection: ^Connection) -> (event: Event_Touch_Mo
 	ok = true
 	return
 }
-parse_wl_touch_frame :: proc(connection: ^Connection) -> (event: Event_Touch_Frame, ok: bool) {
+parse_wl_touch_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Frame, ok: bool) {
+	event.object = Touch(object)
 	ok = true
 	return
 }
-parse_wl_touch_cancel :: proc(connection: ^Connection) -> (event: Event_Touch_Cancel, ok: bool) {
+parse_wl_touch_cancel :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Cancel, ok: bool) {
+	event.object = Touch(object)
 	ok = true
 	return
 }
-parse_wl_touch_shape :: proc(connection: ^Connection) -> (event: Event_Touch_Shape, ok: bool) {
+parse_wl_touch_shape :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Shape, ok: bool) {
+	event.object = Touch(object)
 	read(connection, &event.id) or_return
 	read(connection, &event.major) or_return
 	read(connection, &event.minor) or_return
 	ok = true
 	return
 }
-parse_wl_touch_orientation :: proc(connection: ^Connection) -> (event: Event_Touch_Orientation, ok: bool) {
+parse_wl_touch_orientation :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Orientation, ok: bool) {
+	event.object = Touch(object)
 	read(connection, &event.id) or_return
 	read(connection, &event.orientation) or_return
 	ok = true
 	return
 }
-parse_wl_output_geometry :: proc(connection: ^Connection) -> (event: Event_Output_Geometry, ok: bool) {
+parse_wl_output_geometry :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Geometry, ok: bool) {
+	event.object = Output(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
 	read(connection, &event.physical_width) or_return
@@ -6144,7 +6431,8 @@ parse_wl_output_geometry :: proc(connection: ^Connection) -> (event: Event_Outpu
 	ok = true
 	return
 }
-parse_wl_output_mode :: proc(connection: ^Connection) -> (event: Event_Output_Mode, ok: bool) {
+parse_wl_output_mode :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Mode, ok: bool) {
+	event.object = Output(object)
 	read(connection, &event.flags) or_return
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
@@ -6152,93 +6440,111 @@ parse_wl_output_mode :: proc(connection: ^Connection) -> (event: Event_Output_Mo
 	ok = true
 	return
 }
-parse_wl_output_done :: proc(connection: ^Connection) -> (event: Event_Output_Done, ok: bool) {
+parse_wl_output_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Done, ok: bool) {
+	event.object = Output(object)
 	ok = true
 	return
 }
-parse_wl_output_scale :: proc(connection: ^Connection) -> (event: Event_Output_Scale, ok: bool) {
+parse_wl_output_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Scale, ok: bool) {
+	event.object = Output(object)
 	read(connection, &event.factor) or_return
 	ok = true
 	return
 }
-parse_wl_output_name :: proc(connection: ^Connection) -> (event: Event_Output_Name, ok: bool) {
+parse_wl_output_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Name, ok: bool) {
+	event.object = Output(object)
 	read(connection, &event.name) or_return
 	ok = true
 	return
 }
-parse_wl_output_description :: proc(connection: ^Connection) -> (event: Event_Output_Description, ok: bool) {
+parse_wl_output_description :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Description, ok: bool) {
+	event.object = Output(object)
 	read(connection, &event.description) or_return
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_v1_format :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_V1_Format, ok: bool) {
+parse_zwp_linux_dmabuf_v1_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_V1_Format, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_V1(object)
 	read(connection, &event.format) or_return
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_v1_modifier :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_V1_Modifier, ok: bool) {
+parse_zwp_linux_dmabuf_v1_modifier :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_V1_Modifier, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_V1(object)
 	read(connection, &event.format) or_return
 	read(connection, &event.modifier_hi) or_return
 	read(connection, &event.modifier_lo) or_return
 	ok = true
 	return
 }
-parse_zwp_linux_buffer_params_v1_created :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Buffer_Params_V1_Created, ok: bool) {
+parse_zwp_linux_buffer_params_v1_created :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Buffer_Params_V1_Created, ok: bool) {
+	event.object = Zwp_Linux_Buffer_Params_V1(object)
 	read(connection, &event.buffer) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.buffer) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.buffer) - SERVER_ID_START] = .Buffer
 	ok = true
 	return
 }
-parse_zwp_linux_buffer_params_v1_failed :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Buffer_Params_V1_Failed, ok: bool) {
+parse_zwp_linux_buffer_params_v1_failed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Buffer_Params_V1_Failed, ok: bool) {
+	event.object = Zwp_Linux_Buffer_Params_V1(object)
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_feedback_v1_done :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Done, ok: bool) {
+parse_zwp_linux_dmabuf_feedback_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Done, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_feedback_v1_format_table :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Format_Table, ok: bool) {
+parse_zwp_linux_dmabuf_feedback_v1_format_table :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Format_Table, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.fd) or_return
 	read(connection, &event.size) or_return
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_feedback_v1_main_device :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Main_Device, ok: bool) {
+parse_zwp_linux_dmabuf_feedback_v1_main_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Main_Device, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.device) or_return
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_feedback_v1_tranche_done :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Done, ok: bool) {
+parse_zwp_linux_dmabuf_feedback_v1_tranche_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Done, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_feedback_v1_tranche_target_device :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Target_Device, ok: bool) {
+parse_zwp_linux_dmabuf_feedback_v1_tranche_target_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Target_Device, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.device) or_return
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_feedback_v1_tranche_formats :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Formats, ok: bool) {
+parse_zwp_linux_dmabuf_feedback_v1_tranche_formats :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Formats, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.indices) or_return
 	ok = true
 	return
 }
-parse_zwp_linux_dmabuf_feedback_v1_tranche_flags :: proc(connection: ^Connection) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags, ok: bool) {
+parse_zwp_linux_dmabuf_feedback_v1_tranche_flags :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags, ok: bool) {
+	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.flags) or_return
 	ok = true
 	return
 }
-parse_wp_presentation_clock_id :: proc(connection: ^Connection) -> (event: Event_Wp_Presentation_Clock_Id, ok: bool) {
+parse_wp_presentation_clock_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Clock_Id, ok: bool) {
+	event.object = Wp_Presentation(object)
 	read(connection, &event.clk_id) or_return
 	ok = true
 	return
 }
-parse_wp_presentation_feedback_sync_output :: proc(connection: ^Connection) -> (event: Event_Wp_Presentation_Feedback_Sync_Output, ok: bool) {
+parse_wp_presentation_feedback_sync_output :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Feedback_Sync_Output, ok: bool) {
+	event.object = Wp_Presentation_Feedback(object)
 	read(connection, &event.output) or_return
 	ok = true
 	return
 }
-parse_wp_presentation_feedback_presented :: proc(connection: ^Connection) -> (event: Event_Wp_Presentation_Feedback_Presented, ok: bool) {
+parse_wp_presentation_feedback_presented :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Feedback_Presented, ok: bool) {
+	event.object = Wp_Presentation_Feedback(object)
 	read(connection, &event.tv_sec_hi) or_return
 	read(connection, &event.tv_sec_lo) or_return
 	read(connection, &event.tv_nsec) or_return
@@ -6249,328 +6555,389 @@ parse_wp_presentation_feedback_presented :: proc(connection: ^Connection) -> (ev
 	ok = true
 	return
 }
-parse_wp_presentation_feedback_discarded :: proc(connection: ^Connection) -> (event: Event_Wp_Presentation_Feedback_Discarded, ok: bool) {
+parse_wp_presentation_feedback_discarded :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Feedback_Discarded, ok: bool) {
+	event.object = Wp_Presentation_Feedback(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_seat_v2_tablet_added :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Seat_V2_Tablet_Added, ok: bool) {
+parse_zwp_tablet_seat_v2_tablet_added :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Seat_V2_Tablet_Added, ok: bool) {
+	event.object = Zwp_Tablet_Seat_V2(object)
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_V2
 	ok = true
 	return
 }
-parse_zwp_tablet_seat_v2_tool_added :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Seat_V2_Tool_Added, ok: bool) {
+parse_zwp_tablet_seat_v2_tool_added :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Seat_V2_Tool_Added, ok: bool) {
+	event.object = Zwp_Tablet_Seat_V2(object)
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_Tool_V2
 	ok = true
 	return
 }
-parse_zwp_tablet_seat_v2_pad_added :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Seat_V2_Pad_Added, ok: bool) {
+parse_zwp_tablet_seat_v2_pad_added :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Seat_V2_Pad_Added, ok: bool) {
+	event.object = Zwp_Tablet_Seat_V2(object)
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_Pad_V2
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_type :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Type, ok: bool) {
+parse_zwp_tablet_tool_v2_type :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Type, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.tool_type) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_hardware_serial :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Hardware_Serial, ok: bool) {
+parse_zwp_tablet_tool_v2_hardware_serial :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Hardware_Serial, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.hardware_serial_hi) or_return
 	read(connection, &event.hardware_serial_lo) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_hardware_id_wacom :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Hardware_Id_Wacom, ok: bool) {
+parse_zwp_tablet_tool_v2_hardware_id_wacom :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Hardware_Id_Wacom, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.hardware_id_hi) or_return
 	read(connection, &event.hardware_id_lo) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_capability :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Capability, ok: bool) {
+parse_zwp_tablet_tool_v2_capability :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Capability, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.capability) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_done :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Done, ok: bool) {
+parse_zwp_tablet_tool_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Done, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_removed :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Removed, ok: bool) {
+parse_zwp_tablet_tool_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Removed, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_proximity_in :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Proximity_In, ok: bool) {
+parse_zwp_tablet_tool_v2_proximity_in :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Proximity_In, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.tablet) or_return
 	read(connection, &event.surface) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_proximity_out :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Proximity_Out, ok: bool) {
+parse_zwp_tablet_tool_v2_proximity_out :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Proximity_Out, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_down :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Down, ok: bool) {
+parse_zwp_tablet_tool_v2_down :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Down, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.serial) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_up :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Up, ok: bool) {
+parse_zwp_tablet_tool_v2_up :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Up, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_motion :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Motion, ok: bool) {
+parse_zwp_tablet_tool_v2_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Motion, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_pressure :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Pressure, ok: bool) {
+parse_zwp_tablet_tool_v2_pressure :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Pressure, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.pressure) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_distance :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Distance, ok: bool) {
+parse_zwp_tablet_tool_v2_distance :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Distance, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.distance) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_tilt :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Tilt, ok: bool) {
+parse_zwp_tablet_tool_v2_tilt :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Tilt, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.tilt_x) or_return
 	read(connection, &event.tilt_y) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_rotation :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Rotation, ok: bool) {
+parse_zwp_tablet_tool_v2_rotation :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Rotation, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.degrees) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_slider :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Slider, ok: bool) {
+parse_zwp_tablet_tool_v2_slider :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Slider, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.position) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_wheel :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Wheel, ok: bool) {
+parse_zwp_tablet_tool_v2_wheel :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Wheel, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.degrees) or_return
 	read(connection, &event.clicks) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_button :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Button, ok: bool) {
+parse_zwp_tablet_tool_v2_button :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Button, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.button) or_return
 	read(connection, &event.state) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_tool_v2_frame :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Tool_V2_Frame, ok: bool) {
+parse_zwp_tablet_tool_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Frame, ok: bool) {
+	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.time) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_v2_name :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_V2_Name, ok: bool) {
+parse_zwp_tablet_v2_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Name, ok: bool) {
+	event.object = Zwp_Tablet_V2(object)
 	read(connection, &event.name) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_v2_id :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_V2_Id, ok: bool) {
+parse_zwp_tablet_v2_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Id, ok: bool) {
+	event.object = Zwp_Tablet_V2(object)
 	read(connection, &event.vid) or_return
 	read(connection, &event.pid) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_v2_path :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_V2_Path, ok: bool) {
+parse_zwp_tablet_v2_path :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Path, ok: bool) {
+	event.object = Zwp_Tablet_V2(object)
 	read(connection, &event.path) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_v2_done :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_V2_Done, ok: bool) {
+parse_zwp_tablet_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Done, ok: bool) {
+	event.object = Zwp_Tablet_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_v2_removed :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_V2_Removed, ok: bool) {
+parse_zwp_tablet_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Removed, ok: bool) {
+	event.object = Zwp_Tablet_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_v2_bustype :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_V2_Bustype, ok: bool) {
+parse_zwp_tablet_v2_bustype :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Bustype, ok: bool) {
+	event.object = Zwp_Tablet_V2(object)
 	read(connection, &event.bustype) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_ring_v2_source :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Source, ok: bool) {
+parse_zwp_tablet_pad_ring_v2_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Source, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Ring_V2(object)
 	read(connection, &event.source) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_ring_v2_angle :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Angle, ok: bool) {
+parse_zwp_tablet_pad_ring_v2_angle :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Angle, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Ring_V2(object)
 	read(connection, &event.degrees) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_ring_v2_stop :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Stop, ok: bool) {
+parse_zwp_tablet_pad_ring_v2_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Stop, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Ring_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_ring_v2_frame :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Frame, ok: bool) {
+parse_zwp_tablet_pad_ring_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Frame, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Ring_V2(object)
 	read(connection, &event.time) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_strip_v2_source :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Source, ok: bool) {
+parse_zwp_tablet_pad_strip_v2_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Source, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Strip_V2(object)
 	read(connection, &event.source) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_strip_v2_position :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Position, ok: bool) {
+parse_zwp_tablet_pad_strip_v2_position :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Position, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Strip_V2(object)
 	read(connection, &event.position) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_strip_v2_stop :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Stop, ok: bool) {
+parse_zwp_tablet_pad_strip_v2_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Stop, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Strip_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_strip_v2_frame :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Frame, ok: bool) {
+parse_zwp_tablet_pad_strip_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Frame, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Strip_V2(object)
 	read(connection, &event.time) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_group_v2_buttons :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Buttons, ok: bool) {
+parse_zwp_tablet_pad_group_v2_buttons :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Buttons, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	read(connection, &event.buttons) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_group_v2_ring :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Ring, ok: bool) {
+parse_zwp_tablet_pad_group_v2_ring :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Ring, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	read(connection, &event.ring) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.ring) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.ring) - SERVER_ID_START] = .Zwp_Tablet_Pad_Ring_V2
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_group_v2_strip :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Strip, ok: bool) {
+parse_zwp_tablet_pad_group_v2_strip :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Strip, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	read(connection, &event.strip) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.strip) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.strip) - SERVER_ID_START] = .Zwp_Tablet_Pad_Strip_V2
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_group_v2_modes :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Modes, ok: bool) {
+parse_zwp_tablet_pad_group_v2_modes :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Modes, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	read(connection, &event.modes) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_group_v2_done :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Done, ok: bool) {
+parse_zwp_tablet_pad_group_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Done, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_group_v2_mode_switch :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Mode_Switch, ok: bool) {
+parse_zwp_tablet_pad_group_v2_mode_switch :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Mode_Switch, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.serial) or_return
 	read(connection, &event.mode) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_group_v2_dial :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Dial, ok: bool) {
+parse_zwp_tablet_pad_group_v2_dial :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Dial, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	read(connection, &event.dial) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.dial) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.dial) - SERVER_ID_START] = .Zwp_Tablet_Pad_Dial_V2
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_v2_group :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Group, ok: bool) {
+parse_zwp_tablet_pad_v2_group :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Group, ok: bool) {
+	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.pad_group) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.pad_group) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.pad_group) - SERVER_ID_START] = .Zwp_Tablet_Pad_Group_V2
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_v2_path :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Path, ok: bool) {
+parse_zwp_tablet_pad_v2_path :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Path, ok: bool) {
+	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.path) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_v2_buttons :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Buttons, ok: bool) {
+parse_zwp_tablet_pad_v2_buttons :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Buttons, ok: bool) {
+	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.buttons) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_v2_done :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Done, ok: bool) {
+parse_zwp_tablet_pad_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Done, ok: bool) {
+	event.object = Zwp_Tablet_Pad_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_v2_button :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Button, ok: bool) {
+parse_zwp_tablet_pad_v2_button :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Button, ok: bool) {
+	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.button) or_return
 	read(connection, &event.state) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_v2_enter :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Enter, ok: bool) {
+parse_zwp_tablet_pad_v2_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Enter, ok: bool) {
+	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.tablet) or_return
 	read(connection, &event.surface) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_v2_leave :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Leave, ok: bool) {
+parse_zwp_tablet_pad_v2_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Leave, ok: bool) {
+	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_v2_removed :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_V2_Removed, ok: bool) {
+parse_zwp_tablet_pad_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Removed, ok: bool) {
+	event.object = Zwp_Tablet_Pad_V2(object)
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_dial_v2_delta :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Dial_V2_Delta, ok: bool) {
+parse_zwp_tablet_pad_dial_v2_delta :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Dial_V2_Delta, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Dial_V2(object)
 	read(connection, &event.value120) or_return
 	ok = true
 	return
 }
-parse_zwp_tablet_pad_dial_v2_frame :: proc(connection: ^Connection) -> (event: Event_Zwp_Tablet_Pad_Dial_V2_Frame, ok: bool) {
+parse_zwp_tablet_pad_dial_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Dial_V2_Frame, ok: bool) {
+	event.object = Zwp_Tablet_Pad_Dial_V2(object)
 	read(connection, &event.time) or_return
 	ok = true
 	return
 }
-parse_xdg_wm_base_ping :: proc(connection: ^Connection) -> (event: Event_Xdg_Wm_Base_Ping, ok: bool) {
+parse_xdg_wm_base_ping :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Wm_Base_Ping, ok: bool) {
+	event.object = Xdg_Wm_Base(object)
 	read(connection, &event.serial) or_return
 	ok = true
 	return
 }
-parse_xdg_surface_configure :: proc(connection: ^Connection) -> (event: Event_Xdg_Surface_Configure, ok: bool) {
+parse_xdg_surface_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Surface_Configure, ok: bool) {
+	event.object = Xdg_Surface(object)
 	read(connection, &event.serial) or_return
 	ok = true
 	return
 }
-parse_xdg_toplevel_configure :: proc(connection: ^Connection) -> (event: Event_Xdg_Toplevel_Configure, ok: bool) {
+parse_xdg_toplevel_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Configure, ok: bool) {
+	event.object = Xdg_Toplevel(object)
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
 	read(connection, &event.states) or_return
 	ok = true
 	return
 }
-parse_xdg_toplevel_close :: proc(connection: ^Connection) -> (event: Event_Xdg_Toplevel_Close, ok: bool) {
+parse_xdg_toplevel_close :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Close, ok: bool) {
+	event.object = Xdg_Toplevel(object)
 	ok = true
 	return
 }
-parse_xdg_toplevel_configure_bounds :: proc(connection: ^Connection) -> (event: Event_Xdg_Toplevel_Configure_Bounds, ok: bool) {
+parse_xdg_toplevel_configure_bounds :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Configure_Bounds, ok: bool) {
+	event.object = Xdg_Toplevel(object)
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
 	ok = true
 	return
 }
-parse_xdg_toplevel_wm_capabilities :: proc(connection: ^Connection) -> (event: Event_Xdg_Toplevel_Wm_Capabilities, ok: bool) {
+parse_xdg_toplevel_wm_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Wm_Capabilities, ok: bool) {
+	event.object = Xdg_Toplevel(object)
 	read(connection, &event.capabilities) or_return
 	ok = true
 	return
 }
-parse_xdg_popup_configure :: proc(connection: ^Connection) -> (event: Event_Xdg_Popup_Configure, ok: bool) {
+parse_xdg_popup_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Popup_Configure, ok: bool) {
+	event.object = Xdg_Popup(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
 	read(connection, &event.width) or_return
@@ -6578,82 +6945,98 @@ parse_xdg_popup_configure :: proc(connection: ^Connection) -> (event: Event_Xdg_
 	ok = true
 	return
 }
-parse_xdg_popup_popup_done :: proc(connection: ^Connection) -> (event: Event_Xdg_Popup_Popup_Done, ok: bool) {
+parse_xdg_popup_popup_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Popup_Popup_Done, ok: bool) {
+	event.object = Xdg_Popup(object)
 	ok = true
 	return
 }
-parse_xdg_popup_repositioned :: proc(connection: ^Connection) -> (event: Event_Xdg_Popup_Repositioned, ok: bool) {
+parse_xdg_popup_repositioned :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Popup_Repositioned, ok: bool) {
+	event.object = Xdg_Popup(object)
 	read(connection, &event.token) or_return
 	ok = true
 	return
 }
-parse_wp_color_manager_v1_supported_intent :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Manager_V1_Supported_Intent, ok: bool) {
+parse_wp_color_manager_v1_supported_intent :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Intent, ok: bool) {
+	event.object = Wp_Color_Manager_V1(object)
 	read(connection, &event.render_intent) or_return
 	ok = true
 	return
 }
-parse_wp_color_manager_v1_supported_feature :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Manager_V1_Supported_Feature, ok: bool) {
+parse_wp_color_manager_v1_supported_feature :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Feature, ok: bool) {
+	event.object = Wp_Color_Manager_V1(object)
 	read(connection, &event.feature) or_return
 	ok = true
 	return
 }
-parse_wp_color_manager_v1_supported_tf_named :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Manager_V1_Supported_Tf_Named, ok: bool) {
+parse_wp_color_manager_v1_supported_tf_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Tf_Named, ok: bool) {
+	event.object = Wp_Color_Manager_V1(object)
 	read(connection, &event.tf) or_return
 	ok = true
 	return
 }
-parse_wp_color_manager_v1_supported_primaries_named :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Manager_V1_Supported_Primaries_Named, ok: bool) {
+parse_wp_color_manager_v1_supported_primaries_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Primaries_Named, ok: bool) {
+	event.object = Wp_Color_Manager_V1(object)
 	read(connection, &event.primaries) or_return
 	ok = true
 	return
 }
-parse_wp_color_manager_v1_done :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Manager_V1_Done, ok: bool) {
+parse_wp_color_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Done, ok: bool) {
+	event.object = Wp_Color_Manager_V1(object)
 	ok = true
 	return
 }
-parse_wp_color_management_output_v1_image_description_changed :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Management_Output_V1_Image_Description_Changed, ok: bool) {
+parse_wp_color_management_output_v1_image_description_changed :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Management_Output_V1_Image_Description_Changed, ok: bool) {
+	event.object = Wp_Color_Management_Output_V1(object)
 	ok = true
 	return
 }
-parse_wp_color_management_surface_feedback_v1_preferred_changed :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed, ok: bool) {
+parse_wp_color_management_surface_feedback_v1_preferred_changed :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed, ok: bool) {
+	event.object = Wp_Color_Management_Surface_Feedback_V1(object)
 	read(connection, &event.identity) or_return
 	ok = true
 	return
 }
-parse_wp_color_management_surface_feedback_v1_preferred_changed2 :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2, ok: bool) {
+parse_wp_color_management_surface_feedback_v1_preferred_changed2 :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2, ok: bool) {
+	event.object = Wp_Color_Management_Surface_Feedback_V1(object)
 	read(connection, &event.identity_hi) or_return
 	read(connection, &event.identity_lo) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_v1_failed :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_V1_Failed, ok: bool) {
+parse_wp_image_description_v1_failed :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_V1_Failed, ok: bool) {
+	event.object = Wp_Image_Description_V1(object)
 	read(connection, &event.cause) or_return
 	read(connection, &event.msg) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_v1_ready :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_V1_Ready, ok: bool) {
+parse_wp_image_description_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_V1_Ready, ok: bool) {
+	event.object = Wp_Image_Description_V1(object)
 	read(connection, &event.identity) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_v1_ready2 :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_V1_Ready2, ok: bool) {
+parse_wp_image_description_v1_ready2 :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_V1_Ready2, ok: bool) {
+	event.object = Wp_Image_Description_V1(object)
 	read(connection, &event.identity_hi) or_return
 	read(connection, &event.identity_lo) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_done :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Done, ok: bool) {
+parse_wp_image_description_info_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Done, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_icc_file :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Icc_File, ok: bool) {
+parse_wp_image_description_info_v1_icc_file :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Icc_File, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.icc) or_return
 	read(connection, &event.icc_size) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_primaries :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Primaries, ok: bool) {
+parse_wp_image_description_info_v1_primaries :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Primaries, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.r_x) or_return
 	read(connection, &event.r_y) or_return
 	read(connection, &event.g_x) or_return
@@ -6665,29 +7048,34 @@ parse_wp_image_description_info_v1_primaries :: proc(connection: ^Connection) ->
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_primaries_named :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Primaries_Named, ok: bool) {
+parse_wp_image_description_info_v1_primaries_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Primaries_Named, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.primaries) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_tf_power :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Tf_Power, ok: bool) {
+parse_wp_image_description_info_v1_tf_power :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Tf_Power, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.eexp) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_tf_named :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Tf_Named, ok: bool) {
+parse_wp_image_description_info_v1_tf_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Tf_Named, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.tf) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_luminances :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Luminances, ok: bool) {
+parse_wp_image_description_info_v1_luminances :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Luminances, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.min_lum) or_return
 	read(connection, &event.max_lum) or_return
 	read(connection, &event.reference_lum) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_target_primaries :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Target_Primaries, ok: bool) {
+parse_wp_image_description_info_v1_target_primaries :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Primaries, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.r_x) or_return
 	read(connection, &event.r_y) or_return
 	read(connection, &event.g_x) or_return
@@ -6699,208 +7087,250 @@ parse_wp_image_description_info_v1_target_primaries :: proc(connection: ^Connect
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_target_luminance :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Target_Luminance, ok: bool) {
+parse_wp_image_description_info_v1_target_luminance :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Luminance, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.min_lum) or_return
 	read(connection, &event.max_lum) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_target_max_cll :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Target_Max_Cll, ok: bool) {
+parse_wp_image_description_info_v1_target_max_cll :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Max_Cll, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.max_cll) or_return
 	ok = true
 	return
 }
-parse_wp_image_description_info_v1_target_max_fall :: proc(connection: ^Connection) -> (event: Event_Wp_Image_Description_Info_V1_Target_Max_Fall, ok: bool) {
+parse_wp_image_description_info_v1_target_max_fall :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Max_Fall, ok: bool) {
+	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.max_fall) or_return
 	ok = true
 	return
 }
-parse_wp_color_representation_manager_v1_supported_alpha_mode :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Representation_Manager_V1_Supported_Alpha_Mode, ok: bool) {
+parse_wp_color_representation_manager_v1_supported_alpha_mode :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Representation_Manager_V1_Supported_Alpha_Mode, ok: bool) {
+	event.object = Wp_Color_Representation_Manager_V1(object)
 	read(connection, &event.alpha_mode) or_return
 	ok = true
 	return
 }
-parse_wp_color_representation_manager_v1_supported_coefficients_and_ranges :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Representation_Manager_V1_Supported_Coefficients_And_Ranges, ok: bool) {
+parse_wp_color_representation_manager_v1_supported_coefficients_and_ranges :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Representation_Manager_V1_Supported_Coefficients_And_Ranges, ok: bool) {
+	event.object = Wp_Color_Representation_Manager_V1(object)
 	read(connection, &event.coefficients) or_return
 	read(connection, &event.range) or_return
 	ok = true
 	return
 }
-parse_wp_color_representation_manager_v1_done :: proc(connection: ^Connection) -> (event: Event_Wp_Color_Representation_Manager_V1_Done, ok: bool) {
+parse_wp_color_representation_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Representation_Manager_V1_Done, ok: bool) {
+	event.object = Wp_Color_Representation_Manager_V1(object)
 	ok = true
 	return
 }
-parse_wp_drm_lease_device_v1_drm_fd :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Device_V1_Drm_Fd, ok: bool) {
+parse_wp_drm_lease_device_v1_drm_fd :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Drm_Fd, ok: bool) {
+	event.object = Wp_Drm_Lease_Device_V1(object)
 	read(connection, &event.fd) or_return
 	ok = true
 	return
 }
-parse_wp_drm_lease_device_v1_connector :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Device_V1_Connector, ok: bool) {
+parse_wp_drm_lease_device_v1_connector :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Connector, ok: bool) {
+	event.object = Wp_Drm_Lease_Device_V1(object)
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Wp_Drm_Lease_Connector_V1
 	ok = true
 	return
 }
-parse_wp_drm_lease_device_v1_done :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Device_V1_Done, ok: bool) {
+parse_wp_drm_lease_device_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Done, ok: bool) {
+	event.object = Wp_Drm_Lease_Device_V1(object)
 	ok = true
 	return
 }
-parse_wp_drm_lease_device_v1_released :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Device_V1_Released, ok: bool) {
+parse_wp_drm_lease_device_v1_released :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Released, ok: bool) {
+	event.object = Wp_Drm_Lease_Device_V1(object)
 	ok = true
 	return
 }
-parse_wp_drm_lease_connector_v1_name :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Connector_V1_Name, ok: bool) {
+parse_wp_drm_lease_connector_v1_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Name, ok: bool) {
+	event.object = Wp_Drm_Lease_Connector_V1(object)
 	read(connection, &event.name) or_return
 	ok = true
 	return
 }
-parse_wp_drm_lease_connector_v1_description :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Connector_V1_Description, ok: bool) {
+parse_wp_drm_lease_connector_v1_description :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Description, ok: bool) {
+	event.object = Wp_Drm_Lease_Connector_V1(object)
 	read(connection, &event.description) or_return
 	ok = true
 	return
 }
-parse_wp_drm_lease_connector_v1_connector_id :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Connector_V1_Connector_Id, ok: bool) {
+parse_wp_drm_lease_connector_v1_connector_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Connector_Id, ok: bool) {
+	event.object = Wp_Drm_Lease_Connector_V1(object)
 	read(connection, &event.connector_id) or_return
 	ok = true
 	return
 }
-parse_wp_drm_lease_connector_v1_done :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Connector_V1_Done, ok: bool) {
+parse_wp_drm_lease_connector_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Done, ok: bool) {
+	event.object = Wp_Drm_Lease_Connector_V1(object)
 	ok = true
 	return
 }
-parse_wp_drm_lease_connector_v1_withdrawn :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_Connector_V1_Withdrawn, ok: bool) {
+parse_wp_drm_lease_connector_v1_withdrawn :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Withdrawn, ok: bool) {
+	event.object = Wp_Drm_Lease_Connector_V1(object)
 	ok = true
 	return
 }
-parse_wp_drm_lease_v1_lease_fd :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_V1_Lease_Fd, ok: bool) {
+parse_wp_drm_lease_v1_lease_fd :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_V1_Lease_Fd, ok: bool) {
+	event.object = Wp_Drm_Lease_V1(object)
 	read(connection, &event.leased_fd) or_return
 	ok = true
 	return
 }
-parse_wp_drm_lease_v1_finished :: proc(connection: ^Connection) -> (event: Event_Wp_Drm_Lease_V1_Finished, ok: bool) {
+parse_wp_drm_lease_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_V1_Finished, ok: bool) {
+	event.object = Wp_Drm_Lease_V1(object)
 	ok = true
 	return
 }
-parse_ext_background_effect_manager_v1_capabilities :: proc(connection: ^Connection) -> (event: Event_Ext_Background_Effect_Manager_V1_Capabilities, ok: bool) {
+parse_ext_background_effect_manager_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Background_Effect_Manager_V1_Capabilities, ok: bool) {
+	event.object = Ext_Background_Effect_Manager_V1(object)
 	read(connection, &event.flags) or_return
 	ok = true
 	return
 }
-parse_ext_data_control_device_v1_data_offer :: proc(connection: ^Connection) -> (event: Event_Ext_Data_Control_Device_V1_Data_Offer, ok: bool) {
+parse_ext_data_control_device_v1_data_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Data_Offer, ok: bool) {
+	event.object = Ext_Data_Control_Device_V1(object)
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Ext_Data_Control_Offer_V1
 	ok = true
 	return
 }
-parse_ext_data_control_device_v1_selection :: proc(connection: ^Connection) -> (event: Event_Ext_Data_Control_Device_V1_Selection, ok: bool) {
+parse_ext_data_control_device_v1_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Selection, ok: bool) {
+	event.object = Ext_Data_Control_Device_V1(object)
 	read(connection, &event.id) or_return
 	ok = true
 	return
 }
-parse_ext_data_control_device_v1_finished :: proc(connection: ^Connection) -> (event: Event_Ext_Data_Control_Device_V1_Finished, ok: bool) {
+parse_ext_data_control_device_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Finished, ok: bool) {
+	event.object = Ext_Data_Control_Device_V1(object)
 	ok = true
 	return
 }
-parse_ext_data_control_device_v1_primary_selection :: proc(connection: ^Connection) -> (event: Event_Ext_Data_Control_Device_V1_Primary_Selection, ok: bool) {
+parse_ext_data_control_device_v1_primary_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Primary_Selection, ok: bool) {
+	event.object = Ext_Data_Control_Device_V1(object)
 	read(connection, &event.id) or_return
 	ok = true
 	return
 }
-parse_ext_data_control_source_v1_send :: proc(connection: ^Connection) -> (event: Event_Ext_Data_Control_Source_V1_Send, ok: bool) {
+parse_ext_data_control_source_v1_send :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Source_V1_Send, ok: bool) {
+	event.object = Ext_Data_Control_Source_V1(object)
 	read(connection, &event.mime_type) or_return
 	read(connection, &event.fd) or_return
 	ok = true
 	return
 }
-parse_ext_data_control_source_v1_cancelled :: proc(connection: ^Connection) -> (event: Event_Ext_Data_Control_Source_V1_Cancelled, ok: bool) {
+parse_ext_data_control_source_v1_cancelled :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Source_V1_Cancelled, ok: bool) {
+	event.object = Ext_Data_Control_Source_V1(object)
 	ok = true
 	return
 }
-parse_ext_data_control_offer_v1_offer :: proc(connection: ^Connection) -> (event: Event_Ext_Data_Control_Offer_V1_Offer, ok: bool) {
+parse_ext_data_control_offer_v1_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Offer_V1_Offer, ok: bool) {
+	event.object = Ext_Data_Control_Offer_V1(object)
 	read(connection, &event.mime_type) or_return
 	ok = true
 	return
 }
-parse_ext_foreign_toplevel_list_v1_toplevel :: proc(connection: ^Connection) -> (event: Event_Ext_Foreign_Toplevel_List_V1_Toplevel, ok: bool) {
+parse_ext_foreign_toplevel_list_v1_toplevel :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_List_V1_Toplevel, ok: bool) {
+	event.object = Ext_Foreign_Toplevel_List_V1(object)
 	read(connection, &event.toplevel) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.toplevel) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.toplevel) - SERVER_ID_START] = .Ext_Foreign_Toplevel_Handle_V1
 	ok = true
 	return
 }
-parse_ext_foreign_toplevel_list_v1_finished :: proc(connection: ^Connection) -> (event: Event_Ext_Foreign_Toplevel_List_V1_Finished, ok: bool) {
+parse_ext_foreign_toplevel_list_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_List_V1_Finished, ok: bool) {
+	event.object = Ext_Foreign_Toplevel_List_V1(object)
 	ok = true
 	return
 }
-parse_ext_foreign_toplevel_handle_v1_closed :: proc(connection: ^Connection) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Closed, ok: bool) {
+parse_ext_foreign_toplevel_handle_v1_closed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Closed, ok: bool) {
+	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
 	ok = true
 	return
 }
-parse_ext_foreign_toplevel_handle_v1_done :: proc(connection: ^Connection) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Done, ok: bool) {
+parse_ext_foreign_toplevel_handle_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Done, ok: bool) {
+	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
 	ok = true
 	return
 }
-parse_ext_foreign_toplevel_handle_v1_title :: proc(connection: ^Connection) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Title, ok: bool) {
+parse_ext_foreign_toplevel_handle_v1_title :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Title, ok: bool) {
+	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
 	read(connection, &event.title) or_return
 	ok = true
 	return
 }
-parse_ext_foreign_toplevel_handle_v1_app_id :: proc(connection: ^Connection) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_App_Id, ok: bool) {
+parse_ext_foreign_toplevel_handle_v1_app_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_App_Id, ok: bool) {
+	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
 	read(connection, &event.app_id) or_return
 	ok = true
 	return
 }
-parse_ext_foreign_toplevel_handle_v1_identifier :: proc(connection: ^Connection) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Identifier, ok: bool) {
+parse_ext_foreign_toplevel_handle_v1_identifier :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Identifier, ok: bool) {
+	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
 	read(connection, &event.identifier) or_return
 	ok = true
 	return
 }
-parse_ext_idle_notification_v1_idled :: proc(connection: ^Connection) -> (event: Event_Ext_Idle_Notification_V1_Idled, ok: bool) {
+parse_ext_idle_notification_v1_idled :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Idle_Notification_V1_Idled, ok: bool) {
+	event.object = Ext_Idle_Notification_V1(object)
 	ok = true
 	return
 }
-parse_ext_idle_notification_v1_resumed :: proc(connection: ^Connection) -> (event: Event_Ext_Idle_Notification_V1_Resumed, ok: bool) {
+parse_ext_idle_notification_v1_resumed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Idle_Notification_V1_Resumed, ok: bool) {
+	event.object = Ext_Idle_Notification_V1(object)
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_session_v1_buffer_size :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Buffer_Size, ok: bool) {
+parse_ext_image_copy_capture_session_v1_buffer_size :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Buffer_Size, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_session_v1_shm_format :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Shm_Format, ok: bool) {
+parse_ext_image_copy_capture_session_v1_shm_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Shm_Format, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	read(connection, &event.format) or_return
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_session_v1_dmabuf_device :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Device, ok: bool) {
+parse_ext_image_copy_capture_session_v1_dmabuf_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Device, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	read(connection, &event.device) or_return
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_session_v1_dmabuf_format :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Format, ok: bool) {
+parse_ext_image_copy_capture_session_v1_dmabuf_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Format, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	read(connection, &event.format) or_return
 	read(connection, &event.modifiers) or_return
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_session_v1_done :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Done, ok: bool) {
+parse_ext_image_copy_capture_session_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Done, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_session_v1_stopped :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Stopped, ok: bool) {
+parse_ext_image_copy_capture_session_v1_stopped :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Stopped, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_frame_v1_transform :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Transform, ok: bool) {
+parse_ext_image_copy_capture_frame_v1_transform :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Transform, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
 	read(connection, &event.transform) or_return
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_frame_v1_damage :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Damage, ok: bool) {
+parse_ext_image_copy_capture_frame_v1_damage :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Damage, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
 	read(connection, &event.width) or_return
@@ -6908,190 +7338,222 @@ parse_ext_image_copy_capture_frame_v1_damage :: proc(connection: ^Connection) ->
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_frame_v1_presentation_time :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Presentation_Time, ok: bool) {
+parse_ext_image_copy_capture_frame_v1_presentation_time :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Presentation_Time, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
 	read(connection, &event.tv_sec_hi) or_return
 	read(connection, &event.tv_sec_lo) or_return
 	read(connection, &event.tv_nsec) or_return
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_frame_v1_ready :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Ready, ok: bool) {
+parse_ext_image_copy_capture_frame_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Ready, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_frame_v1_failed :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Failed, ok: bool) {
+parse_ext_image_copy_capture_frame_v1_failed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Failed, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
 	read(connection, &event.reason) or_return
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_cursor_session_v1_enter :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Enter, ok: bool) {
+parse_ext_image_copy_capture_cursor_session_v1_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Enter, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_cursor_session_v1_leave :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Leave, ok: bool) {
+parse_ext_image_copy_capture_cursor_session_v1_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Leave, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_cursor_session_v1_position :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Position, ok: bool) {
+parse_ext_image_copy_capture_cursor_session_v1_position :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Position, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
 	ok = true
 	return
 }
-parse_ext_image_copy_capture_cursor_session_v1_hotspot :: proc(connection: ^Connection) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Hotspot, ok: bool) {
+parse_ext_image_copy_capture_cursor_session_v1_hotspot :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Hotspot, ok: bool) {
+	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
 	ok = true
 	return
 }
-parse_ext_session_lock_v1_locked :: proc(connection: ^Connection) -> (event: Event_Ext_Session_Lock_V1_Locked, ok: bool) {
+parse_ext_session_lock_v1_locked :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Session_Lock_V1_Locked, ok: bool) {
+	event.object = Ext_Session_Lock_V1(object)
 	ok = true
 	return
 }
-parse_ext_session_lock_v1_finished :: proc(connection: ^Connection) -> (event: Event_Ext_Session_Lock_V1_Finished, ok: bool) {
+parse_ext_session_lock_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Session_Lock_V1_Finished, ok: bool) {
+	event.object = Ext_Session_Lock_V1(object)
 	ok = true
 	return
 }
-parse_ext_session_lock_surface_v1_configure :: proc(connection: ^Connection) -> (event: Event_Ext_Session_Lock_Surface_V1_Configure, ok: bool) {
+parse_ext_session_lock_surface_v1_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Session_Lock_Surface_V1_Configure, ok: bool) {
+	event.object = Ext_Session_Lock_Surface_V1(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
 	ok = true
 	return
 }
-parse_ext_transient_seat_v1_ready :: proc(connection: ^Connection) -> (event: Event_Ext_Transient_Seat_V1_Ready, ok: bool) {
+parse_ext_transient_seat_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Transient_Seat_V1_Ready, ok: bool) {
+	event.object = Ext_Transient_Seat_V1(object)
 	read(connection, &event.global_name) or_return
 	ok = true
 	return
 }
-parse_ext_transient_seat_v1_denied :: proc(connection: ^Connection) -> (event: Event_Ext_Transient_Seat_V1_Denied, ok: bool) {
+parse_ext_transient_seat_v1_denied :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Transient_Seat_V1_Denied, ok: bool) {
+	event.object = Ext_Transient_Seat_V1(object)
 	ok = true
 	return
 }
-parse_ext_workspace_manager_v1_workspace_group :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Manager_V1_Workspace_Group, ok: bool) {
+parse_ext_workspace_manager_v1_workspace_group :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Workspace_Group, ok: bool) {
+	event.object = Ext_Workspace_Manager_V1(object)
 	read(connection, &event.workspace_group) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.workspace_group) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.workspace_group) - SERVER_ID_START] = .Ext_Workspace_Group_Handle_V1
 	ok = true
 	return
 }
-parse_ext_workspace_manager_v1_workspace :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Manager_V1_Workspace, ok: bool) {
+parse_ext_workspace_manager_v1_workspace :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Workspace, ok: bool) {
+	event.object = Ext_Workspace_Manager_V1(object)
 	read(connection, &event.workspace) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.workspace) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.workspace) - SERVER_ID_START] = .Ext_Workspace_Handle_V1
 	ok = true
 	return
 }
-parse_ext_workspace_manager_v1_done :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Manager_V1_Done, ok: bool) {
+parse_ext_workspace_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Done, ok: bool) {
+	event.object = Ext_Workspace_Manager_V1(object)
 	ok = true
 	return
 }
-parse_ext_workspace_manager_v1_finished :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Manager_V1_Finished, ok: bool) {
+parse_ext_workspace_manager_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Finished, ok: bool) {
+	event.object = Ext_Workspace_Manager_V1(object)
 	ok = true
 	return
 }
-parse_ext_workspace_group_handle_v1_capabilities :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Group_Handle_V1_Capabilities, ok: bool) {
+parse_ext_workspace_group_handle_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Capabilities, ok: bool) {
+	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.capabilities) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_group_handle_v1_output_enter :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Group_Handle_V1_Output_Enter, ok: bool) {
+parse_ext_workspace_group_handle_v1_output_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Output_Enter, ok: bool) {
+	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.output) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_group_handle_v1_output_leave :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Group_Handle_V1_Output_Leave, ok: bool) {
+parse_ext_workspace_group_handle_v1_output_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Output_Leave, ok: bool) {
+	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.output) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_group_handle_v1_workspace_enter :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Group_Handle_V1_Workspace_Enter, ok: bool) {
+parse_ext_workspace_group_handle_v1_workspace_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Workspace_Enter, ok: bool) {
+	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.workspace) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_group_handle_v1_workspace_leave :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Group_Handle_V1_Workspace_Leave, ok: bool) {
+parse_ext_workspace_group_handle_v1_workspace_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Workspace_Leave, ok: bool) {
+	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.workspace) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_group_handle_v1_removed :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Group_Handle_V1_Removed, ok: bool) {
+parse_ext_workspace_group_handle_v1_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Removed, ok: bool) {
+	event.object = Ext_Workspace_Group_Handle_V1(object)
 	ok = true
 	return
 }
-parse_ext_workspace_handle_v1_id :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Handle_V1_Id, ok: bool) {
+parse_ext_workspace_handle_v1_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Id, ok: bool) {
+	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.id) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_handle_v1_name :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Handle_V1_Name, ok: bool) {
+parse_ext_workspace_handle_v1_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Name, ok: bool) {
+	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.name) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_handle_v1_coordinates :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Handle_V1_Coordinates, ok: bool) {
+parse_ext_workspace_handle_v1_coordinates :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Coordinates, ok: bool) {
+	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.coordinates) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_handle_v1_state :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Handle_V1_State, ok: bool) {
+parse_ext_workspace_handle_v1_state :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_State, ok: bool) {
+	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.state) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_handle_v1_capabilities :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Handle_V1_Capabilities, ok: bool) {
+parse_ext_workspace_handle_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Capabilities, ok: bool) {
+	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.capabilities) or_return
 	ok = true
 	return
 }
-parse_ext_workspace_handle_v1_removed :: proc(connection: ^Connection) -> (event: Event_Ext_Workspace_Handle_V1_Removed, ok: bool) {
+parse_ext_workspace_handle_v1_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Removed, ok: bool) {
+	event.object = Ext_Workspace_Handle_V1(object)
 	ok = true
 	return
 }
-parse_wp_fractional_scale_v1_preferred_scale :: proc(connection: ^Connection) -> (event: Event_Wp_Fractional_Scale_V1_Preferred_Scale, ok: bool) {
+parse_wp_fractional_scale_v1_preferred_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Fractional_Scale_V1_Preferred_Scale, ok: bool) {
+	event.object = Wp_Fractional_Scale_V1(object)
 	read(connection, &event.scale) or_return
 	ok = true
 	return
 }
-parse_xdg_activation_token_v1_done :: proc(connection: ^Connection) -> (event: Event_Xdg_Activation_Token_V1_Done, ok: bool) {
+parse_xdg_activation_token_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Activation_Token_V1_Done, ok: bool) {
+	event.object = Xdg_Activation_Token_V1(object)
 	read(connection, &event.token) or_return
 	ok = true
 	return
 }
-parse_xdg_toplevel_icon_manager_v1_icon_size :: proc(connection: ^Connection) -> (event: Event_Xdg_Toplevel_Icon_Manager_V1_Icon_Size, ok: bool) {
+parse_xdg_toplevel_icon_manager_v1_icon_size :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Icon_Manager_V1_Icon_Size, ok: bool) {
+	event.object = Xdg_Toplevel_Icon_Manager_V1(object)
 	read(connection, &event.size) or_return
 	ok = true
 	return
 }
-parse_xdg_toplevel_icon_manager_v1_done :: proc(connection: ^Connection) -> (event: Event_Xdg_Toplevel_Icon_Manager_V1_Done, ok: bool) {
+parse_xdg_toplevel_icon_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Icon_Manager_V1_Done, ok: bool) {
+	event.object = Xdg_Toplevel_Icon_Manager_V1(object)
 	ok = true
 	return
 }
 
-parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u32) -> (event: Event, ok: bool) {
+parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Type, opcode: u32) -> (event: Event, ok: bool) {
 	switch (object_type) {
 	case .Display:
 		switch opcode {
 		case 0:
-			return parse_wl_display_error(connection)
+			return parse_wl_display_error(connection, object)
 		case 1:
-			return parse_wl_display_delete_id(connection)
+			return parse_wl_display_delete_id(connection, object)
 		case:
 			return
 		}
 	case .Registry:
 		switch opcode {
 		case 0:
-			return parse_wl_registry_global(connection)
+			return parse_wl_registry_global(connection, object)
 		case 1:
-			return parse_wl_registry_global_remove(connection)
+			return parse_wl_registry_global_remove(connection, object)
 		case:
 			return
 		}
 	case .Callback:
 		switch opcode {
 		case 0:
-			return parse_wl_callback_done(connection)
+			return parse_wl_callback_done(connection, object)
 		case:
 			return
 		}
@@ -7108,59 +7570,59 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Shm:
 		switch opcode {
 		case 0:
-			return parse_wl_shm_format(connection)
+			return parse_wl_shm_format(connection, object)
 		case:
 			return
 		}
 	case .Buffer:
 		switch opcode {
 		case 0:
-			return parse_wl_buffer_release(connection)
+			return parse_wl_buffer_release(connection, object)
 		case:
 			return
 		}
 	case .Data_Offer:
 		switch opcode {
 		case 0:
-			return parse_wl_data_offer_offer(connection)
+			return parse_wl_data_offer_offer(connection, object)
 		case 1:
-			return parse_wl_data_offer_source_actions(connection)
+			return parse_wl_data_offer_source_actions(connection, object)
 		case 2:
-			return parse_wl_data_offer_action(connection)
+			return parse_wl_data_offer_action(connection, object)
 		case:
 			return
 		}
 	case .Data_Source:
 		switch opcode {
 		case 0:
-			return parse_wl_data_source_target(connection)
+			return parse_wl_data_source_target(connection, object)
 		case 1:
-			return parse_wl_data_source_send(connection)
+			return parse_wl_data_source_send(connection, object)
 		case 2:
-			return parse_wl_data_source_cancelled(connection)
+			return parse_wl_data_source_cancelled(connection, object)
 		case 3:
-			return parse_wl_data_source_dnd_drop_performed(connection)
+			return parse_wl_data_source_dnd_drop_performed(connection, object)
 		case 4:
-			return parse_wl_data_source_dnd_finished(connection)
+			return parse_wl_data_source_dnd_finished(connection, object)
 		case 5:
-			return parse_wl_data_source_action(connection)
+			return parse_wl_data_source_action(connection, object)
 		case:
 			return
 		}
 	case .Data_Device:
 		switch opcode {
 		case 0:
-			return parse_wl_data_device_data_offer(connection)
+			return parse_wl_data_device_data_offer(connection, object)
 		case 1:
-			return parse_wl_data_device_enter(connection)
+			return parse_wl_data_device_enter(connection, object)
 		case 2:
-			return parse_wl_data_device_leave(connection)
+			return parse_wl_data_device_leave(connection, object)
 		case 3:
-			return parse_wl_data_device_motion(connection)
+			return parse_wl_data_device_motion(connection, object)
 		case 4:
-			return parse_wl_data_device_drop(connection)
+			return parse_wl_data_device_drop(connection, object)
 		case 5:
-			return parse_wl_data_device_selection(connection)
+			return parse_wl_data_device_selection(connection, object)
 		case:
 			return
 		}
@@ -7177,113 +7639,113 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Shell_Surface:
 		switch opcode {
 		case 0:
-			return parse_wl_shell_surface_ping(connection)
+			return parse_wl_shell_surface_ping(connection, object)
 		case 1:
-			return parse_wl_shell_surface_configure(connection)
+			return parse_wl_shell_surface_configure(connection, object)
 		case 2:
-			return parse_wl_shell_surface_popup_done(connection)
+			return parse_wl_shell_surface_popup_done(connection, object)
 		case:
 			return
 		}
 	case .Surface:
 		switch opcode {
 		case 0:
-			return parse_wl_surface_enter(connection)
+			return parse_wl_surface_enter(connection, object)
 		case 1:
-			return parse_wl_surface_leave(connection)
+			return parse_wl_surface_leave(connection, object)
 		case 2:
-			return parse_wl_surface_preferred_buffer_scale(connection)
+			return parse_wl_surface_preferred_buffer_scale(connection, object)
 		case 3:
-			return parse_wl_surface_preferred_buffer_transform(connection)
+			return parse_wl_surface_preferred_buffer_transform(connection, object)
 		case:
 			return
 		}
 	case .Seat:
 		switch opcode {
 		case 0:
-			return parse_wl_seat_capabilities(connection)
+			return parse_wl_seat_capabilities(connection, object)
 		case 1:
-			return parse_wl_seat_name(connection)
+			return parse_wl_seat_name(connection, object)
 		case:
 			return
 		}
 	case .Pointer:
 		switch opcode {
 		case 0:
-			return parse_wl_pointer_enter(connection)
+			return parse_wl_pointer_enter(connection, object)
 		case 1:
-			return parse_wl_pointer_leave(connection)
+			return parse_wl_pointer_leave(connection, object)
 		case 2:
-			return parse_wl_pointer_motion(connection)
+			return parse_wl_pointer_motion(connection, object)
 		case 3:
-			return parse_wl_pointer_button(connection)
+			return parse_wl_pointer_button(connection, object)
 		case 4:
-			return parse_wl_pointer_axis(connection)
+			return parse_wl_pointer_axis(connection, object)
 		case 5:
-			return parse_wl_pointer_frame(connection)
+			return parse_wl_pointer_frame(connection, object)
 		case 6:
-			return parse_wl_pointer_axis_source(connection)
+			return parse_wl_pointer_axis_source(connection, object)
 		case 7:
-			return parse_wl_pointer_axis_stop(connection)
+			return parse_wl_pointer_axis_stop(connection, object)
 		case 8:
-			return parse_wl_pointer_axis_discrete(connection)
+			return parse_wl_pointer_axis_discrete(connection, object)
 		case 9:
-			return parse_wl_pointer_axis_value120(connection)
+			return parse_wl_pointer_axis_value120(connection, object)
 		case 10:
-			return parse_wl_pointer_axis_relative_direction(connection)
+			return parse_wl_pointer_axis_relative_direction(connection, object)
 		case:
 			return
 		}
 	case .Keyboard:
 		switch opcode {
 		case 0:
-			return parse_wl_keyboard_keymap(connection)
+			return parse_wl_keyboard_keymap(connection, object)
 		case 1:
-			return parse_wl_keyboard_enter(connection)
+			return parse_wl_keyboard_enter(connection, object)
 		case 2:
-			return parse_wl_keyboard_leave(connection)
+			return parse_wl_keyboard_leave(connection, object)
 		case 3:
-			return parse_wl_keyboard_key(connection)
+			return parse_wl_keyboard_key(connection, object)
 		case 4:
-			return parse_wl_keyboard_modifiers(connection)
+			return parse_wl_keyboard_modifiers(connection, object)
 		case 5:
-			return parse_wl_keyboard_repeat_info(connection)
+			return parse_wl_keyboard_repeat_info(connection, object)
 		case:
 			return
 		}
 	case .Touch:
 		switch opcode {
 		case 0:
-			return parse_wl_touch_down(connection)
+			return parse_wl_touch_down(connection, object)
 		case 1:
-			return parse_wl_touch_up(connection)
+			return parse_wl_touch_up(connection, object)
 		case 2:
-			return parse_wl_touch_motion(connection)
+			return parse_wl_touch_motion(connection, object)
 		case 3:
-			return parse_wl_touch_frame(connection)
+			return parse_wl_touch_frame(connection, object)
 		case 4:
-			return parse_wl_touch_cancel(connection)
+			return parse_wl_touch_cancel(connection, object)
 		case 5:
-			return parse_wl_touch_shape(connection)
+			return parse_wl_touch_shape(connection, object)
 		case 6:
-			return parse_wl_touch_orientation(connection)
+			return parse_wl_touch_orientation(connection, object)
 		case:
 			return
 		}
 	case .Output:
 		switch opcode {
 		case 0:
-			return parse_wl_output_geometry(connection)
+			return parse_wl_output_geometry(connection, object)
 		case 1:
-			return parse_wl_output_mode(connection)
+			return parse_wl_output_mode(connection, object)
 		case 2:
-			return parse_wl_output_done(connection)
+			return parse_wl_output_done(connection, object)
 		case 3:
-			return parse_wl_output_scale(connection)
+			return parse_wl_output_scale(connection, object)
 		case 4:
-			return parse_wl_output_name(connection)
+			return parse_wl_output_name(connection, object)
 		case 5:
-			return parse_wl_output_description(connection)
+			return parse_wl_output_description(connection, object)
 		case:
 			return
 		}
@@ -7310,55 +7772,55 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Zwp_Linux_Dmabuf_V1:
 		switch opcode {
 		case 0:
-			return parse_zwp_linux_dmabuf_v1_format(connection)
+			return parse_zwp_linux_dmabuf_v1_format(connection, object)
 		case 1:
-			return parse_zwp_linux_dmabuf_v1_modifier(connection)
+			return parse_zwp_linux_dmabuf_v1_modifier(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Linux_Buffer_Params_V1:
 		switch opcode {
 		case 0:
-			return parse_zwp_linux_buffer_params_v1_created(connection)
+			return parse_zwp_linux_buffer_params_v1_created(connection, object)
 		case 1:
-			return parse_zwp_linux_buffer_params_v1_failed(connection)
+			return parse_zwp_linux_buffer_params_v1_failed(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Linux_Dmabuf_Feedback_V1:
 		switch opcode {
 		case 0:
-			return parse_zwp_linux_dmabuf_feedback_v1_done(connection)
+			return parse_zwp_linux_dmabuf_feedback_v1_done(connection, object)
 		case 1:
-			return parse_zwp_linux_dmabuf_feedback_v1_format_table(connection)
+			return parse_zwp_linux_dmabuf_feedback_v1_format_table(connection, object)
 		case 2:
-			return parse_zwp_linux_dmabuf_feedback_v1_main_device(connection)
+			return parse_zwp_linux_dmabuf_feedback_v1_main_device(connection, object)
 		case 3:
-			return parse_zwp_linux_dmabuf_feedback_v1_tranche_done(connection)
+			return parse_zwp_linux_dmabuf_feedback_v1_tranche_done(connection, object)
 		case 4:
-			return parse_zwp_linux_dmabuf_feedback_v1_tranche_target_device(connection)
+			return parse_zwp_linux_dmabuf_feedback_v1_tranche_target_device(connection, object)
 		case 5:
-			return parse_zwp_linux_dmabuf_feedback_v1_tranche_formats(connection)
+			return parse_zwp_linux_dmabuf_feedback_v1_tranche_formats(connection, object)
 		case 6:
-			return parse_zwp_linux_dmabuf_feedback_v1_tranche_flags(connection)
+			return parse_zwp_linux_dmabuf_feedback_v1_tranche_flags(connection, object)
 		case:
 			return
 		}
 	case .Wp_Presentation:
 		switch opcode {
 		case 0:
-			return parse_wp_presentation_clock_id(connection)
+			return parse_wp_presentation_clock_id(connection, object)
 		case:
 			return
 		}
 	case .Wp_Presentation_Feedback:
 		switch opcode {
 		case 0:
-			return parse_wp_presentation_feedback_sync_output(connection)
+			return parse_wp_presentation_feedback_sync_output(connection, object)
 		case 1:
-			return parse_wp_presentation_feedback_presented(connection)
+			return parse_wp_presentation_feedback_presented(connection, object)
 		case 2:
-			return parse_wp_presentation_feedback_discarded(connection)
+			return parse_wp_presentation_feedback_discarded(connection, object)
 		case:
 			return
 		}
@@ -7370,146 +7832,146 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Zwp_Tablet_Seat_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_seat_v2_tablet_added(connection)
+			return parse_zwp_tablet_seat_v2_tablet_added(connection, object)
 		case 1:
-			return parse_zwp_tablet_seat_v2_tool_added(connection)
+			return parse_zwp_tablet_seat_v2_tool_added(connection, object)
 		case 2:
-			return parse_zwp_tablet_seat_v2_pad_added(connection)
+			return parse_zwp_tablet_seat_v2_pad_added(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Tool_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_tool_v2_type(connection)
+			return parse_zwp_tablet_tool_v2_type(connection, object)
 		case 1:
-			return parse_zwp_tablet_tool_v2_hardware_serial(connection)
+			return parse_zwp_tablet_tool_v2_hardware_serial(connection, object)
 		case 2:
-			return parse_zwp_tablet_tool_v2_hardware_id_wacom(connection)
+			return parse_zwp_tablet_tool_v2_hardware_id_wacom(connection, object)
 		case 3:
-			return parse_zwp_tablet_tool_v2_capability(connection)
+			return parse_zwp_tablet_tool_v2_capability(connection, object)
 		case 4:
-			return parse_zwp_tablet_tool_v2_done(connection)
+			return parse_zwp_tablet_tool_v2_done(connection, object)
 		case 5:
-			return parse_zwp_tablet_tool_v2_removed(connection)
+			return parse_zwp_tablet_tool_v2_removed(connection, object)
 		case 6:
-			return parse_zwp_tablet_tool_v2_proximity_in(connection)
+			return parse_zwp_tablet_tool_v2_proximity_in(connection, object)
 		case 7:
-			return parse_zwp_tablet_tool_v2_proximity_out(connection)
+			return parse_zwp_tablet_tool_v2_proximity_out(connection, object)
 		case 8:
-			return parse_zwp_tablet_tool_v2_down(connection)
+			return parse_zwp_tablet_tool_v2_down(connection, object)
 		case 9:
-			return parse_zwp_tablet_tool_v2_up(connection)
+			return parse_zwp_tablet_tool_v2_up(connection, object)
 		case 10:
-			return parse_zwp_tablet_tool_v2_motion(connection)
+			return parse_zwp_tablet_tool_v2_motion(connection, object)
 		case 11:
-			return parse_zwp_tablet_tool_v2_pressure(connection)
+			return parse_zwp_tablet_tool_v2_pressure(connection, object)
 		case 12:
-			return parse_zwp_tablet_tool_v2_distance(connection)
+			return parse_zwp_tablet_tool_v2_distance(connection, object)
 		case 13:
-			return parse_zwp_tablet_tool_v2_tilt(connection)
+			return parse_zwp_tablet_tool_v2_tilt(connection, object)
 		case 14:
-			return parse_zwp_tablet_tool_v2_rotation(connection)
+			return parse_zwp_tablet_tool_v2_rotation(connection, object)
 		case 15:
-			return parse_zwp_tablet_tool_v2_slider(connection)
+			return parse_zwp_tablet_tool_v2_slider(connection, object)
 		case 16:
-			return parse_zwp_tablet_tool_v2_wheel(connection)
+			return parse_zwp_tablet_tool_v2_wheel(connection, object)
 		case 17:
-			return parse_zwp_tablet_tool_v2_button(connection)
+			return parse_zwp_tablet_tool_v2_button(connection, object)
 		case 18:
-			return parse_zwp_tablet_tool_v2_frame(connection)
+			return parse_zwp_tablet_tool_v2_frame(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_v2_name(connection)
+			return parse_zwp_tablet_v2_name(connection, object)
 		case 1:
-			return parse_zwp_tablet_v2_id(connection)
+			return parse_zwp_tablet_v2_id(connection, object)
 		case 2:
-			return parse_zwp_tablet_v2_path(connection)
+			return parse_zwp_tablet_v2_path(connection, object)
 		case 3:
-			return parse_zwp_tablet_v2_done(connection)
+			return parse_zwp_tablet_v2_done(connection, object)
 		case 4:
-			return parse_zwp_tablet_v2_removed(connection)
+			return parse_zwp_tablet_v2_removed(connection, object)
 		case 5:
-			return parse_zwp_tablet_v2_bustype(connection)
+			return parse_zwp_tablet_v2_bustype(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_Ring_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_ring_v2_source(connection)
+			return parse_zwp_tablet_pad_ring_v2_source(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_ring_v2_angle(connection)
+			return parse_zwp_tablet_pad_ring_v2_angle(connection, object)
 		case 2:
-			return parse_zwp_tablet_pad_ring_v2_stop(connection)
+			return parse_zwp_tablet_pad_ring_v2_stop(connection, object)
 		case 3:
-			return parse_zwp_tablet_pad_ring_v2_frame(connection)
+			return parse_zwp_tablet_pad_ring_v2_frame(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_Strip_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_strip_v2_source(connection)
+			return parse_zwp_tablet_pad_strip_v2_source(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_strip_v2_position(connection)
+			return parse_zwp_tablet_pad_strip_v2_position(connection, object)
 		case 2:
-			return parse_zwp_tablet_pad_strip_v2_stop(connection)
+			return parse_zwp_tablet_pad_strip_v2_stop(connection, object)
 		case 3:
-			return parse_zwp_tablet_pad_strip_v2_frame(connection)
+			return parse_zwp_tablet_pad_strip_v2_frame(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_Group_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_group_v2_buttons(connection)
+			return parse_zwp_tablet_pad_group_v2_buttons(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_group_v2_ring(connection)
+			return parse_zwp_tablet_pad_group_v2_ring(connection, object)
 		case 2:
-			return parse_zwp_tablet_pad_group_v2_strip(connection)
+			return parse_zwp_tablet_pad_group_v2_strip(connection, object)
 		case 3:
-			return parse_zwp_tablet_pad_group_v2_modes(connection)
+			return parse_zwp_tablet_pad_group_v2_modes(connection, object)
 		case 4:
-			return parse_zwp_tablet_pad_group_v2_done(connection)
+			return parse_zwp_tablet_pad_group_v2_done(connection, object)
 		case 5:
-			return parse_zwp_tablet_pad_group_v2_mode_switch(connection)
+			return parse_zwp_tablet_pad_group_v2_mode_switch(connection, object)
 		case 6:
-			return parse_zwp_tablet_pad_group_v2_dial(connection)
+			return parse_zwp_tablet_pad_group_v2_dial(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_v2_group(connection)
+			return parse_zwp_tablet_pad_v2_group(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_v2_path(connection)
+			return parse_zwp_tablet_pad_v2_path(connection, object)
 		case 2:
-			return parse_zwp_tablet_pad_v2_buttons(connection)
+			return parse_zwp_tablet_pad_v2_buttons(connection, object)
 		case 3:
-			return parse_zwp_tablet_pad_v2_done(connection)
+			return parse_zwp_tablet_pad_v2_done(connection, object)
 		case 4:
-			return parse_zwp_tablet_pad_v2_button(connection)
+			return parse_zwp_tablet_pad_v2_button(connection, object)
 		case 5:
-			return parse_zwp_tablet_pad_v2_enter(connection)
+			return parse_zwp_tablet_pad_v2_enter(connection, object)
 		case 6:
-			return parse_zwp_tablet_pad_v2_leave(connection)
+			return parse_zwp_tablet_pad_v2_leave(connection, object)
 		case 7:
-			return parse_zwp_tablet_pad_v2_removed(connection)
+			return parse_zwp_tablet_pad_v2_removed(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_Dial_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_dial_v2_delta(connection)
+			return parse_zwp_tablet_pad_dial_v2_delta(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_dial_v2_frame(connection)
+			return parse_zwp_tablet_pad_dial_v2_frame(connection, object)
 		case:
 			return
 		}
@@ -7526,7 +7988,7 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Xdg_Wm_Base:
 		switch opcode {
 		case 0:
-			return parse_xdg_wm_base_ping(connection)
+			return parse_xdg_wm_base_ping(connection, object)
 		case:
 			return
 		}
@@ -7538,31 +8000,31 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Xdg_Surface:
 		switch opcode {
 		case 0:
-			return parse_xdg_surface_configure(connection)
+			return parse_xdg_surface_configure(connection, object)
 		case:
 			return
 		}
 	case .Xdg_Toplevel:
 		switch opcode {
 		case 0:
-			return parse_xdg_toplevel_configure(connection)
+			return parse_xdg_toplevel_configure(connection, object)
 		case 1:
-			return parse_xdg_toplevel_close(connection)
+			return parse_xdg_toplevel_close(connection, object)
 		case 2:
-			return parse_xdg_toplevel_configure_bounds(connection)
+			return parse_xdg_toplevel_configure_bounds(connection, object)
 		case 3:
-			return parse_xdg_toplevel_wm_capabilities(connection)
+			return parse_xdg_toplevel_wm_capabilities(connection, object)
 		case:
 			return
 		}
 	case .Xdg_Popup:
 		switch opcode {
 		case 0:
-			return parse_xdg_popup_configure(connection)
+			return parse_xdg_popup_configure(connection, object)
 		case 1:
-			return parse_xdg_popup_popup_done(connection)
+			return parse_xdg_popup_popup_done(connection, object)
 		case 2:
-			return parse_xdg_popup_repositioned(connection)
+			return parse_xdg_popup_repositioned(connection, object)
 		case:
 			return
 		}
@@ -7579,22 +8041,22 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Wp_Color_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_color_manager_v1_supported_intent(connection)
+			return parse_wp_color_manager_v1_supported_intent(connection, object)
 		case 1:
-			return parse_wp_color_manager_v1_supported_feature(connection)
+			return parse_wp_color_manager_v1_supported_feature(connection, object)
 		case 2:
-			return parse_wp_color_manager_v1_supported_tf_named(connection)
+			return parse_wp_color_manager_v1_supported_tf_named(connection, object)
 		case 3:
-			return parse_wp_color_manager_v1_supported_primaries_named(connection)
+			return parse_wp_color_manager_v1_supported_primaries_named(connection, object)
 		case 4:
-			return parse_wp_color_manager_v1_done(connection)
+			return parse_wp_color_manager_v1_done(connection, object)
 		case:
 			return
 		}
 	case .Wp_Color_Management_Output_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_color_management_output_v1_image_description_changed(connection)
+			return parse_wp_color_management_output_v1_image_description_changed(connection, object)
 		case:
 			return
 		}
@@ -7606,9 +8068,9 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Wp_Color_Management_Surface_Feedback_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_color_management_surface_feedback_v1_preferred_changed(connection)
+			return parse_wp_color_management_surface_feedback_v1_preferred_changed(connection, object)
 		case 1:
-			return parse_wp_color_management_surface_feedback_v1_preferred_changed2(connection)
+			return parse_wp_color_management_surface_feedback_v1_preferred_changed2(connection, object)
 		case:
 			return
 		}
@@ -7625,38 +8087,38 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Wp_Image_Description_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_image_description_v1_failed(connection)
+			return parse_wp_image_description_v1_failed(connection, object)
 		case 1:
-			return parse_wp_image_description_v1_ready(connection)
+			return parse_wp_image_description_v1_ready(connection, object)
 		case 2:
-			return parse_wp_image_description_v1_ready2(connection)
+			return parse_wp_image_description_v1_ready2(connection, object)
 		case:
 			return
 		}
 	case .Wp_Image_Description_Info_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_image_description_info_v1_done(connection)
+			return parse_wp_image_description_info_v1_done(connection, object)
 		case 1:
-			return parse_wp_image_description_info_v1_icc_file(connection)
+			return parse_wp_image_description_info_v1_icc_file(connection, object)
 		case 2:
-			return parse_wp_image_description_info_v1_primaries(connection)
+			return parse_wp_image_description_info_v1_primaries(connection, object)
 		case 3:
-			return parse_wp_image_description_info_v1_primaries_named(connection)
+			return parse_wp_image_description_info_v1_primaries_named(connection, object)
 		case 4:
-			return parse_wp_image_description_info_v1_tf_power(connection)
+			return parse_wp_image_description_info_v1_tf_power(connection, object)
 		case 5:
-			return parse_wp_image_description_info_v1_tf_named(connection)
+			return parse_wp_image_description_info_v1_tf_named(connection, object)
 		case 6:
-			return parse_wp_image_description_info_v1_luminances(connection)
+			return parse_wp_image_description_info_v1_luminances(connection, object)
 		case 7:
-			return parse_wp_image_description_info_v1_target_primaries(connection)
+			return parse_wp_image_description_info_v1_target_primaries(connection, object)
 		case 8:
-			return parse_wp_image_description_info_v1_target_luminance(connection)
+			return parse_wp_image_description_info_v1_target_luminance(connection, object)
 		case 9:
-			return parse_wp_image_description_info_v1_target_max_cll(connection)
+			return parse_wp_image_description_info_v1_target_max_cll(connection, object)
 		case 10:
-			return parse_wp_image_description_info_v1_target_max_fall(connection)
+			return parse_wp_image_description_info_v1_target_max_fall(connection, object)
 		case:
 			return
 		}
@@ -7668,11 +8130,11 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Wp_Color_Representation_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_color_representation_manager_v1_supported_alpha_mode(connection)
+			return parse_wp_color_representation_manager_v1_supported_alpha_mode(connection, object)
 		case 1:
-			return parse_wp_color_representation_manager_v1_supported_coefficients_and_ranges(connection)
+			return parse_wp_color_representation_manager_v1_supported_coefficients_and_ranges(connection, object)
 		case 2:
-			return parse_wp_color_representation_manager_v1_done(connection)
+			return parse_wp_color_representation_manager_v1_done(connection, object)
 		case:
 			return
 		}
@@ -7714,28 +8176,28 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Wp_Drm_Lease_Device_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_drm_lease_device_v1_drm_fd(connection)
+			return parse_wp_drm_lease_device_v1_drm_fd(connection, object)
 		case 1:
-			return parse_wp_drm_lease_device_v1_connector(connection)
+			return parse_wp_drm_lease_device_v1_connector(connection, object)
 		case 2:
-			return parse_wp_drm_lease_device_v1_done(connection)
+			return parse_wp_drm_lease_device_v1_done(connection, object)
 		case 3:
-			return parse_wp_drm_lease_device_v1_released(connection)
+			return parse_wp_drm_lease_device_v1_released(connection, object)
 		case:
 			return
 		}
 	case .Wp_Drm_Lease_Connector_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_drm_lease_connector_v1_name(connection)
+			return parse_wp_drm_lease_connector_v1_name(connection, object)
 		case 1:
-			return parse_wp_drm_lease_connector_v1_description(connection)
+			return parse_wp_drm_lease_connector_v1_description(connection, object)
 		case 2:
-			return parse_wp_drm_lease_connector_v1_connector_id(connection)
+			return parse_wp_drm_lease_connector_v1_connector_id(connection, object)
 		case 3:
-			return parse_wp_drm_lease_connector_v1_done(connection)
+			return parse_wp_drm_lease_connector_v1_done(connection, object)
 		case 4:
-			return parse_wp_drm_lease_connector_v1_withdrawn(connection)
+			return parse_wp_drm_lease_connector_v1_withdrawn(connection, object)
 		case:
 			return
 		}
@@ -7747,16 +8209,16 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Wp_Drm_Lease_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_drm_lease_v1_lease_fd(connection)
+			return parse_wp_drm_lease_v1_lease_fd(connection, object)
 		case 1:
-			return parse_wp_drm_lease_v1_finished(connection)
+			return parse_wp_drm_lease_v1_finished(connection, object)
 		case:
 			return
 		}
 	case .Ext_Background_Effect_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_background_effect_manager_v1_capabilities(connection)
+			return parse_ext_background_effect_manager_v1_capabilities(connection, object)
 		case:
 			return
 		}
@@ -7773,53 +8235,53 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Ext_Data_Control_Device_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_data_control_device_v1_data_offer(connection)
+			return parse_ext_data_control_device_v1_data_offer(connection, object)
 		case 1:
-			return parse_ext_data_control_device_v1_selection(connection)
+			return parse_ext_data_control_device_v1_selection(connection, object)
 		case 2:
-			return parse_ext_data_control_device_v1_finished(connection)
+			return parse_ext_data_control_device_v1_finished(connection, object)
 		case 3:
-			return parse_ext_data_control_device_v1_primary_selection(connection)
+			return parse_ext_data_control_device_v1_primary_selection(connection, object)
 		case:
 			return
 		}
 	case .Ext_Data_Control_Source_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_data_control_source_v1_send(connection)
+			return parse_ext_data_control_source_v1_send(connection, object)
 		case 1:
-			return parse_ext_data_control_source_v1_cancelled(connection)
+			return parse_ext_data_control_source_v1_cancelled(connection, object)
 		case:
 			return
 		}
 	case .Ext_Data_Control_Offer_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_data_control_offer_v1_offer(connection)
+			return parse_ext_data_control_offer_v1_offer(connection, object)
 		case:
 			return
 		}
 	case .Ext_Foreign_Toplevel_List_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_foreign_toplevel_list_v1_toplevel(connection)
+			return parse_ext_foreign_toplevel_list_v1_toplevel(connection, object)
 		case 1:
-			return parse_ext_foreign_toplevel_list_v1_finished(connection)
+			return parse_ext_foreign_toplevel_list_v1_finished(connection, object)
 		case:
 			return
 		}
 	case .Ext_Foreign_Toplevel_Handle_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_foreign_toplevel_handle_v1_closed(connection)
+			return parse_ext_foreign_toplevel_handle_v1_closed(connection, object)
 		case 1:
-			return parse_ext_foreign_toplevel_handle_v1_done(connection)
+			return parse_ext_foreign_toplevel_handle_v1_done(connection, object)
 		case 2:
-			return parse_ext_foreign_toplevel_handle_v1_title(connection)
+			return parse_ext_foreign_toplevel_handle_v1_title(connection, object)
 		case 3:
-			return parse_ext_foreign_toplevel_handle_v1_app_id(connection)
+			return parse_ext_foreign_toplevel_handle_v1_app_id(connection, object)
 		case 4:
-			return parse_ext_foreign_toplevel_handle_v1_identifier(connection)
+			return parse_ext_foreign_toplevel_handle_v1_identifier(connection, object)
 		case:
 			return
 		}
@@ -7831,9 +8293,9 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Ext_Idle_Notification_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_idle_notification_v1_idled(connection)
+			return parse_ext_idle_notification_v1_idled(connection, object)
 		case 1:
-			return parse_ext_idle_notification_v1_resumed(connection)
+			return parse_ext_idle_notification_v1_resumed(connection, object)
 		case:
 			return
 		}
@@ -7860,45 +8322,45 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Ext_Image_Copy_Capture_Session_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_image_copy_capture_session_v1_buffer_size(connection)
+			return parse_ext_image_copy_capture_session_v1_buffer_size(connection, object)
 		case 1:
-			return parse_ext_image_copy_capture_session_v1_shm_format(connection)
+			return parse_ext_image_copy_capture_session_v1_shm_format(connection, object)
 		case 2:
-			return parse_ext_image_copy_capture_session_v1_dmabuf_device(connection)
+			return parse_ext_image_copy_capture_session_v1_dmabuf_device(connection, object)
 		case 3:
-			return parse_ext_image_copy_capture_session_v1_dmabuf_format(connection)
+			return parse_ext_image_copy_capture_session_v1_dmabuf_format(connection, object)
 		case 4:
-			return parse_ext_image_copy_capture_session_v1_done(connection)
+			return parse_ext_image_copy_capture_session_v1_done(connection, object)
 		case 5:
-			return parse_ext_image_copy_capture_session_v1_stopped(connection)
+			return parse_ext_image_copy_capture_session_v1_stopped(connection, object)
 		case:
 			return
 		}
 	case .Ext_Image_Copy_Capture_Frame_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_image_copy_capture_frame_v1_transform(connection)
+			return parse_ext_image_copy_capture_frame_v1_transform(connection, object)
 		case 1:
-			return parse_ext_image_copy_capture_frame_v1_damage(connection)
+			return parse_ext_image_copy_capture_frame_v1_damage(connection, object)
 		case 2:
-			return parse_ext_image_copy_capture_frame_v1_presentation_time(connection)
+			return parse_ext_image_copy_capture_frame_v1_presentation_time(connection, object)
 		case 3:
-			return parse_ext_image_copy_capture_frame_v1_ready(connection)
+			return parse_ext_image_copy_capture_frame_v1_ready(connection, object)
 		case 4:
-			return parse_ext_image_copy_capture_frame_v1_failed(connection)
+			return parse_ext_image_copy_capture_frame_v1_failed(connection, object)
 		case:
 			return
 		}
 	case .Ext_Image_Copy_Capture_Cursor_Session_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_image_copy_capture_cursor_session_v1_enter(connection)
+			return parse_ext_image_copy_capture_cursor_session_v1_enter(connection, object)
 		case 1:
-			return parse_ext_image_copy_capture_cursor_session_v1_leave(connection)
+			return parse_ext_image_copy_capture_cursor_session_v1_leave(connection, object)
 		case 2:
-			return parse_ext_image_copy_capture_cursor_session_v1_position(connection)
+			return parse_ext_image_copy_capture_cursor_session_v1_position(connection, object)
 		case 3:
-			return parse_ext_image_copy_capture_cursor_session_v1_hotspot(connection)
+			return parse_ext_image_copy_capture_cursor_session_v1_hotspot(connection, object)
 		case:
 			return
 		}
@@ -7910,16 +8372,16 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Ext_Session_Lock_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_session_lock_v1_locked(connection)
+			return parse_ext_session_lock_v1_locked(connection, object)
 		case 1:
-			return parse_ext_session_lock_v1_finished(connection)
+			return parse_ext_session_lock_v1_finished(connection, object)
 		case:
 			return
 		}
 	case .Ext_Session_Lock_Surface_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_session_lock_surface_v1_configure(connection)
+			return parse_ext_session_lock_surface_v1_configure(connection, object)
 		case:
 			return
 		}
@@ -7931,56 +8393,56 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Ext_Transient_Seat_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_transient_seat_v1_ready(connection)
+			return parse_ext_transient_seat_v1_ready(connection, object)
 		case 1:
-			return parse_ext_transient_seat_v1_denied(connection)
+			return parse_ext_transient_seat_v1_denied(connection, object)
 		case:
 			return
 		}
 	case .Ext_Workspace_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_workspace_manager_v1_workspace_group(connection)
+			return parse_ext_workspace_manager_v1_workspace_group(connection, object)
 		case 1:
-			return parse_ext_workspace_manager_v1_workspace(connection)
+			return parse_ext_workspace_manager_v1_workspace(connection, object)
 		case 2:
-			return parse_ext_workspace_manager_v1_done(connection)
+			return parse_ext_workspace_manager_v1_done(connection, object)
 		case 3:
-			return parse_ext_workspace_manager_v1_finished(connection)
+			return parse_ext_workspace_manager_v1_finished(connection, object)
 		case:
 			return
 		}
 	case .Ext_Workspace_Group_Handle_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_workspace_group_handle_v1_capabilities(connection)
+			return parse_ext_workspace_group_handle_v1_capabilities(connection, object)
 		case 1:
-			return parse_ext_workspace_group_handle_v1_output_enter(connection)
+			return parse_ext_workspace_group_handle_v1_output_enter(connection, object)
 		case 2:
-			return parse_ext_workspace_group_handle_v1_output_leave(connection)
+			return parse_ext_workspace_group_handle_v1_output_leave(connection, object)
 		case 3:
-			return parse_ext_workspace_group_handle_v1_workspace_enter(connection)
+			return parse_ext_workspace_group_handle_v1_workspace_enter(connection, object)
 		case 4:
-			return parse_ext_workspace_group_handle_v1_workspace_leave(connection)
+			return parse_ext_workspace_group_handle_v1_workspace_leave(connection, object)
 		case 5:
-			return parse_ext_workspace_group_handle_v1_removed(connection)
+			return parse_ext_workspace_group_handle_v1_removed(connection, object)
 		case:
 			return
 		}
 	case .Ext_Workspace_Handle_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_workspace_handle_v1_id(connection)
+			return parse_ext_workspace_handle_v1_id(connection, object)
 		case 1:
-			return parse_ext_workspace_handle_v1_name(connection)
+			return parse_ext_workspace_handle_v1_name(connection, object)
 		case 2:
-			return parse_ext_workspace_handle_v1_coordinates(connection)
+			return parse_ext_workspace_handle_v1_coordinates(connection, object)
 		case 3:
-			return parse_ext_workspace_handle_v1_state(connection)
+			return parse_ext_workspace_handle_v1_state(connection, object)
 		case 4:
-			return parse_ext_workspace_handle_v1_capabilities(connection)
+			return parse_ext_workspace_handle_v1_capabilities(connection, object)
 		case 5:
-			return parse_ext_workspace_handle_v1_removed(connection)
+			return parse_ext_workspace_handle_v1_removed(connection, object)
 		case:
 			return
 		}
@@ -8002,7 +8464,7 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Wp_Fractional_Scale_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_fractional_scale_v1_preferred_scale(connection)
+			return parse_wp_fractional_scale_v1_preferred_scale(connection, object)
 		case:
 			return
 		}
@@ -8059,7 +8521,7 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Xdg_Activation_Token_V1:
 		switch opcode {
 		case 0:
-			return parse_xdg_activation_token_v1_done(connection)
+			return parse_xdg_activation_token_v1_done(connection, object)
 		case:
 			return
 		}
@@ -8091,9 +8553,9 @@ parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u
 	case .Xdg_Toplevel_Icon_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_xdg_toplevel_icon_manager_v1_icon_size(connection)
+			return parse_xdg_toplevel_icon_manager_v1_icon_size(connection, object)
 		case 1:
-			return parse_xdg_toplevel_icon_manager_v1_done(connection)
+			return parse_xdg_toplevel_icon_manager_v1_done(connection, object)
 		case:
 			return
 		}

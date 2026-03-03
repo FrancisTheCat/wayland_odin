@@ -85,9 +85,9 @@ connection_poll :: proc(connection: ^Connection, buffer: []byte) {
 }
 
 @(require_results)
-peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: bool) {
+peek_event :: proc(connection: ^Connection) -> (event: Event, ok: bool) {
 	for {
-		object, event, ok = _peek_event(connection)
+		event, ok = _peek_event(connection)
 		if !ok {
 			return
 		}
@@ -100,10 +100,12 @@ peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: b
 }
 
 @(require_results)
-_peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: bool) {
+_peek_event :: proc(connection: ^Connection) -> (event: Event, ok: bool) {
 	if len(connection.data) - connection.data_cursor < 8 {
 		return
 	}
+
+	object: u32
 	intrinsics.mem_copy(&object, &connection.data[connection.data_cursor], 4)
 	opcode, size: u16
 	intrinsics.mem_copy(&opcode, &connection.data[connection.data_cursor + 4], 2)
@@ -128,7 +130,7 @@ _peek_event :: proc(connection: ^Connection) -> (object: u32, event: Event, ok: 
 	}
 
 	connection.data_cursor += 8
-	return object, parse_event(connection, object_type, u32(opcode))
+	return parse_event(connection, object, object_type, u32(opcode))
 }
 
 read :: proc {

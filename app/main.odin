@@ -66,9 +66,7 @@ main :: proc() {
 		wl.connection_flush(&connection)
 		wl.connection_poll(&connection, buffer)
 		
-		for {
-			object, event := wl.peek_event(&connection) or_break
-
+		for event in wl.peek_event(&connection) {
 			#partial switch e in event {
 			case wl.Event_Registry_Global:
 				switch e.interface {
@@ -97,11 +95,11 @@ main :: proc() {
 					fmt.println(event)
 				}
 			case wl.Event_Xdg_Wm_Base_Ping:
-				wl.xdg_wm_base_pong(&connection, wl.Xdg_Wm_Base(object), e.serial)
+				wl.xdg_wm_base_pong(&connection, e.object, e.serial)
 			case wl.Event_Xdg_Toplevel_Close:
 				return
 			case wl.Event_Xdg_Surface_Configure:
-				wl.xdg_surface_ack_configure(&connection, wl.Xdg_Surface(object), e.serial)
+				wl.xdg_surface_ack_configure(&connection, e.object, e.serial)
 				configured = true
 			case wl.Event_Pointer_Enter:
 				enter_serial = e.serial

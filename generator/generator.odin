@@ -224,14 +224,24 @@ main :: proc() {
 			return true
 		}
 
-		generate_event :: proc(ctx: ^Context, element: xml.Element, event_name, event_type_name: string, opcode: int) -> (ok: bool) {
-			fmt.wprintf(ctx.event_parser_writer, "parse_%v :: proc(connection: ^Connection", event_name)
+		generate_event :: proc(
+			ctx:             ^Context,
+			element:         xml.Element,
+			event_name:      string,
+			event_type_name: string,
+			opcode:          int,
+		) -> (ok: bool) {
+			fmt.wprintf(ctx.event_parser_writer, "parse_%v :: proc(connection: ^Connection, object: u32)", event_name)
+			fmt.wprintfln(ctx.event_parser_writer, " -> (event: Event_%v, ok: bool) {{", event_type_name)
+
 			fmt.wprintf(ctx.event_types_writer, "Event_%v :: struct {{\n", event_type_name)
+			fmt.wprintf(ctx.event_types_writer, "\tobject: %s,\n", ctx.event_prefix)
 
 			fmt.wprintfln(ctx.parser_writer, "\t\tcase %d:", opcode)
-			fmt.wprintfln(ctx.parser_writer, "\t\t\treturn parse_%v(connection)", event_name)
+			fmt.wprintfln(ctx.parser_writer, "\t\t\treturn parse_%v(connection, object)", event_name)
 
 			body: strings.Builder
+			fmt.sbprintfln(&body, "\tevent.object = %v(object)", ctx.event_prefix)
 
 			for child_id in element.value {
 				child := ctx.document.elements[child_id.(u32) or_continue]
@@ -252,10 +262,9 @@ main :: proc() {
 			}
 			fmt.wprint(ctx.event_types_writer, "}\n")
 
-			fmt.wprint(ctx.event_parser_writer, ")")
-			fmt.wprintfln(ctx.event_parser_writer, " -> (event: Event_%v, ok: bool) {{", event_type_name)
 			fmt.wprint(ctx.event_parser_writer, strings.to_string(body))
 			fmt.wprintln(ctx.event_parser_writer, "\tok = true\n\treturn\n}")
+
 			return true
 		}
 
@@ -361,7 +370,7 @@ main :: proc() {
 
 	fmt.wprintln(ctx.event_union_writer,  "Event :: union {")
 	fmt.wprintln(ctx.object_enum_writer,  "Object_Type :: enum {")
-	fmt.wprintln(ctx.parser_writer,       "parse_event :: proc(connection: ^Connection, object_type: Object_Type, opcode: u32) -> (event: Event, ok: bool) {")
+	fmt.wprintln(ctx.parser_writer,       "parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Type, opcode: u32) -> (event: Event, ok: bool) {")
 	fmt.wprintln(ctx.parser_writer,       "\tswitch (object_type) {")
 	fmt.wprintln(ctx.resolution_writer,   "resolve_type :: proc($T: typeid, interface: string, location := #caller_location) -> (type: Object_Type) {")
 	fmt.wprintln(ctx.resolution_writer,   "\tswitch typeid_of(T) {")
