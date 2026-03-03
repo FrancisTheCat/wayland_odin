@@ -6,6 +6,7 @@ import "core:sys/linux"
 
 import "core:bytes"
 import "core:slice"
+import "core:fmt"
 
 Fd     :: linux.Fd
 Object :: distinct u32
@@ -22,6 +23,8 @@ Connection :: struct {
 	fds_out:             [dynamic]Fd,
 	free_ids:            [dynamic]u32,
 	socket:              linux.Fd,
+	log_fn:              proc(message: string, user_data: rawptr),
+	user_data:           rawptr,
 }
 
 @(require_results)
@@ -63,7 +66,12 @@ connection_flush :: proc(connection: ^Connection) {
 }
 
 @(require_results)
-display_connect :: proc(socket: linux.Fd, allocator := context.allocator) -> (connection: Connection, display: Display) {
+display_connect :: proc(
+	socket: linux.Fd,
+	allocator := context.allocator,
+	log_fn: proc(message: string, user_data: rawptr) = nil,
+	user_data: rawptr = nil,
+) -> (connection: Connection, display: Display) {
 	connection.socket                 = socket
 	connection.fds_in                 = make([dynamic]linux.Fd,       allocator)
 	connection.fds_out                = make([dynamic]linux.Fd,       allocator)
@@ -71,6 +79,8 @@ display_connect :: proc(socket: linux.Fd, allocator := context.allocator) -> (co
 	connection.server_object_types    = make([dynamic]Object_Type,    allocator)
 	connection.client_object_types    = make([dynamic]Object_Type, 2, allocator)
 	connection.client_object_types[1] = .Display
+	connection.log_fn                 = log_fn
+	connection.user_data              = user_data
 	display                           = 1
 	return
 }
@@ -181,4 +191,10 @@ read_string :: proc(connection: ^Connection, data: ^string) -> bool {
 	data^ = string(connection.data[connection.data_cursor:][:length - 1])
 	connection.data_cursor = (connection.data_cursor + int(length) + 3) & -4
 	return true
+}
+
+_debug_log :: proc(connection: ^Connection, args: ..any) {
+	if connection.log_fn != nil {
+		connection.log_fn(fmt.tprint(..args, sep = ""), connection.user_data)
+	}
 }

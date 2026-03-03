@@ -127,21 +127,24 @@ main :: proc() {
 		}
 		
 		generate_request :: proc(ctx: ^Context, element: xml.Element, request_name: string, opcode: int) -> (ok: bool) {
-			request_name := strings.trim_prefix(request_name, "wl_")
-			fmt.wprintf(ctx.requests_writer, "%v :: proc(connection: ^Connection, %v: %v", request_name, ctx.request_prefix, ctx.event_prefix)
-			body: strings.Builder
-			sizes: strings.Builder
+			request_prefix := strings.trim_prefix(ctx.request_prefix, "wl_")
+			fmt.wprintf(ctx.requests_writer, "%v_%v :: proc(connection: ^Connection, %v: %v", request_prefix, request_name, request_prefix, ctx.event_prefix)
+			body:          strings.Builder
+			sizes:         strings.Builder
 			return_values: strings.Builder
+			debug_log:     strings.Builder
 
 			has_new_id := false
 
 			fmt.sbprint(&sizes, "\t_size: u16 = 8")
 			
-			fmt.sbprintfln(&body, "\t%v := %v", ctx.request_prefix, ctx.request_prefix)
-			fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", ctx.request_prefix, ctx.request_prefix)
+			fmt.sbprintfln(&body, "\t%v := %v", request_prefix, request_prefix)
+			fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", request_prefix, request_prefix)
 			fmt.sbprintfln(&body, "\topcode: u16 = %d", opcode)
 			fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))")
 			fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))")
+
+			fmt.sbprintf(&debug_log, `	_debug_log(connection, "-> %s@", %s, ".%s:"`, ctx.request_prefix, request_prefix, request_name)
 
 			for child_id in element.value {
 				child := ctx.document.elements[child_id.(u32) or_continue]
@@ -152,6 +155,8 @@ main :: proc() {
 				name, type, new_id := parse_field(ctx, child_id.(u32)) or_return
 				type = strings.trim_prefix(type, "Wl_")
 
+				fmt.sbprintf(&debug_log, `, " %s=", %s`, name, name)
+
 				generate_write_string :: proc(body, sizes: ^strings.Builder, name: string) {
 					fmt.sbprintf(sizes, " + 4 + u16((len(%v) + 1 + 3) & -4)", name)
 					fmt.sbprintfln(body, "\t_%v_len := u32(len(%v)) + 1", name, name)
@@ -160,7 +165,6 @@ main :: proc() {
 					fmt.sbprintfln(body, "\tfor _ in len(%v) ..< (len(%v) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)", name, name)
 				}
 
-				// TODO: handle strings
 				switch type {
 				case "Fd":
 					fmt.sbprintfln(&body, "\tappend(&connection.fds_out, %v)", name)
@@ -220,6 +224,8 @@ main :: proc() {
 			fmt.wprint(ctx.requests_writer, " {\n")
 			fmt.wprintln(ctx.requests_writer, strings.to_string(sizes))
 			fmt.wprint(ctx.requests_writer, strings.to_string(body))
+			fmt.sbprintfln(&debug_log, ")")
+			fmt.wprint(ctx.requests_writer, strings.to_string(debug_log))
 			fmt.wprint(ctx.requests_writer, "\treturn\n}\n")
 			return true
 		}
@@ -228,20 +234,25 @@ main :: proc() {
 			ctx:             ^Context,
 			element:         xml.Element,
 			event_name:      string,
-			event_type_name: string,
 			opcode:          int,
 		) -> (ok: bool) {
-			fmt.wprintf(ctx.event_parser_writer, "parse_%v :: proc(connection: ^Connection, object: u32)", event_name)
-			fmt.wprintfln(ctx.event_parser_writer, " -> (event: Event_%v, ok: bool) {{", event_type_name)
+			type_name := fmt.tprintf("%v_%v", ctx.event_prefix, strings.to_ada_case(event_name, context.temp_allocator))
+			fmt.wprintfln(ctx.event_union_writer, "\tEvent_%v,", type_name)
 
-			fmt.wprintf(ctx.event_types_writer, "Event_%v :: struct {{\n", event_type_name)
+			fmt.wprintf(ctx.event_parser_writer, "parse_%v_%v :: proc(connection: ^Connection, object: u32)", ctx.request_prefix, event_name)
+			fmt.wprintfln(ctx.event_parser_writer, " -> (event: Event_%v, ok: bool) {{", type_name)
+
+			fmt.wprintf(ctx.event_types_writer, "Event_%v :: struct {{\n", type_name)
 			fmt.wprintf(ctx.event_types_writer, "\tobject: %s,\n", ctx.event_prefix)
 
 			fmt.wprintfln(ctx.parser_writer, "\t\tcase %d:", opcode)
-			fmt.wprintfln(ctx.parser_writer, "\t\t\treturn parse_%v(connection, object)", event_name)
+			fmt.wprintfln(ctx.parser_writer, "\t\t\treturn parse_%v_%v(connection, object)", ctx.request_prefix, event_name)
 
 			body: strings.Builder
 			fmt.sbprintfln(&body, "\tevent.object = %v(object)", ctx.event_prefix)
+
+			debug_log: strings.Builder
+			fmt.sbprintf(&debug_log, `	_debug_log(connection, "<- %s@", object, ".%s:"`, ctx.request_prefix, event_name)
 
 			for child_id in element.value {
 				child := ctx.document.elements[child_id.(u32) or_continue]
@@ -253,6 +264,8 @@ main :: proc() {
 				type = strings.trim_prefix(type, "Wl_")
 				fmt.wprintf(ctx.event_types_writer, "\t%v: %v,\n", name, type)
 
+				fmt.sbprintf(&debug_log, `, " %s=", event.%s`, name, name)
+
 				fmt.sbprintfln(&body, "\tread(connection, &event.%v) or_return", name)
 
 				if new_id {
@@ -263,6 +276,8 @@ main :: proc() {
 			fmt.wprint(ctx.event_types_writer, "}\n")
 
 			fmt.wprint(ctx.event_parser_writer, strings.to_string(body))
+			fmt.sbprintfln(&debug_log, ")")
+			fmt.wprint(ctx.event_parser_writer, strings.to_string(debug_log))
 			fmt.wprintln(ctx.event_parser_writer, "\tok = true\n\treturn\n}")
 
 			return true
@@ -325,12 +340,10 @@ main :: proc() {
 			name  := xml.find_attribute_val_by_key(ctx.document, child_id.(u32), "name") or_continue
 			switch child.ident {
 			case "request":
-				generate_request(ctx, child, fmt.tprintf("%v_%v", ctx.request_prefix, name), request_opcode) or_return
+				generate_request(ctx, child, name, request_opcode) or_return
 				request_opcode += 1
 			case "event":
-				type_name := fmt.tprintf("%v_%v", ctx.event_prefix, strings.to_ada_case(name, context.temp_allocator))
-				generate_event(ctx, child, fmt.tprintf("%v_%v", ctx.request_prefix, name), type_name, event_opcode) or_return
-				fmt.wprintfln(ctx.event_union_writer, "\tEvent_%v,", type_name)
+				generate_event(ctx, child, name, event_opcode) or_return
 				event_opcode += 1
 			case "enum":
 				type_name := fmt.tprintf("%v_%v", ctx.event_prefix, strings.to_ada_case(name, context.temp_allocator))
@@ -391,8 +404,7 @@ main :: proc() {
 			if child.ident == "interface" {
 				name := xml.find_attribute_val_by_key(document, child_id.(u32), "name") or_continue
 				ctx.request_prefix = name
-				ctx.event_prefix   = strings.to_ada_case(name, context.temp_allocator)
-				ctx.event_prefix   = strings.trim_prefix(ctx.event_prefix, "Wl_")
+				ctx.event_prefix   = strings.trim_prefix(strings.to_ada_case(name), "Wl_")
 				ok := generate_interface(&ctx, child)
 				if !ok {
 					fmt.eprintfln("Failed to generate interface: %v", name)

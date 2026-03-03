@@ -16,7 +16,9 @@ main :: proc() {
 	errno := linux.connect(socket, &addr)
 	assert(errno == {})
 
-	connection, display := wl.display_connect(socket)
+	connection, display := wl.display_connect(socket, log_fn = proc(message: string, user_pointer: rawptr) {
+		fmt.println(message)
+	})
 
 	registry := wl.display_get_registry(&connection, display)
 	wl.display_sync(&connection, display)

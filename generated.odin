@@ -1191,32 +1191,34 @@ Xwayland_Surface_V1_Error :: enum u32 {
 	Invalid_Serial = 1,
 }
 
-display_sync :: proc(connection: ^Connection, wl_display: Display) -> (callback: Callback) {
+display_sync :: proc(connection: ^Connection, display: Display) -> (callback: Callback) {
 	_size: u16 = 8 + size_of(callback)
-	wl_display := wl_display
-	bytes.buffer_write_ptr(&connection.buffer, &wl_display, size_of(wl_display))
+	display := display
+	bytes.buffer_write_ptr(&connection.buffer, &display, size_of(display))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	callback = auto_cast generate_id(connection, .Callback)
 	bytes.buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
+	_debug_log(connection, "-> wl_display@", display, ".sync:", " callback=", callback)
 	return
 }
-display_get_registry :: proc(connection: ^Connection, wl_display: Display) -> (registry: Registry) {
+display_get_registry :: proc(connection: ^Connection, display: Display) -> (registry: Registry) {
 	_size: u16 = 8 + size_of(registry)
-	wl_display := wl_display
-	bytes.buffer_write_ptr(&connection.buffer, &wl_display, size_of(wl_display))
+	display := display
+	bytes.buffer_write_ptr(&connection.buffer, &display, size_of(display))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	registry = auto_cast generate_id(connection, .Registry)
 	bytes.buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
+	_debug_log(connection, "-> wl_display@", display, ".get_registry:", " registry=", registry)
 	return
 }
-registry_bind :: proc(connection: ^Connection, wl_registry: Registry, name: u32, interface: string, version: u32, $T: typeid, _location := #caller_location) -> (id: T) where intrinsics.type_is_named(T), intrinsics.type_base_type(T) == u32 {
+registry_bind :: proc(connection: ^Connection, registry: Registry, name: u32, interface: string, version: u32, $T: typeid, _location := #caller_location) -> (id: T) where intrinsics.type_is_named(T), intrinsics.type_base_type(T) == u32 {
 	_size: u16 = 8 + size_of(name) + 4 + u16((len(interface) + 1 + 3) & -4) + size_of(version) + size_of(id)
-	wl_registry := wl_registry
-	bytes.buffer_write_ptr(&connection.buffer, &wl_registry, size_of(wl_registry))
+	registry := registry
+	bytes.buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1231,34 +1233,37 @@ registry_bind :: proc(connection: ^Connection, wl_registry: Registry, name: u32,
 	_type := resolve_type(T, interface, _location)
 	id = auto_cast generate_id(connection, _type)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wl_registry@", registry, ".bind:", " name=", name, " id=", id)
 	return
 }
-compositor_create_surface :: proc(connection: ^Connection, wl_compositor: Compositor) -> (id: Surface) {
+compositor_create_surface :: proc(connection: ^Connection, compositor: Compositor) -> (id: Surface) {
 	_size: u16 = 8 + size_of(id)
-	wl_compositor := wl_compositor
-	bytes.buffer_write_ptr(&connection.buffer, &wl_compositor, size_of(wl_compositor))
+	compositor := compositor
+	bytes.buffer_write_ptr(&connection.buffer, &compositor, size_of(compositor))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Surface)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wl_compositor@", compositor, ".create_surface:", " id=", id)
 	return
 }
-compositor_create_region :: proc(connection: ^Connection, wl_compositor: Compositor) -> (id: Region) {
+compositor_create_region :: proc(connection: ^Connection, compositor: Compositor) -> (id: Region) {
 	_size: u16 = 8 + size_of(id)
-	wl_compositor := wl_compositor
-	bytes.buffer_write_ptr(&connection.buffer, &wl_compositor, size_of(wl_compositor))
+	compositor := compositor
+	bytes.buffer_write_ptr(&connection.buffer, &compositor, size_of(compositor))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Region)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wl_compositor@", compositor, ".create_region:", " id=", id)
 	return
 }
-shm_pool_create_buffer :: proc(connection: ^Connection, wl_shm_pool: Shm_Pool, offset: i32, width: i32, height: i32, stride: i32, format: Shm_Format) -> (id: Buffer) {
+shm_pool_create_buffer :: proc(connection: ^Connection, shm_pool: Shm_Pool, offset: i32, width: i32, height: i32, stride: i32, format: Shm_Format) -> (id: Buffer) {
 	_size: u16 = 8 + size_of(id) + size_of(offset) + size_of(width) + size_of(height) + size_of(stride) + size_of(format)
-	wl_shm_pool := wl_shm_pool
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shm_pool, size_of(wl_shm_pool))
+	shm_pool := shm_pool
+	bytes.buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1274,32 +1279,35 @@ shm_pool_create_buffer :: proc(connection: ^Connection, wl_shm_pool: Shm_Pool, o
 	bytes.buffer_write_ptr(&connection.buffer, &stride, size_of(stride))
 	format := format
 	bytes.buffer_write_ptr(&connection.buffer, &format, size_of(format))
+	_debug_log(connection, "-> wl_shm_pool@", shm_pool, ".create_buffer:", " id=", id, " offset=", offset, " width=", width, " height=", height, " stride=", stride, " format=", format)
 	return
 }
-shm_pool_destroy :: proc(connection: ^Connection, wl_shm_pool: Shm_Pool) {
+shm_pool_destroy :: proc(connection: ^Connection, shm_pool: Shm_Pool) {
 	_size: u16 = 8
-	wl_shm_pool := wl_shm_pool
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shm_pool, size_of(wl_shm_pool))
+	shm_pool := shm_pool
+	bytes.buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_shm_pool@", shm_pool, ".destroy:")
 	return
 }
-shm_pool_resize :: proc(connection: ^Connection, wl_shm_pool: Shm_Pool, size: i32) {
+shm_pool_resize :: proc(connection: ^Connection, shm_pool: Shm_Pool, size: i32) {
 	_size: u16 = 8 + size_of(size)
-	wl_shm_pool := wl_shm_pool
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shm_pool, size_of(wl_shm_pool))
+	shm_pool := shm_pool
+	bytes.buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	size := size
 	bytes.buffer_write_ptr(&connection.buffer, &size, size_of(size))
+	_debug_log(connection, "-> wl_shm_pool@", shm_pool, ".resize:", " size=", size)
 	return
 }
-shm_create_pool :: proc(connection: ^Connection, wl_shm: Shm, fd: Fd, size: i32) -> (id: Shm_Pool) {
+shm_create_pool :: proc(connection: ^Connection, shm: Shm, fd: Fd, size: i32) -> (id: Shm_Pool) {
 	_size: u16 = 8 + size_of(id) + size_of(size)
-	wl_shm := wl_shm
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shm, size_of(wl_shm))
+	shm := shm
+	bytes.buffer_write_ptr(&connection.buffer, &shm, size_of(shm))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1308,30 +1316,33 @@ shm_create_pool :: proc(connection: ^Connection, wl_shm: Shm, fd: Fd, size: i32)
 	append(&connection.fds_out, fd)
 	size := size
 	bytes.buffer_write_ptr(&connection.buffer, &size, size_of(size))
+	_debug_log(connection, "-> wl_shm@", shm, ".create_pool:", " id=", id, " fd=", fd, " size=", size)
 	return
 }
-shm_release :: proc(connection: ^Connection, wl_shm: Shm) {
+shm_release :: proc(connection: ^Connection, shm: Shm) {
 	_size: u16 = 8
-	wl_shm := wl_shm
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shm, size_of(wl_shm))
+	shm := shm
+	bytes.buffer_write_ptr(&connection.buffer, &shm, size_of(shm))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_shm@", shm, ".release:")
 	return
 }
-buffer_destroy :: proc(connection: ^Connection, wl_buffer: Buffer) {
+buffer_destroy :: proc(connection: ^Connection, buffer: Buffer) {
 	_size: u16 = 8
-	wl_buffer := wl_buffer
-	bytes.buffer_write_ptr(&connection.buffer, &wl_buffer, size_of(wl_buffer))
+	buffer := buffer
+	bytes.buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_buffer@", buffer, ".destroy:")
 	return
 }
-data_offer_accept :: proc(connection: ^Connection, wl_data_offer: Data_Offer, serial: u32, mime_type: string) {
+data_offer_accept :: proc(connection: ^Connection, data_offer: Data_Offer, serial: u32, mime_type: string) {
 	_size: u16 = 8 + size_of(serial) + 4 + u16((len(mime_type) + 1 + 3) & -4)
-	wl_data_offer := wl_data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_offer, size_of(wl_data_offer))
+	data_offer := data_offer
+	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1342,12 +1353,13 @@ data_offer_accept :: proc(connection: ^Connection, wl_data_offer: Data_Offer, se
 	bytes.buffer_write_string(&connection.buffer, mime_type)
 	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> wl_data_offer@", data_offer, ".accept:", " serial=", serial, " mime_type=", mime_type)
 	return
 }
-data_offer_receive :: proc(connection: ^Connection, wl_data_offer: Data_Offer, mime_type: string, fd: Fd) {
+data_offer_receive :: proc(connection: ^Connection, data_offer: Data_Offer, mime_type: string, fd: Fd) {
 	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
-	wl_data_offer := wl_data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_offer, size_of(wl_data_offer))
+	data_offer := data_offer
+	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1357,30 +1369,33 @@ data_offer_receive :: proc(connection: ^Connection, wl_data_offer: Data_Offer, m
 	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
 	append(&connection.fds_out, fd)
+	_debug_log(connection, "-> wl_data_offer@", data_offer, ".receive:", " mime_type=", mime_type, " fd=", fd)
 	return
 }
-data_offer_destroy :: proc(connection: ^Connection, wl_data_offer: Data_Offer) {
+data_offer_destroy :: proc(connection: ^Connection, data_offer: Data_Offer) {
 	_size: u16 = 8
-	wl_data_offer := wl_data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_offer, size_of(wl_data_offer))
+	data_offer := data_offer
+	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_data_offer@", data_offer, ".destroy:")
 	return
 }
-data_offer_finish :: proc(connection: ^Connection, wl_data_offer: Data_Offer) {
+data_offer_finish :: proc(connection: ^Connection, data_offer: Data_Offer) {
 	_size: u16 = 8
-	wl_data_offer := wl_data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_offer, size_of(wl_data_offer))
+	data_offer := data_offer
+	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 3
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_data_offer@", data_offer, ".finish:")
 	return
 }
-data_offer_set_actions :: proc(connection: ^Connection, wl_data_offer: Data_Offer, dnd_actions: Data_Device_Manager_Dnd_Action, preferred_action: Data_Device_Manager_Dnd_Action) {
+data_offer_set_actions :: proc(connection: ^Connection, data_offer: Data_Offer, dnd_actions: Data_Device_Manager_Dnd_Action, preferred_action: Data_Device_Manager_Dnd_Action) {
 	_size: u16 = 8 + size_of(dnd_actions) + size_of(preferred_action)
-	wl_data_offer := wl_data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_offer, size_of(wl_data_offer))
+	data_offer := data_offer
+	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 4
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1388,12 +1403,13 @@ data_offer_set_actions :: proc(connection: ^Connection, wl_data_offer: Data_Offe
 	bytes.buffer_write_ptr(&connection.buffer, &dnd_actions, size_of(dnd_actions))
 	preferred_action := preferred_action
 	bytes.buffer_write_ptr(&connection.buffer, &preferred_action, size_of(preferred_action))
+	_debug_log(connection, "-> wl_data_offer@", data_offer, ".set_actions:", " dnd_actions=", dnd_actions, " preferred_action=", preferred_action)
 	return
 }
-data_source_offer :: proc(connection: ^Connection, wl_data_source: Data_Source, mime_type: string) {
+data_source_offer :: proc(connection: ^Connection, data_source: Data_Source, mime_type: string) {
 	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
-	wl_data_source := wl_data_source
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_source, size_of(wl_data_source))
+	data_source := data_source
+	bytes.buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1402,32 +1418,35 @@ data_source_offer :: proc(connection: ^Connection, wl_data_source: Data_Source, 
 	bytes.buffer_write_string(&connection.buffer, mime_type)
 	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> wl_data_source@", data_source, ".offer:", " mime_type=", mime_type)
 	return
 }
-data_source_destroy :: proc(connection: ^Connection, wl_data_source: Data_Source) {
+data_source_destroy :: proc(connection: ^Connection, data_source: Data_Source) {
 	_size: u16 = 8
-	wl_data_source := wl_data_source
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_source, size_of(wl_data_source))
+	data_source := data_source
+	bytes.buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_data_source@", data_source, ".destroy:")
 	return
 }
-data_source_set_actions :: proc(connection: ^Connection, wl_data_source: Data_Source, dnd_actions: Data_Device_Manager_Dnd_Action) {
+data_source_set_actions :: proc(connection: ^Connection, data_source: Data_Source, dnd_actions: Data_Device_Manager_Dnd_Action) {
 	_size: u16 = 8 + size_of(dnd_actions)
-	wl_data_source := wl_data_source
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_source, size_of(wl_data_source))
+	data_source := data_source
+	bytes.buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	dnd_actions := dnd_actions
 	bytes.buffer_write_ptr(&connection.buffer, &dnd_actions, size_of(dnd_actions))
+	_debug_log(connection, "-> wl_data_source@", data_source, ".set_actions:", " dnd_actions=", dnd_actions)
 	return
 }
-data_device_start_drag :: proc(connection: ^Connection, wl_data_device: Data_Device, source: Data_Source, origin: Surface, icon: Surface, serial: u32) {
+data_device_start_drag :: proc(connection: ^Connection, data_device: Data_Device, source: Data_Source, origin: Surface, icon: Surface, serial: u32) {
 	_size: u16 = 8 + size_of(source) + size_of(origin) + size_of(icon) + size_of(serial)
-	wl_data_device := wl_data_device
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_device, size_of(wl_data_device))
+	data_device := data_device
+	bytes.buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1439,12 +1458,13 @@ data_device_start_drag :: proc(connection: ^Connection, wl_data_device: Data_Dev
 	bytes.buffer_write_ptr(&connection.buffer, &icon, size_of(icon))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> wl_data_device@", data_device, ".start_drag:", " source=", source, " origin=", origin, " icon=", icon, " serial=", serial)
 	return
 }
-data_device_set_selection :: proc(connection: ^Connection, wl_data_device: Data_Device, source: Data_Source, serial: u32) {
+data_device_set_selection :: proc(connection: ^Connection, data_device: Data_Device, source: Data_Source, serial: u32) {
 	_size: u16 = 8 + size_of(source) + size_of(serial)
-	wl_data_device := wl_data_device
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_device, size_of(wl_data_device))
+	data_device := data_device
+	bytes.buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1452,32 +1472,35 @@ data_device_set_selection :: proc(connection: ^Connection, wl_data_device: Data_
 	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> wl_data_device@", data_device, ".set_selection:", " source=", source, " serial=", serial)
 	return
 }
-data_device_release :: proc(connection: ^Connection, wl_data_device: Data_Device) {
+data_device_release :: proc(connection: ^Connection, data_device: Data_Device) {
 	_size: u16 = 8
-	wl_data_device := wl_data_device
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_device, size_of(wl_data_device))
+	data_device := data_device
+	bytes.buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_data_device@", data_device, ".release:")
 	return
 }
-data_device_manager_create_data_source :: proc(connection: ^Connection, wl_data_device_manager: Data_Device_Manager) -> (id: Data_Source) {
+data_device_manager_create_data_source :: proc(connection: ^Connection, data_device_manager: Data_Device_Manager) -> (id: Data_Source) {
 	_size: u16 = 8 + size_of(id)
-	wl_data_device_manager := wl_data_device_manager
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_device_manager, size_of(wl_data_device_manager))
+	data_device_manager := data_device_manager
+	bytes.buffer_write_ptr(&connection.buffer, &data_device_manager, size_of(data_device_manager))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Data_Source)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wl_data_device_manager@", data_device_manager, ".create_data_source:", " id=", id)
 	return
 }
-data_device_manager_get_data_device :: proc(connection: ^Connection, wl_data_device_manager: Data_Device_Manager, seat: Seat) -> (id: Data_Device) {
+data_device_manager_get_data_device :: proc(connection: ^Connection, data_device_manager: Data_Device_Manager, seat: Seat) -> (id: Data_Device) {
 	_size: u16 = 8 + size_of(id) + size_of(seat)
-	wl_data_device_manager := wl_data_device_manager
-	bytes.buffer_write_ptr(&connection.buffer, &wl_data_device_manager, size_of(wl_data_device_manager))
+	data_device_manager := data_device_manager
+	bytes.buffer_write_ptr(&connection.buffer, &data_device_manager, size_of(data_device_manager))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1485,12 +1508,13 @@ data_device_manager_get_data_device :: proc(connection: ^Connection, wl_data_dev
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	seat := seat
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_debug_log(connection, "-> wl_data_device_manager@", data_device_manager, ".get_data_device:", " id=", id, " seat=", seat)
 	return
 }
-shell_get_shell_surface :: proc(connection: ^Connection, wl_shell: Shell, surface: Surface) -> (id: Shell_Surface) {
+shell_get_shell_surface :: proc(connection: ^Connection, shell: Shell, surface: Surface) -> (id: Shell_Surface) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wl_shell := wl_shell
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell, size_of(wl_shell))
+	shell := shell
+	bytes.buffer_write_ptr(&connection.buffer, &shell, size_of(shell))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1498,23 +1522,25 @@ shell_get_shell_surface :: proc(connection: ^Connection, wl_shell: Shell, surfac
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wl_shell@", shell, ".get_shell_surface:", " id=", id, " surface=", surface)
 	return
 }
-shell_surface_pong :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, serial: u32) {
+shell_surface_pong :: proc(connection: ^Connection, shell_surface: Shell_Surface, serial: u32) {
 	_size: u16 = 8 + size_of(serial)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".pong:", " serial=", serial)
 	return
 }
-shell_surface_move :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, seat: Seat, serial: u32) {
+shell_surface_move :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1522,12 +1548,13 @@ shell_surface_move :: proc(connection: ^Connection, wl_shell_surface: Shell_Surf
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".move:", " seat=", seat, " serial=", serial)
 	return
 }
-shell_surface_resize :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, seat: Seat, serial: u32, edges: Shell_Surface_Resize) {
+shell_surface_resize :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32, edges: Shell_Surface_Resize) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(edges)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1537,21 +1564,23 @@ shell_surface_resize :: proc(connection: ^Connection, wl_shell_surface: Shell_Su
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	edges := edges
 	bytes.buffer_write_ptr(&connection.buffer, &edges, size_of(edges))
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".resize:", " seat=", seat, " serial=", serial, " edges=", edges)
 	return
 }
-shell_surface_set_toplevel :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface) {
+shell_surface_set_toplevel :: proc(connection: ^Connection, shell_surface: Shell_Surface) {
 	_size: u16 = 8
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 3
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_toplevel:")
 	return
 }
-shell_surface_set_transient :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, parent: Surface, x: i32, y: i32, flags: Shell_Surface_Transient) {
+shell_surface_set_transient :: proc(connection: ^Connection, shell_surface: Shell_Surface, parent: Surface, x: i32, y: i32, flags: Shell_Surface_Transient) {
 	_size: u16 = 8 + size_of(parent) + size_of(x) + size_of(y) + size_of(flags)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 4
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1563,12 +1592,13 @@ shell_surface_set_transient :: proc(connection: ^Connection, wl_shell_surface: S
 	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	flags := flags
 	bytes.buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_transient:", " parent=", parent, " x=", x, " y=", y, " flags=", flags)
 	return
 }
-shell_surface_set_fullscreen :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, method: Shell_Surface_Fullscreen_Method, framerate: u32, output: Output) {
+shell_surface_set_fullscreen :: proc(connection: ^Connection, shell_surface: Shell_Surface, method: Shell_Surface_Fullscreen_Method, framerate: u32, output: Output) {
 	_size: u16 = 8 + size_of(method) + size_of(framerate) + size_of(output)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 5
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1578,12 +1608,13 @@ shell_surface_set_fullscreen :: proc(connection: ^Connection, wl_shell_surface: 
 	bytes.buffer_write_ptr(&connection.buffer, &framerate, size_of(framerate))
 	output := output
 	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_fullscreen:", " method=", method, " framerate=", framerate, " output=", output)
 	return
 }
-shell_surface_set_popup :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, seat: Seat, serial: u32, parent: Surface, x: i32, y: i32, flags: Shell_Surface_Transient) {
+shell_surface_set_popup :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32, parent: Surface, x: i32, y: i32, flags: Shell_Surface_Transient) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(parent) + size_of(x) + size_of(y) + size_of(flags)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 6
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1599,23 +1630,25 @@ shell_surface_set_popup :: proc(connection: ^Connection, wl_shell_surface: Shell
 	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	flags := flags
 	bytes.buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_popup:", " seat=", seat, " serial=", serial, " parent=", parent, " x=", x, " y=", y, " flags=", flags)
 	return
 }
-shell_surface_set_maximized :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, output: Output) {
+shell_surface_set_maximized :: proc(connection: ^Connection, shell_surface: Shell_Surface, output: Output) {
 	_size: u16 = 8 + size_of(output)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 7
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	output := output
 	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_maximized:", " output=", output)
 	return
 }
-shell_surface_set_title :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, title: string) {
+shell_surface_set_title :: proc(connection: ^Connection, shell_surface: Shell_Surface, title: string) {
 	_size: u16 = 8 + 4 + u16((len(title) + 1 + 3) & -4)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 8
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1624,12 +1657,13 @@ shell_surface_set_title :: proc(connection: ^Connection, wl_shell_surface: Shell
 	bytes.buffer_write_string(&connection.buffer, title)
 	for _ in len(title) ..< (len(title) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_title:", " title=", title)
 	return
 }
-shell_surface_set_class :: proc(connection: ^Connection, wl_shell_surface: Shell_Surface, class_: string) {
+shell_surface_set_class :: proc(connection: ^Connection, shell_surface: Shell_Surface, class_: string) {
 	_size: u16 = 8 + 4 + u16((len(class_) + 1 + 3) & -4)
-	wl_shell_surface := wl_shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_shell_surface, size_of(wl_shell_surface))
+	shell_surface := shell_surface
+	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 9
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1638,21 +1672,23 @@ shell_surface_set_class :: proc(connection: ^Connection, wl_shell_surface: Shell
 	bytes.buffer_write_string(&connection.buffer, class_)
 	for _ in len(class_) ..< (len(class_) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_class:", " class_=", class_)
 	return
 }
-surface_destroy :: proc(connection: ^Connection, wl_surface: Surface) {
+surface_destroy :: proc(connection: ^Connection, surface: Surface) {
 	_size: u16 = 8
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_surface@", surface, ".destroy:")
 	return
 }
-surface_attach :: proc(connection: ^Connection, wl_surface: Surface, buffer: Buffer, x: i32, y: i32) {
+surface_attach :: proc(connection: ^Connection, surface: Surface, buffer: Buffer, x: i32, y: i32) {
 	_size: u16 = 8 + size_of(buffer) + size_of(x) + size_of(y)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1662,12 +1698,13 @@ surface_attach :: proc(connection: ^Connection, wl_surface: Surface, buffer: Buf
 	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
 	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_debug_log(connection, "-> wl_surface@", surface, ".attach:", " buffer=", buffer, " x=", x, " y=", y)
 	return
 }
-surface_damage :: proc(connection: ^Connection, wl_surface: Surface, x: i32, y: i32, width: i32, height: i32) {
+surface_damage :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1679,76 +1716,83 @@ surface_damage :: proc(connection: ^Connection, wl_surface: Surface, x: i32, y: 
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> wl_surface@", surface, ".damage:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
-surface_frame :: proc(connection: ^Connection, wl_surface: Surface) -> (callback: Callback) {
+surface_frame :: proc(connection: ^Connection, surface: Surface) -> (callback: Callback) {
 	_size: u16 = 8 + size_of(callback)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 3
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	callback = auto_cast generate_id(connection, .Callback)
 	bytes.buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
+	_debug_log(connection, "-> wl_surface@", surface, ".frame:", " callback=", callback)
 	return
 }
-surface_set_opaque_region :: proc(connection: ^Connection, wl_surface: Surface, region: Region) {
+surface_set_opaque_region :: proc(connection: ^Connection, surface: Surface, region: Region) {
 	_size: u16 = 8 + size_of(region)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 4
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	region := region
 	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_debug_log(connection, "-> wl_surface@", surface, ".set_opaque_region:", " region=", region)
 	return
 }
-surface_set_input_region :: proc(connection: ^Connection, wl_surface: Surface, region: Region) {
+surface_set_input_region :: proc(connection: ^Connection, surface: Surface, region: Region) {
 	_size: u16 = 8 + size_of(region)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 5
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	region := region
 	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_debug_log(connection, "-> wl_surface@", surface, ".set_input_region:", " region=", region)
 	return
 }
-surface_commit :: proc(connection: ^Connection, wl_surface: Surface) {
+surface_commit :: proc(connection: ^Connection, surface: Surface) {
 	_size: u16 = 8
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 6
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_surface@", surface, ".commit:")
 	return
 }
-surface_set_buffer_transform :: proc(connection: ^Connection, wl_surface: Surface, transform: Output_Transform) {
+surface_set_buffer_transform :: proc(connection: ^Connection, surface: Surface, transform: Output_Transform) {
 	_size: u16 = 8 + size_of(transform)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 7
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	transform := transform
 	bytes.buffer_write_ptr(&connection.buffer, &transform, size_of(transform))
+	_debug_log(connection, "-> wl_surface@", surface, ".set_buffer_transform:", " transform=", transform)
 	return
 }
-surface_set_buffer_scale :: proc(connection: ^Connection, wl_surface: Surface, scale: i32) {
+surface_set_buffer_scale :: proc(connection: ^Connection, surface: Surface, scale: i32) {
 	_size: u16 = 8 + size_of(scale)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 8
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	scale := scale
 	bytes.buffer_write_ptr(&connection.buffer, &scale, size_of(scale))
+	_debug_log(connection, "-> wl_surface@", surface, ".set_buffer_scale:", " scale=", scale)
 	return
 }
-surface_damage_buffer :: proc(connection: ^Connection, wl_surface: Surface, x: i32, y: i32, width: i32, height: i32) {
+surface_damage_buffer :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 9
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1760,12 +1804,13 @@ surface_damage_buffer :: proc(connection: ^Connection, wl_surface: Surface, x: i
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> wl_surface@", surface, ".damage_buffer:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
-surface_offset :: proc(connection: ^Connection, wl_surface: Surface, x: i32, y: i32) {
+surface_offset :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y)
-	wl_surface := wl_surface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_surface, size_of(wl_surface))
+	surface := surface
+	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 10
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1773,54 +1818,59 @@ surface_offset :: proc(connection: ^Connection, wl_surface: Surface, x: i32, y: 
 	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
 	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_debug_log(connection, "-> wl_surface@", surface, ".offset:", " x=", x, " y=", y)
 	return
 }
-seat_get_pointer :: proc(connection: ^Connection, wl_seat: Seat) -> (id: Pointer) {
+seat_get_pointer :: proc(connection: ^Connection, seat: Seat) -> (id: Pointer) {
 	_size: u16 = 8 + size_of(id)
-	wl_seat := wl_seat
-	bytes.buffer_write_ptr(&connection.buffer, &wl_seat, size_of(wl_seat))
+	seat := seat
+	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Pointer)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wl_seat@", seat, ".get_pointer:", " id=", id)
 	return
 }
-seat_get_keyboard :: proc(connection: ^Connection, wl_seat: Seat) -> (id: Keyboard) {
+seat_get_keyboard :: proc(connection: ^Connection, seat: Seat) -> (id: Keyboard) {
 	_size: u16 = 8 + size_of(id)
-	wl_seat := wl_seat
-	bytes.buffer_write_ptr(&connection.buffer, &wl_seat, size_of(wl_seat))
+	seat := seat
+	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Keyboard)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wl_seat@", seat, ".get_keyboard:", " id=", id)
 	return
 }
-seat_get_touch :: proc(connection: ^Connection, wl_seat: Seat) -> (id: Touch) {
+seat_get_touch :: proc(connection: ^Connection, seat: Seat) -> (id: Touch) {
 	_size: u16 = 8 + size_of(id)
-	wl_seat := wl_seat
-	bytes.buffer_write_ptr(&connection.buffer, &wl_seat, size_of(wl_seat))
+	seat := seat
+	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Touch)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wl_seat@", seat, ".get_touch:", " id=", id)
 	return
 }
-seat_release :: proc(connection: ^Connection, wl_seat: Seat) {
+seat_release :: proc(connection: ^Connection, seat: Seat) {
 	_size: u16 = 8
-	wl_seat := wl_seat
-	bytes.buffer_write_ptr(&connection.buffer, &wl_seat, size_of(wl_seat))
+	seat := seat
+	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	opcode: u16 = 3
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_seat@", seat, ".release:")
 	return
 }
-pointer_set_cursor :: proc(connection: ^Connection, wl_pointer: Pointer, serial: u32, surface: Surface, hotspot_x: i32, hotspot_y: i32) {
+pointer_set_cursor :: proc(connection: ^Connection, pointer: Pointer, serial: u32, surface: Surface, hotspot_x: i32, hotspot_y: i32) {
 	_size: u16 = 8 + size_of(serial) + size_of(surface) + size_of(hotspot_x) + size_of(hotspot_y)
-	wl_pointer := wl_pointer
-	bytes.buffer_write_ptr(&connection.buffer, &wl_pointer, size_of(wl_pointer))
+	pointer := pointer
+	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1832,57 +1882,63 @@ pointer_set_cursor :: proc(connection: ^Connection, wl_pointer: Pointer, serial:
 	bytes.buffer_write_ptr(&connection.buffer, &hotspot_x, size_of(hotspot_x))
 	hotspot_y := hotspot_y
 	bytes.buffer_write_ptr(&connection.buffer, &hotspot_y, size_of(hotspot_y))
+	_debug_log(connection, "-> wl_pointer@", pointer, ".set_cursor:", " serial=", serial, " surface=", surface, " hotspot_x=", hotspot_x, " hotspot_y=", hotspot_y)
 	return
 }
-pointer_release :: proc(connection: ^Connection, wl_pointer: Pointer) {
+pointer_release :: proc(connection: ^Connection, pointer: Pointer) {
 	_size: u16 = 8
-	wl_pointer := wl_pointer
-	bytes.buffer_write_ptr(&connection.buffer, &wl_pointer, size_of(wl_pointer))
+	pointer := pointer
+	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_pointer@", pointer, ".release:")
 	return
 }
-keyboard_release :: proc(connection: ^Connection, wl_keyboard: Keyboard) {
+keyboard_release :: proc(connection: ^Connection, keyboard: Keyboard) {
 	_size: u16 = 8
-	wl_keyboard := wl_keyboard
-	bytes.buffer_write_ptr(&connection.buffer, &wl_keyboard, size_of(wl_keyboard))
+	keyboard := keyboard
+	bytes.buffer_write_ptr(&connection.buffer, &keyboard, size_of(keyboard))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_keyboard@", keyboard, ".release:")
 	return
 }
-touch_release :: proc(connection: ^Connection, wl_touch: Touch) {
+touch_release :: proc(connection: ^Connection, touch: Touch) {
 	_size: u16 = 8
-	wl_touch := wl_touch
-	bytes.buffer_write_ptr(&connection.buffer, &wl_touch, size_of(wl_touch))
+	touch := touch
+	bytes.buffer_write_ptr(&connection.buffer, &touch, size_of(touch))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_touch@", touch, ".release:")
 	return
 }
-output_release :: proc(connection: ^Connection, wl_output: Output) {
+output_release :: proc(connection: ^Connection, output: Output) {
 	_size: u16 = 8
-	wl_output := wl_output
-	bytes.buffer_write_ptr(&connection.buffer, &wl_output, size_of(wl_output))
+	output := output
+	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_output@", output, ".release:")
 	return
 }
-region_destroy :: proc(connection: ^Connection, wl_region: Region) {
+region_destroy :: proc(connection: ^Connection, region: Region) {
 	_size: u16 = 8
-	wl_region := wl_region
-	bytes.buffer_write_ptr(&connection.buffer, &wl_region, size_of(wl_region))
+	region := region
+	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_region@", region, ".destroy:")
 	return
 }
-region_add :: proc(connection: ^Connection, wl_region: Region, x: i32, y: i32, width: i32, height: i32) {
+region_add :: proc(connection: ^Connection, region: Region, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	wl_region := wl_region
-	bytes.buffer_write_ptr(&connection.buffer, &wl_region, size_of(wl_region))
+	region := region
+	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1894,12 +1950,13 @@ region_add :: proc(connection: ^Connection, wl_region: Region, x: i32, y: i32, w
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> wl_region@", region, ".add:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
-region_subtract :: proc(connection: ^Connection, wl_region: Region, x: i32, y: i32, width: i32, height: i32) {
+region_subtract :: proc(connection: ^Connection, region: Region, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	wl_region := wl_region
-	bytes.buffer_write_ptr(&connection.buffer, &wl_region, size_of(wl_region))
+	region := region
+	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1911,21 +1968,23 @@ region_subtract :: proc(connection: ^Connection, wl_region: Region, x: i32, y: i
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> wl_region@", region, ".subtract:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
-subcompositor_destroy :: proc(connection: ^Connection, wl_subcompositor: Subcompositor) {
+subcompositor_destroy :: proc(connection: ^Connection, subcompositor: Subcompositor) {
 	_size: u16 = 8
-	wl_subcompositor := wl_subcompositor
-	bytes.buffer_write_ptr(&connection.buffer, &wl_subcompositor, size_of(wl_subcompositor))
+	subcompositor := subcompositor
+	bytes.buffer_write_ptr(&connection.buffer, &subcompositor, size_of(subcompositor))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_subcompositor@", subcompositor, ".destroy:")
 	return
 }
-subcompositor_get_subsurface :: proc(connection: ^Connection, wl_subcompositor: Subcompositor, surface: Surface, parent: Surface) -> (id: Subsurface) {
+subcompositor_get_subsurface :: proc(connection: ^Connection, subcompositor: Subcompositor, surface: Surface, parent: Surface) -> (id: Subsurface) {
 	_size: u16 = 8 + size_of(id) + size_of(surface) + size_of(parent)
-	wl_subcompositor := wl_subcompositor
-	bytes.buffer_write_ptr(&connection.buffer, &wl_subcompositor, size_of(wl_subcompositor))
+	subcompositor := subcompositor
+	bytes.buffer_write_ptr(&connection.buffer, &subcompositor, size_of(subcompositor))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1935,21 +1994,23 @@ subcompositor_get_subsurface :: proc(connection: ^Connection, wl_subcompositor: 
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	parent := parent
 	bytes.buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
+	_debug_log(connection, "-> wl_subcompositor@", subcompositor, ".get_subsurface:", " id=", id, " surface=", surface, " parent=", parent)
 	return
 }
-subsurface_destroy :: proc(connection: ^Connection, wl_subsurface: Subsurface) {
+subsurface_destroy :: proc(connection: ^Connection, subsurface: Subsurface) {
 	_size: u16 = 8
-	wl_subsurface := wl_subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_subsurface, size_of(wl_subsurface))
+	subsurface := subsurface
+	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_subsurface@", subsurface, ".destroy:")
 	return
 }
-subsurface_set_position :: proc(connection: ^Connection, wl_subsurface: Subsurface, x: i32, y: i32) {
+subsurface_set_position :: proc(connection: ^Connection, subsurface: Subsurface, x: i32, y: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y)
-	wl_subsurface := wl_subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_subsurface, size_of(wl_subsurface))
+	subsurface := subsurface
+	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
@@ -1957,66 +2018,73 @@ subsurface_set_position :: proc(connection: ^Connection, wl_subsurface: Subsurfa
 	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
 	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_debug_log(connection, "-> wl_subsurface@", subsurface, ".set_position:", " x=", x, " y=", y)
 	return
 }
-subsurface_place_above :: proc(connection: ^Connection, wl_subsurface: Subsurface, sibling: Surface) {
+subsurface_place_above :: proc(connection: ^Connection, subsurface: Subsurface, sibling: Surface) {
 	_size: u16 = 8 + size_of(sibling)
-	wl_subsurface := wl_subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_subsurface, size_of(wl_subsurface))
+	subsurface := subsurface
+	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	sibling := sibling
 	bytes.buffer_write_ptr(&connection.buffer, &sibling, size_of(sibling))
+	_debug_log(connection, "-> wl_subsurface@", subsurface, ".place_above:", " sibling=", sibling)
 	return
 }
-subsurface_place_below :: proc(connection: ^Connection, wl_subsurface: Subsurface, sibling: Surface) {
+subsurface_place_below :: proc(connection: ^Connection, subsurface: Subsurface, sibling: Surface) {
 	_size: u16 = 8 + size_of(sibling)
-	wl_subsurface := wl_subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_subsurface, size_of(wl_subsurface))
+	subsurface := subsurface
+	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 3
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	sibling := sibling
 	bytes.buffer_write_ptr(&connection.buffer, &sibling, size_of(sibling))
+	_debug_log(connection, "-> wl_subsurface@", subsurface, ".place_below:", " sibling=", sibling)
 	return
 }
-subsurface_set_sync :: proc(connection: ^Connection, wl_subsurface: Subsurface) {
+subsurface_set_sync :: proc(connection: ^Connection, subsurface: Subsurface) {
 	_size: u16 = 8
-	wl_subsurface := wl_subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_subsurface, size_of(wl_subsurface))
+	subsurface := subsurface
+	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 4
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_subsurface@", subsurface, ".set_sync:")
 	return
 }
-subsurface_set_desync :: proc(connection: ^Connection, wl_subsurface: Subsurface) {
+subsurface_set_desync :: proc(connection: ^Connection, subsurface: Subsurface) {
 	_size: u16 = 8
-	wl_subsurface := wl_subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &wl_subsurface, size_of(wl_subsurface))
+	subsurface := subsurface
+	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 5
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_subsurface@", subsurface, ".set_desync:")
 	return
 }
-fixes_destroy :: proc(connection: ^Connection, wl_fixes: Fixes) {
+fixes_destroy :: proc(connection: ^Connection, fixes: Fixes) {
 	_size: u16 = 8
-	wl_fixes := wl_fixes
-	bytes.buffer_write_ptr(&connection.buffer, &wl_fixes, size_of(wl_fixes))
+	fixes := fixes
+	bytes.buffer_write_ptr(&connection.buffer, &fixes, size_of(fixes))
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wl_fixes@", fixes, ".destroy:")
 	return
 }
-fixes_destroy_registry :: proc(connection: ^Connection, wl_fixes: Fixes, registry: Registry) {
+fixes_destroy_registry :: proc(connection: ^Connection, fixes: Fixes, registry: Registry) {
 	_size: u16 = 8 + size_of(registry)
-	wl_fixes := wl_fixes
-	bytes.buffer_write_ptr(&connection.buffer, &wl_fixes, size_of(wl_fixes))
+	fixes := fixes
+	bytes.buffer_write_ptr(&connection.buffer, &fixes, size_of(fixes))
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	registry := registry
 	bytes.buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
+	_debug_log(connection, "-> wl_fixes@", fixes, ".destroy_registry:", " registry=", registry)
 	return
 }
 zwp_linux_dmabuf_v1_destroy :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) {
@@ -2026,6 +2094,7 @@ zwp_linux_dmabuf_v1_destroy :: proc(connection: ^Connection, zwp_linux_dmabuf_v1
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".destroy:")
 	return
 }
 zwp_linux_dmabuf_v1_create_params :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) -> (params_id: Zwp_Linux_Buffer_Params_V1) {
@@ -2037,6 +2106,7 @@ zwp_linux_dmabuf_v1_create_params :: proc(connection: ^Connection, zwp_linux_dma
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	params_id = auto_cast generate_id(connection, .Zwp_Linux_Buffer_Params_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &params_id, size_of(params_id))
+	_debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".create_params:", " params_id=", params_id)
 	return
 }
 zwp_linux_dmabuf_v1_get_default_feedback :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) -> (id: Zwp_Linux_Dmabuf_Feedback_V1) {
@@ -2048,6 +2118,7 @@ zwp_linux_dmabuf_v1_get_default_feedback :: proc(connection: ^Connection, zwp_li
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Zwp_Linux_Dmabuf_Feedback_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".get_default_feedback:", " id=", id)
 	return
 }
 zwp_linux_dmabuf_v1_get_surface_feedback :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1, surface: Surface) -> (id: Zwp_Linux_Dmabuf_Feedback_V1) {
@@ -2061,6 +2132,7 @@ zwp_linux_dmabuf_v1_get_surface_feedback :: proc(connection: ^Connection, zwp_li
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".get_surface_feedback:", " id=", id, " surface=", surface)
 	return
 }
 zwp_linux_buffer_params_v1_destroy :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1) {
@@ -2070,6 +2142,7 @@ zwp_linux_buffer_params_v1_destroy :: proc(connection: ^Connection, zwp_linux_bu
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".destroy:")
 	return
 }
 zwp_linux_buffer_params_v1_add :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, fd: Fd, plane_idx: u32, offset: u32, stride: u32, modifier_hi: u32, modifier_lo: u32) {
@@ -2090,6 +2163,7 @@ zwp_linux_buffer_params_v1_add :: proc(connection: ^Connection, zwp_linux_buffer
 	bytes.buffer_write_ptr(&connection.buffer, &modifier_hi, size_of(modifier_hi))
 	modifier_lo := modifier_lo
 	bytes.buffer_write_ptr(&connection.buffer, &modifier_lo, size_of(modifier_lo))
+	_debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".add:", " fd=", fd, " plane_idx=", plane_idx, " offset=", offset, " stride=", stride, " modifier_hi=", modifier_hi, " modifier_lo=", modifier_lo)
 	return
 }
 zwp_linux_buffer_params_v1_create :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, width: i32, height: i32, format: u32, flags: Zwp_Linux_Buffer_Params_V1_Flags) {
@@ -2107,6 +2181,7 @@ zwp_linux_buffer_params_v1_create :: proc(connection: ^Connection, zwp_linux_buf
 	bytes.buffer_write_ptr(&connection.buffer, &format, size_of(format))
 	flags := flags
 	bytes.buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
+	_debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".create:", " width=", width, " height=", height, " format=", format, " flags=", flags)
 	return
 }
 zwp_linux_buffer_params_v1_create_immed :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, width: i32, height: i32, format: u32, flags: Zwp_Linux_Buffer_Params_V1_Flags) -> (buffer_id: Buffer) {
@@ -2126,6 +2201,7 @@ zwp_linux_buffer_params_v1_create_immed :: proc(connection: ^Connection, zwp_lin
 	bytes.buffer_write_ptr(&connection.buffer, &format, size_of(format))
 	flags := flags
 	bytes.buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
+	_debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".create_immed:", " buffer_id=", buffer_id, " width=", width, " height=", height, " format=", format, " flags=", flags)
 	return
 }
 zwp_linux_dmabuf_feedback_v1_destroy :: proc(connection: ^Connection, zwp_linux_dmabuf_feedback_v1: Zwp_Linux_Dmabuf_Feedback_V1) {
@@ -2135,6 +2211,7 @@ zwp_linux_dmabuf_feedback_v1_destroy :: proc(connection: ^Connection, zwp_linux_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_linux_dmabuf_feedback_v1@", zwp_linux_dmabuf_feedback_v1, ".destroy:")
 	return
 }
 wp_presentation_destroy :: proc(connection: ^Connection, wp_presentation: Wp_Presentation) {
@@ -2144,6 +2221,7 @@ wp_presentation_destroy :: proc(connection: ^Connection, wp_presentation: Wp_Pre
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_presentation@", wp_presentation, ".destroy:")
 	return
 }
 wp_presentation_feedback :: proc(connection: ^Connection, wp_presentation: Wp_Presentation, surface: Surface) -> (callback: Wp_Presentation_Feedback) {
@@ -2157,6 +2235,7 @@ wp_presentation_feedback :: proc(connection: ^Connection, wp_presentation: Wp_Pr
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	callback = auto_cast generate_id(connection, .Wp_Presentation_Feedback)
 	bytes.buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
+	_debug_log(connection, "-> wp_presentation@", wp_presentation, ".feedback:", " surface=", surface, " callback=", callback)
 	return
 }
 zwp_tablet_manager_v2_get_tablet_seat :: proc(connection: ^Connection, zwp_tablet_manager_v2: Zwp_Tablet_Manager_V2, seat: Seat) -> (tablet_seat: Zwp_Tablet_Seat_V2) {
@@ -2170,6 +2249,7 @@ zwp_tablet_manager_v2_get_tablet_seat :: proc(connection: ^Connection, zwp_table
 	bytes.buffer_write_ptr(&connection.buffer, &tablet_seat, size_of(tablet_seat))
 	seat := seat
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_debug_log(connection, "-> zwp_tablet_manager_v2@", zwp_tablet_manager_v2, ".get_tablet_seat:", " tablet_seat=", tablet_seat, " seat=", seat)
 	return
 }
 zwp_tablet_manager_v2_destroy :: proc(connection: ^Connection, zwp_tablet_manager_v2: Zwp_Tablet_Manager_V2) {
@@ -2179,6 +2259,7 @@ zwp_tablet_manager_v2_destroy :: proc(connection: ^Connection, zwp_tablet_manage
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_manager_v2@", zwp_tablet_manager_v2, ".destroy:")
 	return
 }
 zwp_tablet_seat_v2_destroy :: proc(connection: ^Connection, zwp_tablet_seat_v2: Zwp_Tablet_Seat_V2) {
@@ -2188,6 +2269,7 @@ zwp_tablet_seat_v2_destroy :: proc(connection: ^Connection, zwp_tablet_seat_v2: 
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_seat_v2@", zwp_tablet_seat_v2, ".destroy:")
 	return
 }
 zwp_tablet_tool_v2_set_cursor :: proc(connection: ^Connection, zwp_tablet_tool_v2: Zwp_Tablet_Tool_V2, serial: u32, surface: Surface, hotspot_x: i32, hotspot_y: i32) {
@@ -2205,6 +2287,7 @@ zwp_tablet_tool_v2_set_cursor :: proc(connection: ^Connection, zwp_tablet_tool_v
 	bytes.buffer_write_ptr(&connection.buffer, &hotspot_x, size_of(hotspot_x))
 	hotspot_y := hotspot_y
 	bytes.buffer_write_ptr(&connection.buffer, &hotspot_y, size_of(hotspot_y))
+	_debug_log(connection, "-> zwp_tablet_tool_v2@", zwp_tablet_tool_v2, ".set_cursor:", " serial=", serial, " surface=", surface, " hotspot_x=", hotspot_x, " hotspot_y=", hotspot_y)
 	return
 }
 zwp_tablet_tool_v2_destroy :: proc(connection: ^Connection, zwp_tablet_tool_v2: Zwp_Tablet_Tool_V2) {
@@ -2214,6 +2297,7 @@ zwp_tablet_tool_v2_destroy :: proc(connection: ^Connection, zwp_tablet_tool_v2: 
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_tool_v2@", zwp_tablet_tool_v2, ".destroy:")
 	return
 }
 zwp_tablet_v2_destroy :: proc(connection: ^Connection, zwp_tablet_v2: Zwp_Tablet_V2) {
@@ -2223,6 +2307,7 @@ zwp_tablet_v2_destroy :: proc(connection: ^Connection, zwp_tablet_v2: Zwp_Tablet
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_v2@", zwp_tablet_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_ring_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_ring_v2: Zwp_Tablet_Pad_Ring_V2, description: string, serial: u32) {
@@ -2239,6 +2324,7 @@ zwp_tablet_pad_ring_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> zwp_tablet_pad_ring_v2@", zwp_tablet_pad_ring_v2, ".set_feedback:", " description=", description, " serial=", serial)
 	return
 }
 zwp_tablet_pad_ring_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_ring_v2: Zwp_Tablet_Pad_Ring_V2) {
@@ -2248,6 +2334,7 @@ zwp_tablet_pad_ring_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_r
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_pad_ring_v2@", zwp_tablet_pad_ring_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_strip_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_strip_v2: Zwp_Tablet_Pad_Strip_V2, description: string, serial: u32) {
@@ -2264,6 +2351,7 @@ zwp_tablet_pad_strip_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> zwp_tablet_pad_strip_v2@", zwp_tablet_pad_strip_v2, ".set_feedback:", " description=", description, " serial=", serial)
 	return
 }
 zwp_tablet_pad_strip_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_strip_v2: Zwp_Tablet_Pad_Strip_V2) {
@@ -2273,6 +2361,7 @@ zwp_tablet_pad_strip_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_pad_strip_v2@", zwp_tablet_pad_strip_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_group_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_group_v2: Zwp_Tablet_Pad_Group_V2) {
@@ -2282,6 +2371,7 @@ zwp_tablet_pad_group_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_pad_group_v2@", zwp_tablet_pad_group_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_v2: Zwp_Tablet_Pad_V2, button: u32, description: string, serial: u32) {
@@ -2300,6 +2390,7 @@ zwp_tablet_pad_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_v
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> zwp_tablet_pad_v2@", zwp_tablet_pad_v2, ".set_feedback:", " button=", button, " description=", description, " serial=", serial)
 	return
 }
 zwp_tablet_pad_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_v2: Zwp_Tablet_Pad_V2) {
@@ -2309,6 +2400,7 @@ zwp_tablet_pad_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_v2: Zw
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_pad_v2@", zwp_tablet_pad_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_dial_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_dial_v2: Zwp_Tablet_Pad_Dial_V2, description: string, serial: u32) {
@@ -2325,6 +2417,7 @@ zwp_tablet_pad_dial_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> zwp_tablet_pad_dial_v2@", zwp_tablet_pad_dial_v2, ".set_feedback:", " description=", description, " serial=", serial)
 	return
 }
 zwp_tablet_pad_dial_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_dial_v2: Zwp_Tablet_Pad_Dial_V2) {
@@ -2334,6 +2427,7 @@ zwp_tablet_pad_dial_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_d
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> zwp_tablet_pad_dial_v2@", zwp_tablet_pad_dial_v2, ".destroy:")
 	return
 }
 wp_viewporter_destroy :: proc(connection: ^Connection, wp_viewporter: Wp_Viewporter) {
@@ -2343,6 +2437,7 @@ wp_viewporter_destroy :: proc(connection: ^Connection, wp_viewporter: Wp_Viewpor
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_viewporter@", wp_viewporter, ".destroy:")
 	return
 }
 wp_viewporter_get_viewport :: proc(connection: ^Connection, wp_viewporter: Wp_Viewporter, surface: Surface) -> (id: Wp_Viewport) {
@@ -2356,6 +2451,7 @@ wp_viewporter_get_viewport :: proc(connection: ^Connection, wp_viewporter: Wp_Vi
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_viewporter@", wp_viewporter, ".get_viewport:", " id=", id, " surface=", surface)
 	return
 }
 wp_viewport_destroy :: proc(connection: ^Connection, wp_viewport: Wp_Viewport) {
@@ -2365,6 +2461,7 @@ wp_viewport_destroy :: proc(connection: ^Connection, wp_viewport: Wp_Viewport) {
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_viewport@", wp_viewport, ".destroy:")
 	return
 }
 wp_viewport_set_source :: proc(connection: ^Connection, wp_viewport: Wp_Viewport, x: f64, y: f64, width: f64, height: f64) {
@@ -2382,6 +2479,7 @@ wp_viewport_set_source :: proc(connection: ^Connection, wp_viewport: Wp_Viewport
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> wp_viewport@", wp_viewport, ".set_source:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 wp_viewport_set_destination :: proc(connection: ^Connection, wp_viewport: Wp_Viewport, width: i32, height: i32) {
@@ -2395,6 +2493,7 @@ wp_viewport_set_destination :: proc(connection: ^Connection, wp_viewport: Wp_Vie
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> wp_viewport@", wp_viewport, ".set_destination:", " width=", width, " height=", height)
 	return
 }
 xdg_wm_base_destroy :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base) {
@@ -2404,6 +2503,7 @@ xdg_wm_base_destroy :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base) {
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".destroy:")
 	return
 }
 xdg_wm_base_create_positioner :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base) -> (id: Xdg_Positioner) {
@@ -2415,6 +2515,7 @@ xdg_wm_base_create_positioner :: proc(connection: ^Connection, xdg_wm_base: Xdg_
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Positioner)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".create_positioner:", " id=", id)
 	return
 }
 xdg_wm_base_get_xdg_surface :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base, surface: Surface) -> (id: Xdg_Surface) {
@@ -2428,6 +2529,7 @@ xdg_wm_base_get_xdg_surface :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".get_xdg_surface:", " id=", id, " surface=", surface)
 	return
 }
 xdg_wm_base_pong :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base, serial: u32) {
@@ -2439,6 +2541,7 @@ xdg_wm_base_pong :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base, seri
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".pong:", " serial=", serial)
 	return
 }
 xdg_positioner_destroy :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner) {
@@ -2448,6 +2551,7 @@ xdg_positioner_destroy :: proc(connection: ^Connection, xdg_positioner: Xdg_Posi
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".destroy:")
 	return
 }
 xdg_positioner_set_size :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, width: i32, height: i32) {
@@ -2461,6 +2565,7 @@ xdg_positioner_set_size :: proc(connection: ^Connection, xdg_positioner: Xdg_Pos
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_size:", " width=", width, " height=", height)
 	return
 }
 xdg_positioner_set_anchor_rect :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, x: i32, y: i32, width: i32, height: i32) {
@@ -2478,6 +2583,7 @@ xdg_positioner_set_anchor_rect :: proc(connection: ^Connection, xdg_positioner: 
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_anchor_rect:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 xdg_positioner_set_anchor :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, anchor: Xdg_Positioner_Anchor) {
@@ -2489,6 +2595,7 @@ xdg_positioner_set_anchor :: proc(connection: ^Connection, xdg_positioner: Xdg_P
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	anchor := anchor
 	bytes.buffer_write_ptr(&connection.buffer, &anchor, size_of(anchor))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_anchor:", " anchor=", anchor)
 	return
 }
 xdg_positioner_set_gravity :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, gravity: Xdg_Positioner_Gravity) {
@@ -2500,6 +2607,7 @@ xdg_positioner_set_gravity :: proc(connection: ^Connection, xdg_positioner: Xdg_
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	gravity := gravity
 	bytes.buffer_write_ptr(&connection.buffer, &gravity, size_of(gravity))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_gravity:", " gravity=", gravity)
 	return
 }
 xdg_positioner_set_constraint_adjustment :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, constraint_adjustment: Xdg_Positioner_Constraint_Adjustment) {
@@ -2511,6 +2619,7 @@ xdg_positioner_set_constraint_adjustment :: proc(connection: ^Connection, xdg_po
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	constraint_adjustment := constraint_adjustment
 	bytes.buffer_write_ptr(&connection.buffer, &constraint_adjustment, size_of(constraint_adjustment))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_constraint_adjustment:", " constraint_adjustment=", constraint_adjustment)
 	return
 }
 xdg_positioner_set_offset :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, x: i32, y: i32) {
@@ -2524,6 +2633,7 @@ xdg_positioner_set_offset :: proc(connection: ^Connection, xdg_positioner: Xdg_P
 	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
 	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_offset:", " x=", x, " y=", y)
 	return
 }
 xdg_positioner_set_reactive :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner) {
@@ -2533,6 +2643,7 @@ xdg_positioner_set_reactive :: proc(connection: ^Connection, xdg_positioner: Xdg
 	opcode: u16 = 7
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_reactive:")
 	return
 }
 xdg_positioner_set_parent_size :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, parent_width: i32, parent_height: i32) {
@@ -2546,6 +2657,7 @@ xdg_positioner_set_parent_size :: proc(connection: ^Connection, xdg_positioner: 
 	bytes.buffer_write_ptr(&connection.buffer, &parent_width, size_of(parent_width))
 	parent_height := parent_height
 	bytes.buffer_write_ptr(&connection.buffer, &parent_height, size_of(parent_height))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_parent_size:", " parent_width=", parent_width, " parent_height=", parent_height)
 	return
 }
 xdg_positioner_set_parent_configure :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, serial: u32) {
@@ -2557,6 +2669,7 @@ xdg_positioner_set_parent_configure :: proc(connection: ^Connection, xdg_positio
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_parent_configure:", " serial=", serial)
 	return
 }
 xdg_surface_destroy :: proc(connection: ^Connection, xdg_surface: Xdg_Surface) {
@@ -2566,6 +2679,7 @@ xdg_surface_destroy :: proc(connection: ^Connection, xdg_surface: Xdg_Surface) {
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".destroy:")
 	return
 }
 xdg_surface_get_toplevel :: proc(connection: ^Connection, xdg_surface: Xdg_Surface) -> (id: Xdg_Toplevel) {
@@ -2577,6 +2691,7 @@ xdg_surface_get_toplevel :: proc(connection: ^Connection, xdg_surface: Xdg_Surfa
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Toplevel)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".get_toplevel:", " id=", id)
 	return
 }
 xdg_surface_get_popup :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, parent: Xdg_Surface, positioner: Xdg_Positioner) -> (id: Xdg_Popup) {
@@ -2592,6 +2707,7 @@ xdg_surface_get_popup :: proc(connection: ^Connection, xdg_surface: Xdg_Surface,
 	bytes.buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
 	positioner := positioner
 	bytes.buffer_write_ptr(&connection.buffer, &positioner, size_of(positioner))
+	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".get_popup:", " id=", id, " parent=", parent, " positioner=", positioner)
 	return
 }
 xdg_surface_set_window_geometry :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, x: i32, y: i32, width: i32, height: i32) {
@@ -2609,6 +2725,7 @@ xdg_surface_set_window_geometry :: proc(connection: ^Connection, xdg_surface: Xd
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".set_window_geometry:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 xdg_surface_ack_configure :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, serial: u32) {
@@ -2620,6 +2737,7 @@ xdg_surface_ack_configure :: proc(connection: ^Connection, xdg_surface: Xdg_Surf
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".ack_configure:", " serial=", serial)
 	return
 }
 xdg_toplevel_destroy :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
@@ -2629,6 +2747,7 @@ xdg_toplevel_destroy :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".destroy:")
 	return
 }
 xdg_toplevel_set_parent :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, parent: Xdg_Toplevel) {
@@ -2640,6 +2759,7 @@ xdg_toplevel_set_parent :: proc(connection: ^Connection, xdg_toplevel: Xdg_Tople
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	parent := parent
 	bytes.buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_parent:", " parent=", parent)
 	return
 }
 xdg_toplevel_set_title :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, title: string) {
@@ -2654,6 +2774,7 @@ xdg_toplevel_set_title :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplev
 	bytes.buffer_write_string(&connection.buffer, title)
 	for _ in len(title) ..< (len(title) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_title:", " title=", title)
 	return
 }
 xdg_toplevel_set_app_id :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, app_id: string) {
@@ -2668,6 +2789,7 @@ xdg_toplevel_set_app_id :: proc(connection: ^Connection, xdg_toplevel: Xdg_Tople
 	bytes.buffer_write_string(&connection.buffer, app_id)
 	for _ in len(app_id) ..< (len(app_id) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_app_id:", " app_id=", app_id)
 	return
 }
 xdg_toplevel_show_window_menu :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32, x: i32, y: i32) {
@@ -2685,6 +2807,7 @@ xdg_toplevel_show_window_menu :: proc(connection: ^Connection, xdg_toplevel: Xdg
 	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
 	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".show_window_menu:", " seat=", seat, " serial=", serial, " x=", x, " y=", y)
 	return
 }
 xdg_toplevel_move :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32) {
@@ -2698,6 +2821,7 @@ xdg_toplevel_move :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, s
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".move:", " seat=", seat, " serial=", serial)
 	return
 }
 xdg_toplevel_resize :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32, edges: Xdg_Toplevel_Resize_Edge) {
@@ -2713,6 +2837,7 @@ xdg_toplevel_resize :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel,
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	edges := edges
 	bytes.buffer_write_ptr(&connection.buffer, &edges, size_of(edges))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".resize:", " seat=", seat, " serial=", serial, " edges=", edges)
 	return
 }
 xdg_toplevel_set_max_size :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, width: i32, height: i32) {
@@ -2726,6 +2851,7 @@ xdg_toplevel_set_max_size :: proc(connection: ^Connection, xdg_toplevel: Xdg_Top
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_max_size:", " width=", width, " height=", height)
 	return
 }
 xdg_toplevel_set_min_size :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, width: i32, height: i32) {
@@ -2739,6 +2865,7 @@ xdg_toplevel_set_min_size :: proc(connection: ^Connection, xdg_toplevel: Xdg_Top
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_min_size:", " width=", width, " height=", height)
 	return
 }
 xdg_toplevel_set_maximized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
@@ -2748,6 +2875,7 @@ xdg_toplevel_set_maximized :: proc(connection: ^Connection, xdg_toplevel: Xdg_To
 	opcode: u16 = 9
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_maximized:")
 	return
 }
 xdg_toplevel_unset_maximized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
@@ -2757,6 +2885,7 @@ xdg_toplevel_unset_maximized :: proc(connection: ^Connection, xdg_toplevel: Xdg_
 	opcode: u16 = 10
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".unset_maximized:")
 	return
 }
 xdg_toplevel_set_fullscreen :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, output: Output) {
@@ -2768,6 +2897,7 @@ xdg_toplevel_set_fullscreen :: proc(connection: ^Connection, xdg_toplevel: Xdg_T
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	output := output
 	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_fullscreen:", " output=", output)
 	return
 }
 xdg_toplevel_unset_fullscreen :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
@@ -2777,6 +2907,7 @@ xdg_toplevel_unset_fullscreen :: proc(connection: ^Connection, xdg_toplevel: Xdg
 	opcode: u16 = 12
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".unset_fullscreen:")
 	return
 }
 xdg_toplevel_set_minimized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
@@ -2786,6 +2917,7 @@ xdg_toplevel_set_minimized :: proc(connection: ^Connection, xdg_toplevel: Xdg_To
 	opcode: u16 = 13
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_minimized:")
 	return
 }
 xdg_popup_destroy :: proc(connection: ^Connection, xdg_popup: Xdg_Popup) {
@@ -2795,6 +2927,7 @@ xdg_popup_destroy :: proc(connection: ^Connection, xdg_popup: Xdg_Popup) {
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_popup@", xdg_popup, ".destroy:")
 	return
 }
 xdg_popup_grab :: proc(connection: ^Connection, xdg_popup: Xdg_Popup, seat: Seat, serial: u32) {
@@ -2808,6 +2941,7 @@ xdg_popup_grab :: proc(connection: ^Connection, xdg_popup: Xdg_Popup, seat: Seat
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> xdg_popup@", xdg_popup, ".grab:", " seat=", seat, " serial=", serial)
 	return
 }
 xdg_popup_reposition :: proc(connection: ^Connection, xdg_popup: Xdg_Popup, positioner: Xdg_Positioner, token: u32) {
@@ -2821,6 +2955,7 @@ xdg_popup_reposition :: proc(connection: ^Connection, xdg_popup: Xdg_Popup, posi
 	bytes.buffer_write_ptr(&connection.buffer, &positioner, size_of(positioner))
 	token := token
 	bytes.buffer_write_ptr(&connection.buffer, &token, size_of(token))
+	_debug_log(connection, "-> xdg_popup@", xdg_popup, ".reposition:", " positioner=", positioner, " token=", token)
 	return
 }
 wp_alpha_modifier_v1_destroy :: proc(connection: ^Connection, wp_alpha_modifier_v1: Wp_Alpha_Modifier_V1) {
@@ -2830,6 +2965,7 @@ wp_alpha_modifier_v1_destroy :: proc(connection: ^Connection, wp_alpha_modifier_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_alpha_modifier_v1@", wp_alpha_modifier_v1, ".destroy:")
 	return
 }
 wp_alpha_modifier_v1_get_surface :: proc(connection: ^Connection, wp_alpha_modifier_v1: Wp_Alpha_Modifier_V1, surface: Surface) -> (id: Wp_Alpha_Modifier_Surface_V1) {
@@ -2843,6 +2979,7 @@ wp_alpha_modifier_v1_get_surface :: proc(connection: ^Connection, wp_alpha_modif
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_alpha_modifier_v1@", wp_alpha_modifier_v1, ".get_surface:", " id=", id, " surface=", surface)
 	return
 }
 wp_alpha_modifier_surface_v1_destroy :: proc(connection: ^Connection, wp_alpha_modifier_surface_v1: Wp_Alpha_Modifier_Surface_V1) {
@@ -2852,6 +2989,7 @@ wp_alpha_modifier_surface_v1_destroy :: proc(connection: ^Connection, wp_alpha_m
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_alpha_modifier_surface_v1@", wp_alpha_modifier_surface_v1, ".destroy:")
 	return
 }
 wp_alpha_modifier_surface_v1_set_multiplier :: proc(connection: ^Connection, wp_alpha_modifier_surface_v1: Wp_Alpha_Modifier_Surface_V1, factor: u32) {
@@ -2863,6 +3001,7 @@ wp_alpha_modifier_surface_v1_set_multiplier :: proc(connection: ^Connection, wp_
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	factor := factor
 	bytes.buffer_write_ptr(&connection.buffer, &factor, size_of(factor))
+	_debug_log(connection, "-> wp_alpha_modifier_surface_v1@", wp_alpha_modifier_surface_v1, ".set_multiplier:", " factor=", factor)
 	return
 }
 wp_color_manager_v1_destroy :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) {
@@ -2872,6 +3011,7 @@ wp_color_manager_v1_destroy :: proc(connection: ^Connection, wp_color_manager_v1
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".destroy:")
 	return
 }
 wp_color_manager_v1_get_output :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, output: Output) -> (id: Wp_Color_Management_Output_V1) {
@@ -2885,6 +3025,7 @@ wp_color_manager_v1_get_output :: proc(connection: ^Connection, wp_color_manager
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	output := output
 	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_output:", " id=", id, " output=", output)
 	return
 }
 wp_color_manager_v1_get_surface :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, surface: Surface) -> (id: Wp_Color_Management_Surface_V1) {
@@ -2898,6 +3039,7 @@ wp_color_manager_v1_get_surface :: proc(connection: ^Connection, wp_color_manage
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
 	return
 }
 wp_color_manager_v1_get_surface_feedback :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, surface: Surface) -> (id: Wp_Color_Management_Surface_Feedback_V1) {
@@ -2911,6 +3053,7 @@ wp_color_manager_v1_get_surface_feedback :: proc(connection: ^Connection, wp_col
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_surface_feedback:", " id=", id, " surface=", surface)
 	return
 }
 wp_color_manager_v1_create_icc_creator :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (obj: Wp_Image_Description_Creator_Icc_V1) {
@@ -2922,6 +3065,7 @@ wp_color_manager_v1_create_icc_creator :: proc(connection: ^Connection, wp_color
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	obj = auto_cast generate_id(connection, .Wp_Image_Description_Creator_Icc_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &obj, size_of(obj))
+	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_icc_creator:", " obj=", obj)
 	return
 }
 wp_color_manager_v1_create_parametric_creator :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (obj: Wp_Image_Description_Creator_Params_V1) {
@@ -2933,6 +3077,7 @@ wp_color_manager_v1_create_parametric_creator :: proc(connection: ^Connection, w
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	obj = auto_cast generate_id(connection, .Wp_Image_Description_Creator_Params_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &obj, size_of(obj))
+	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_parametric_creator:", " obj=", obj)
 	return
 }
 wp_color_manager_v1_create_windows_scrgb :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (image_description: Wp_Image_Description_V1) {
@@ -2944,6 +3089,7 @@ wp_color_manager_v1_create_windows_scrgb :: proc(connection: ^Connection, wp_col
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_windows_scrgb:", " image_description=", image_description)
 	return
 }
 wp_color_manager_v1_get_image_description :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, reference: Wp_Image_Description_Reference_V1) -> (image_description: Wp_Image_Description_V1) {
@@ -2957,6 +3103,7 @@ wp_color_manager_v1_get_image_description :: proc(connection: ^Connection, wp_co
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	reference := reference
 	bytes.buffer_write_ptr(&connection.buffer, &reference, size_of(reference))
+	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_image_description:", " image_description=", image_description, " reference=", reference)
 	return
 }
 wp_color_management_output_v1_destroy :: proc(connection: ^Connection, wp_color_management_output_v1: Wp_Color_Management_Output_V1) {
@@ -2966,6 +3113,7 @@ wp_color_management_output_v1_destroy :: proc(connection: ^Connection, wp_color_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_color_management_output_v1@", wp_color_management_output_v1, ".destroy:")
 	return
 }
 wp_color_management_output_v1_get_image_description :: proc(connection: ^Connection, wp_color_management_output_v1: Wp_Color_Management_Output_V1) -> (image_description: Wp_Image_Description_V1) {
@@ -2977,6 +3125,7 @@ wp_color_management_output_v1_get_image_description :: proc(connection: ^Connect
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_debug_log(connection, "-> wp_color_management_output_v1@", wp_color_management_output_v1, ".get_image_description:", " image_description=", image_description)
 	return
 }
 wp_color_management_surface_v1_destroy :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1) {
@@ -2986,6 +3135,7 @@ wp_color_management_surface_v1_destroy :: proc(connection: ^Connection, wp_color
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".destroy:")
 	return
 }
 wp_color_management_surface_v1_set_image_description :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1, image_description: Wp_Image_Description_V1, render_intent: Wp_Color_Manager_V1_Render_Intent) {
@@ -2999,6 +3149,7 @@ wp_color_management_surface_v1_set_image_description :: proc(connection: ^Connec
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	render_intent := render_intent
 	bytes.buffer_write_ptr(&connection.buffer, &render_intent, size_of(render_intent))
+	_debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".set_image_description:", " image_description=", image_description, " render_intent=", render_intent)
 	return
 }
 wp_color_management_surface_v1_unset_image_description :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1) {
@@ -3008,6 +3159,7 @@ wp_color_management_surface_v1_unset_image_description :: proc(connection: ^Conn
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".unset_image_description:")
 	return
 }
 wp_color_management_surface_feedback_v1_destroy :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) {
@@ -3017,6 +3169,7 @@ wp_color_management_surface_feedback_v1_destroy :: proc(connection: ^Connection,
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".destroy:")
 	return
 }
 wp_color_management_surface_feedback_v1_get_preferred :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) -> (image_description: Wp_Image_Description_V1) {
@@ -3028,6 +3181,7 @@ wp_color_management_surface_feedback_v1_get_preferred :: proc(connection: ^Conne
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".get_preferred:", " image_description=", image_description)
 	return
 }
 wp_color_management_surface_feedback_v1_get_preferred_parametric :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) -> (image_description: Wp_Image_Description_V1) {
@@ -3039,6 +3193,7 @@ wp_color_management_surface_feedback_v1_get_preferred_parametric :: proc(connect
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".get_preferred_parametric:", " image_description=", image_description)
 	return
 }
 wp_image_description_creator_icc_v1_create :: proc(connection: ^Connection, wp_image_description_creator_icc_v1: Wp_Image_Description_Creator_Icc_V1) -> (image_description: Wp_Image_Description_V1) {
@@ -3050,6 +3205,7 @@ wp_image_description_creator_icc_v1_create :: proc(connection: ^Connection, wp_i
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_debug_log(connection, "-> wp_image_description_creator_icc_v1@", wp_image_description_creator_icc_v1, ".create:", " image_description=", image_description)
 	return
 }
 wp_image_description_creator_icc_v1_set_icc_file :: proc(connection: ^Connection, wp_image_description_creator_icc_v1: Wp_Image_Description_Creator_Icc_V1, icc_profile: Fd, offset: u32, length: u32) {
@@ -3064,6 +3220,7 @@ wp_image_description_creator_icc_v1_set_icc_file :: proc(connection: ^Connection
 	bytes.buffer_write_ptr(&connection.buffer, &offset, size_of(offset))
 	length := length
 	bytes.buffer_write_ptr(&connection.buffer, &length, size_of(length))
+	_debug_log(connection, "-> wp_image_description_creator_icc_v1@", wp_image_description_creator_icc_v1, ".set_icc_file:", " icc_profile=", icc_profile, " offset=", offset, " length=", length)
 	return
 }
 wp_image_description_creator_params_v1_create :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1) -> (image_description: Wp_Image_Description_V1) {
@@ -3075,6 +3232,7 @@ wp_image_description_creator_params_v1_create :: proc(connection: ^Connection, w
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".create:", " image_description=", image_description)
 	return
 }
 wp_image_description_creator_params_v1_set_tf_named :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, tf: Wp_Color_Manager_V1_Transfer_Function) {
@@ -3086,6 +3244,7 @@ wp_image_description_creator_params_v1_set_tf_named :: proc(connection: ^Connect
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	tf := tf
 	bytes.buffer_write_ptr(&connection.buffer, &tf, size_of(tf))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_tf_named:", " tf=", tf)
 	return
 }
 wp_image_description_creator_params_v1_set_tf_power :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, eexp: u32) {
@@ -3097,6 +3256,7 @@ wp_image_description_creator_params_v1_set_tf_power :: proc(connection: ^Connect
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	eexp := eexp
 	bytes.buffer_write_ptr(&connection.buffer, &eexp, size_of(eexp))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_tf_power:", " eexp=", eexp)
 	return
 }
 wp_image_description_creator_params_v1_set_primaries_named :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, primaries: Wp_Color_Manager_V1_Primaries) {
@@ -3108,6 +3268,7 @@ wp_image_description_creator_params_v1_set_primaries_named :: proc(connection: ^
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	primaries := primaries
 	bytes.buffer_write_ptr(&connection.buffer, &primaries, size_of(primaries))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_primaries_named:", " primaries=", primaries)
 	return
 }
 wp_image_description_creator_params_v1_set_primaries :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, r_x: i32, r_y: i32, g_x: i32, g_y: i32, b_x: i32, b_y: i32, w_x: i32, w_y: i32) {
@@ -3133,6 +3294,7 @@ wp_image_description_creator_params_v1_set_primaries :: proc(connection: ^Connec
 	bytes.buffer_write_ptr(&connection.buffer, &w_x, size_of(w_x))
 	w_y := w_y
 	bytes.buffer_write_ptr(&connection.buffer, &w_y, size_of(w_y))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_primaries:", " r_x=", r_x, " r_y=", r_y, " g_x=", g_x, " g_y=", g_y, " b_x=", b_x, " b_y=", b_y, " w_x=", w_x, " w_y=", w_y)
 	return
 }
 wp_image_description_creator_params_v1_set_luminances :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, min_lum: u32, max_lum: u32, reference_lum: u32) {
@@ -3148,6 +3310,7 @@ wp_image_description_creator_params_v1_set_luminances :: proc(connection: ^Conne
 	bytes.buffer_write_ptr(&connection.buffer, &max_lum, size_of(max_lum))
 	reference_lum := reference_lum
 	bytes.buffer_write_ptr(&connection.buffer, &reference_lum, size_of(reference_lum))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_luminances:", " min_lum=", min_lum, " max_lum=", max_lum, " reference_lum=", reference_lum)
 	return
 }
 wp_image_description_creator_params_v1_set_mastering_display_primaries :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, r_x: i32, r_y: i32, g_x: i32, g_y: i32, b_x: i32, b_y: i32, w_x: i32, w_y: i32) {
@@ -3173,6 +3336,7 @@ wp_image_description_creator_params_v1_set_mastering_display_primaries :: proc(c
 	bytes.buffer_write_ptr(&connection.buffer, &w_x, size_of(w_x))
 	w_y := w_y
 	bytes.buffer_write_ptr(&connection.buffer, &w_y, size_of(w_y))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_mastering_display_primaries:", " r_x=", r_x, " r_y=", r_y, " g_x=", g_x, " g_y=", g_y, " b_x=", b_x, " b_y=", b_y, " w_x=", w_x, " w_y=", w_y)
 	return
 }
 wp_image_description_creator_params_v1_set_mastering_luminance :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, min_lum: u32, max_lum: u32) {
@@ -3186,6 +3350,7 @@ wp_image_description_creator_params_v1_set_mastering_luminance :: proc(connectio
 	bytes.buffer_write_ptr(&connection.buffer, &min_lum, size_of(min_lum))
 	max_lum := max_lum
 	bytes.buffer_write_ptr(&connection.buffer, &max_lum, size_of(max_lum))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_mastering_luminance:", " min_lum=", min_lum, " max_lum=", max_lum)
 	return
 }
 wp_image_description_creator_params_v1_set_max_cll :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, max_cll: u32) {
@@ -3197,6 +3362,7 @@ wp_image_description_creator_params_v1_set_max_cll :: proc(connection: ^Connecti
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	max_cll := max_cll
 	bytes.buffer_write_ptr(&connection.buffer, &max_cll, size_of(max_cll))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_max_cll:", " max_cll=", max_cll)
 	return
 }
 wp_image_description_creator_params_v1_set_max_fall :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, max_fall: u32) {
@@ -3208,6 +3374,7 @@ wp_image_description_creator_params_v1_set_max_fall :: proc(connection: ^Connect
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	max_fall := max_fall
 	bytes.buffer_write_ptr(&connection.buffer, &max_fall, size_of(max_fall))
+	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_max_fall:", " max_fall=", max_fall)
 	return
 }
 wp_image_description_v1_destroy :: proc(connection: ^Connection, wp_image_description_v1: Wp_Image_Description_V1) {
@@ -3217,6 +3384,7 @@ wp_image_description_v1_destroy :: proc(connection: ^Connection, wp_image_descri
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_image_description_v1@", wp_image_description_v1, ".destroy:")
 	return
 }
 wp_image_description_v1_get_information :: proc(connection: ^Connection, wp_image_description_v1: Wp_Image_Description_V1) -> (information: Wp_Image_Description_Info_V1) {
@@ -3228,6 +3396,7 @@ wp_image_description_v1_get_information :: proc(connection: ^Connection, wp_imag
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	information = auto_cast generate_id(connection, .Wp_Image_Description_Info_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &information, size_of(information))
+	_debug_log(connection, "-> wp_image_description_v1@", wp_image_description_v1, ".get_information:", " information=", information)
 	return
 }
 wp_image_description_reference_v1_destroy :: proc(connection: ^Connection, wp_image_description_reference_v1: Wp_Image_Description_Reference_V1) {
@@ -3237,6 +3406,7 @@ wp_image_description_reference_v1_destroy :: proc(connection: ^Connection, wp_im
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_image_description_reference_v1@", wp_image_description_reference_v1, ".destroy:")
 	return
 }
 wp_color_representation_manager_v1_destroy :: proc(connection: ^Connection, wp_color_representation_manager_v1: Wp_Color_Representation_Manager_V1) {
@@ -3246,6 +3416,7 @@ wp_color_representation_manager_v1_destroy :: proc(connection: ^Connection, wp_c
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_color_representation_manager_v1@", wp_color_representation_manager_v1, ".destroy:")
 	return
 }
 wp_color_representation_manager_v1_get_surface :: proc(connection: ^Connection, wp_color_representation_manager_v1: Wp_Color_Representation_Manager_V1, surface: Surface) -> (id: Wp_Color_Representation_Surface_V1) {
@@ -3259,6 +3430,7 @@ wp_color_representation_manager_v1_get_surface :: proc(connection: ^Connection, 
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_color_representation_manager_v1@", wp_color_representation_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
 	return
 }
 wp_color_representation_surface_v1_destroy :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1) {
@@ -3268,6 +3440,7 @@ wp_color_representation_surface_v1_destroy :: proc(connection: ^Connection, wp_c
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".destroy:")
 	return
 }
 wp_color_representation_surface_v1_set_alpha_mode :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, alpha_mode: Wp_Color_Representation_Surface_V1_Alpha_Mode) {
@@ -3279,6 +3452,7 @@ wp_color_representation_surface_v1_set_alpha_mode :: proc(connection: ^Connectio
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	alpha_mode := alpha_mode
 	bytes.buffer_write_ptr(&connection.buffer, &alpha_mode, size_of(alpha_mode))
+	_debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_alpha_mode:", " alpha_mode=", alpha_mode)
 	return
 }
 wp_color_representation_surface_v1_set_coefficients_and_range :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, coefficients: Wp_Color_Representation_Surface_V1_Coefficients, range: Wp_Color_Representation_Surface_V1_Range) {
@@ -3292,6 +3466,7 @@ wp_color_representation_surface_v1_set_coefficients_and_range :: proc(connection
 	bytes.buffer_write_ptr(&connection.buffer, &coefficients, size_of(coefficients))
 	range := range
 	bytes.buffer_write_ptr(&connection.buffer, &range, size_of(range))
+	_debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_coefficients_and_range:", " coefficients=", coefficients, " range=", range)
 	return
 }
 wp_color_representation_surface_v1_set_chroma_location :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, chroma_location: Wp_Color_Representation_Surface_V1_Chroma_Location) {
@@ -3303,6 +3478,7 @@ wp_color_representation_surface_v1_set_chroma_location :: proc(connection: ^Conn
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	chroma_location := chroma_location
 	bytes.buffer_write_ptr(&connection.buffer, &chroma_location, size_of(chroma_location))
+	_debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_chroma_location:", " chroma_location=", chroma_location)
 	return
 }
 wp_commit_timing_manager_v1_destroy :: proc(connection: ^Connection, wp_commit_timing_manager_v1: Wp_Commit_Timing_Manager_V1) {
@@ -3312,6 +3488,7 @@ wp_commit_timing_manager_v1_destroy :: proc(connection: ^Connection, wp_commit_t
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_commit_timing_manager_v1@", wp_commit_timing_manager_v1, ".destroy:")
 	return
 }
 wp_commit_timing_manager_v1_get_timer :: proc(connection: ^Connection, wp_commit_timing_manager_v1: Wp_Commit_Timing_Manager_V1, surface: Surface) -> (id: Wp_Commit_Timer_V1) {
@@ -3325,6 +3502,7 @@ wp_commit_timing_manager_v1_get_timer :: proc(connection: ^Connection, wp_commit
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_commit_timing_manager_v1@", wp_commit_timing_manager_v1, ".get_timer:", " id=", id, " surface=", surface)
 	return
 }
 wp_commit_timer_v1_set_timestamp :: proc(connection: ^Connection, wp_commit_timer_v1: Wp_Commit_Timer_V1, tv_sec_hi: u32, tv_sec_lo: u32, tv_nsec: u32) {
@@ -3340,6 +3518,7 @@ wp_commit_timer_v1_set_timestamp :: proc(connection: ^Connection, wp_commit_time
 	bytes.buffer_write_ptr(&connection.buffer, &tv_sec_lo, size_of(tv_sec_lo))
 	tv_nsec := tv_nsec
 	bytes.buffer_write_ptr(&connection.buffer, &tv_nsec, size_of(tv_nsec))
+	_debug_log(connection, "-> wp_commit_timer_v1@", wp_commit_timer_v1, ".set_timestamp:", " tv_sec_hi=", tv_sec_hi, " tv_sec_lo=", tv_sec_lo, " tv_nsec=", tv_nsec)
 	return
 }
 wp_commit_timer_v1_destroy :: proc(connection: ^Connection, wp_commit_timer_v1: Wp_Commit_Timer_V1) {
@@ -3349,6 +3528,7 @@ wp_commit_timer_v1_destroy :: proc(connection: ^Connection, wp_commit_timer_v1: 
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_commit_timer_v1@", wp_commit_timer_v1, ".destroy:")
 	return
 }
 wp_content_type_manager_v1_destroy :: proc(connection: ^Connection, wp_content_type_manager_v1: Wp_Content_Type_Manager_V1) {
@@ -3358,6 +3538,7 @@ wp_content_type_manager_v1_destroy :: proc(connection: ^Connection, wp_content_t
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_content_type_manager_v1@", wp_content_type_manager_v1, ".destroy:")
 	return
 }
 wp_content_type_manager_v1_get_surface_content_type :: proc(connection: ^Connection, wp_content_type_manager_v1: Wp_Content_Type_Manager_V1, surface: Surface) -> (id: Wp_Content_Type_V1) {
@@ -3371,6 +3552,7 @@ wp_content_type_manager_v1_get_surface_content_type :: proc(connection: ^Connect
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_content_type_manager_v1@", wp_content_type_manager_v1, ".get_surface_content_type:", " id=", id, " surface=", surface)
 	return
 }
 wp_content_type_v1_destroy :: proc(connection: ^Connection, wp_content_type_v1: Wp_Content_Type_V1) {
@@ -3380,6 +3562,7 @@ wp_content_type_v1_destroy :: proc(connection: ^Connection, wp_content_type_v1: 
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_content_type_v1@", wp_content_type_v1, ".destroy:")
 	return
 }
 wp_content_type_v1_set_content_type :: proc(connection: ^Connection, wp_content_type_v1: Wp_Content_Type_V1, content_type: Wp_Content_Type_V1_Type) {
@@ -3391,6 +3574,7 @@ wp_content_type_v1_set_content_type :: proc(connection: ^Connection, wp_content_
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	content_type := content_type
 	bytes.buffer_write_ptr(&connection.buffer, &content_type, size_of(content_type))
+	_debug_log(connection, "-> wp_content_type_v1@", wp_content_type_v1, ".set_content_type:", " content_type=", content_type)
 	return
 }
 wp_cursor_shape_manager_v1_destroy :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1) {
@@ -3400,6 +3584,7 @@ wp_cursor_shape_manager_v1_destroy :: proc(connection: ^Connection, wp_cursor_sh
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".destroy:")
 	return
 }
 wp_cursor_shape_manager_v1_get_pointer :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1, pointer: Pointer) -> (cursor_shape_device: Wp_Cursor_Shape_Device_V1) {
@@ -3413,6 +3598,7 @@ wp_cursor_shape_manager_v1_get_pointer :: proc(connection: ^Connection, wp_curso
 	bytes.buffer_write_ptr(&connection.buffer, &cursor_shape_device, size_of(cursor_shape_device))
 	pointer := pointer
 	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
+	_debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".get_pointer:", " cursor_shape_device=", cursor_shape_device, " pointer=", pointer)
 	return
 }
 wp_cursor_shape_manager_v1_get_tablet_tool_v2 :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1, tablet_tool: Zwp_Tablet_Tool_V2) -> (cursor_shape_device: Wp_Cursor_Shape_Device_V1) {
@@ -3426,6 +3612,7 @@ wp_cursor_shape_manager_v1_get_tablet_tool_v2 :: proc(connection: ^Connection, w
 	bytes.buffer_write_ptr(&connection.buffer, &cursor_shape_device, size_of(cursor_shape_device))
 	tablet_tool := tablet_tool
 	bytes.buffer_write_ptr(&connection.buffer, &tablet_tool, size_of(tablet_tool))
+	_debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".get_tablet_tool_v2:", " cursor_shape_device=", cursor_shape_device, " tablet_tool=", tablet_tool)
 	return
 }
 wp_cursor_shape_device_v1_destroy :: proc(connection: ^Connection, wp_cursor_shape_device_v1: Wp_Cursor_Shape_Device_V1) {
@@ -3435,6 +3622,7 @@ wp_cursor_shape_device_v1_destroy :: proc(connection: ^Connection, wp_cursor_sha
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_cursor_shape_device_v1@", wp_cursor_shape_device_v1, ".destroy:")
 	return
 }
 wp_cursor_shape_device_v1_set_shape :: proc(connection: ^Connection, wp_cursor_shape_device_v1: Wp_Cursor_Shape_Device_V1, serial: u32, shape: Wp_Cursor_Shape_Device_V1_Shape) {
@@ -3448,6 +3636,7 @@ wp_cursor_shape_device_v1_set_shape :: proc(connection: ^Connection, wp_cursor_s
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	shape := shape
 	bytes.buffer_write_ptr(&connection.buffer, &shape, size_of(shape))
+	_debug_log(connection, "-> wp_cursor_shape_device_v1@", wp_cursor_shape_device_v1, ".set_shape:", " serial=", serial, " shape=", shape)
 	return
 }
 wp_drm_lease_device_v1_create_lease_request :: proc(connection: ^Connection, wp_drm_lease_device_v1: Wp_Drm_Lease_Device_V1) -> (id: Wp_Drm_Lease_Request_V1) {
@@ -3459,6 +3648,7 @@ wp_drm_lease_device_v1_create_lease_request :: proc(connection: ^Connection, wp_
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Drm_Lease_Request_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wp_drm_lease_device_v1@", wp_drm_lease_device_v1, ".create_lease_request:", " id=", id)
 	return
 }
 wp_drm_lease_device_v1_release :: proc(connection: ^Connection, wp_drm_lease_device_v1: Wp_Drm_Lease_Device_V1) {
@@ -3468,6 +3658,7 @@ wp_drm_lease_device_v1_release :: proc(connection: ^Connection, wp_drm_lease_dev
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_drm_lease_device_v1@", wp_drm_lease_device_v1, ".release:")
 	return
 }
 wp_drm_lease_connector_v1_destroy :: proc(connection: ^Connection, wp_drm_lease_connector_v1: Wp_Drm_Lease_Connector_V1) {
@@ -3477,6 +3668,7 @@ wp_drm_lease_connector_v1_destroy :: proc(connection: ^Connection, wp_drm_lease_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_drm_lease_connector_v1@", wp_drm_lease_connector_v1, ".destroy:")
 	return
 }
 wp_drm_lease_request_v1_request_connector :: proc(connection: ^Connection, wp_drm_lease_request_v1: Wp_Drm_Lease_Request_V1, connector: Wp_Drm_Lease_Connector_V1) {
@@ -3488,6 +3680,7 @@ wp_drm_lease_request_v1_request_connector :: proc(connection: ^Connection, wp_dr
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	connector := connector
 	bytes.buffer_write_ptr(&connection.buffer, &connector, size_of(connector))
+	_debug_log(connection, "-> wp_drm_lease_request_v1@", wp_drm_lease_request_v1, ".request_connector:", " connector=", connector)
 	return
 }
 wp_drm_lease_request_v1_submit :: proc(connection: ^Connection, wp_drm_lease_request_v1: Wp_Drm_Lease_Request_V1) -> (id: Wp_Drm_Lease_V1) {
@@ -3499,6 +3692,7 @@ wp_drm_lease_request_v1_submit :: proc(connection: ^Connection, wp_drm_lease_req
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Drm_Lease_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> wp_drm_lease_request_v1@", wp_drm_lease_request_v1, ".submit:", " id=", id)
 	return
 }
 wp_drm_lease_v1_destroy :: proc(connection: ^Connection, wp_drm_lease_v1: Wp_Drm_Lease_V1) {
@@ -3508,6 +3702,7 @@ wp_drm_lease_v1_destroy :: proc(connection: ^Connection, wp_drm_lease_v1: Wp_Drm
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_drm_lease_v1@", wp_drm_lease_v1, ".destroy:")
 	return
 }
 ext_background_effect_manager_v1_destroy :: proc(connection: ^Connection, ext_background_effect_manager_v1: Ext_Background_Effect_Manager_V1) {
@@ -3517,6 +3712,7 @@ ext_background_effect_manager_v1_destroy :: proc(connection: ^Connection, ext_ba
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_background_effect_manager_v1@", ext_background_effect_manager_v1, ".destroy:")
 	return
 }
 ext_background_effect_manager_v1_get_background_effect :: proc(connection: ^Connection, ext_background_effect_manager_v1: Ext_Background_Effect_Manager_V1, surface: Surface) -> (id: Ext_Background_Effect_Surface_V1) {
@@ -3530,6 +3726,7 @@ ext_background_effect_manager_v1_get_background_effect :: proc(connection: ^Conn
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> ext_background_effect_manager_v1@", ext_background_effect_manager_v1, ".get_background_effect:", " id=", id, " surface=", surface)
 	return
 }
 ext_background_effect_surface_v1_destroy :: proc(connection: ^Connection, ext_background_effect_surface_v1: Ext_Background_Effect_Surface_V1) {
@@ -3539,6 +3736,7 @@ ext_background_effect_surface_v1_destroy :: proc(connection: ^Connection, ext_ba
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_background_effect_surface_v1@", ext_background_effect_surface_v1, ".destroy:")
 	return
 }
 ext_background_effect_surface_v1_set_blur_region :: proc(connection: ^Connection, ext_background_effect_surface_v1: Ext_Background_Effect_Surface_V1, region: Region) {
@@ -3550,6 +3748,7 @@ ext_background_effect_surface_v1_set_blur_region :: proc(connection: ^Connection
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	region := region
 	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_debug_log(connection, "-> ext_background_effect_surface_v1@", ext_background_effect_surface_v1, ".set_blur_region:", " region=", region)
 	return
 }
 ext_data_control_manager_v1_create_data_source :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1) -> (id: Ext_Data_Control_Source_V1) {
@@ -3561,6 +3760,7 @@ ext_data_control_manager_v1_create_data_source :: proc(connection: ^Connection, 
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Data_Control_Source_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".create_data_source:", " id=", id)
 	return
 }
 ext_data_control_manager_v1_get_data_device :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1, seat: Seat) -> (id: Ext_Data_Control_Device_V1) {
@@ -3574,6 +3774,7 @@ ext_data_control_manager_v1_get_data_device :: proc(connection: ^Connection, ext
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	seat := seat
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".get_data_device:", " id=", id, " seat=", seat)
 	return
 }
 ext_data_control_manager_v1_destroy :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1) {
@@ -3583,6 +3784,7 @@ ext_data_control_manager_v1_destroy :: proc(connection: ^Connection, ext_data_co
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".destroy:")
 	return
 }
 ext_data_control_device_v1_set_selection :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1, source: Ext_Data_Control_Source_V1) {
@@ -3594,6 +3796,7 @@ ext_data_control_device_v1_set_selection :: proc(connection: ^Connection, ext_da
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	source := source
 	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".set_selection:", " source=", source)
 	return
 }
 ext_data_control_device_v1_destroy :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1) {
@@ -3603,6 +3806,7 @@ ext_data_control_device_v1_destroy :: proc(connection: ^Connection, ext_data_con
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".destroy:")
 	return
 }
 ext_data_control_device_v1_set_primary_selection :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1, source: Ext_Data_Control_Source_V1) {
@@ -3614,6 +3818,7 @@ ext_data_control_device_v1_set_primary_selection :: proc(connection: ^Connection
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	source := source
 	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".set_primary_selection:", " source=", source)
 	return
 }
 ext_data_control_source_v1_offer :: proc(connection: ^Connection, ext_data_control_source_v1: Ext_Data_Control_Source_V1, mime_type: string) {
@@ -3628,6 +3833,7 @@ ext_data_control_source_v1_offer :: proc(connection: ^Connection, ext_data_contr
 	bytes.buffer_write_string(&connection.buffer, mime_type)
 	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> ext_data_control_source_v1@", ext_data_control_source_v1, ".offer:", " mime_type=", mime_type)
 	return
 }
 ext_data_control_source_v1_destroy :: proc(connection: ^Connection, ext_data_control_source_v1: Ext_Data_Control_Source_V1) {
@@ -3637,6 +3843,7 @@ ext_data_control_source_v1_destroy :: proc(connection: ^Connection, ext_data_con
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_data_control_source_v1@", ext_data_control_source_v1, ".destroy:")
 	return
 }
 ext_data_control_offer_v1_receive :: proc(connection: ^Connection, ext_data_control_offer_v1: Ext_Data_Control_Offer_V1, mime_type: string, fd: Fd) {
@@ -3652,6 +3859,7 @@ ext_data_control_offer_v1_receive :: proc(connection: ^Connection, ext_data_cont
 	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
 	append(&connection.fds_out, fd)
+	_debug_log(connection, "-> ext_data_control_offer_v1@", ext_data_control_offer_v1, ".receive:", " mime_type=", mime_type, " fd=", fd)
 	return
 }
 ext_data_control_offer_v1_destroy :: proc(connection: ^Connection, ext_data_control_offer_v1: Ext_Data_Control_Offer_V1) {
@@ -3661,6 +3869,7 @@ ext_data_control_offer_v1_destroy :: proc(connection: ^Connection, ext_data_cont
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_data_control_offer_v1@", ext_data_control_offer_v1, ".destroy:")
 	return
 }
 ext_foreign_toplevel_list_v1_stop :: proc(connection: ^Connection, ext_foreign_toplevel_list_v1: Ext_Foreign_Toplevel_List_V1) {
@@ -3670,6 +3879,7 @@ ext_foreign_toplevel_list_v1_stop :: proc(connection: ^Connection, ext_foreign_t
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_foreign_toplevel_list_v1@", ext_foreign_toplevel_list_v1, ".stop:")
 	return
 }
 ext_foreign_toplevel_list_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_list_v1: Ext_Foreign_Toplevel_List_V1) {
@@ -3679,6 +3889,7 @@ ext_foreign_toplevel_list_v1_destroy :: proc(connection: ^Connection, ext_foreig
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_foreign_toplevel_list_v1@", ext_foreign_toplevel_list_v1, ".destroy:")
 	return
 }
 ext_foreign_toplevel_handle_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_handle_v1: Ext_Foreign_Toplevel_Handle_V1) {
@@ -3688,6 +3899,7 @@ ext_foreign_toplevel_handle_v1_destroy :: proc(connection: ^Connection, ext_fore
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_foreign_toplevel_handle_v1@", ext_foreign_toplevel_handle_v1, ".destroy:")
 	return
 }
 ext_idle_notifier_v1_destroy :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1) {
@@ -3697,6 +3909,7 @@ ext_idle_notifier_v1_destroy :: proc(connection: ^Connection, ext_idle_notifier_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".destroy:")
 	return
 }
 ext_idle_notifier_v1_get_idle_notification :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1, timeout: u32, seat: Seat) -> (id: Ext_Idle_Notification_V1) {
@@ -3712,6 +3925,7 @@ ext_idle_notifier_v1_get_idle_notification :: proc(connection: ^Connection, ext_
 	bytes.buffer_write_ptr(&connection.buffer, &timeout, size_of(timeout))
 	seat := seat
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".get_idle_notification:", " id=", id, " timeout=", timeout, " seat=", seat)
 	return
 }
 ext_idle_notifier_v1_get_input_idle_notification :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1, timeout: u32, seat: Seat) -> (id: Ext_Idle_Notification_V1) {
@@ -3727,6 +3941,7 @@ ext_idle_notifier_v1_get_input_idle_notification :: proc(connection: ^Connection
 	bytes.buffer_write_ptr(&connection.buffer, &timeout, size_of(timeout))
 	seat := seat
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".get_input_idle_notification:", " id=", id, " timeout=", timeout, " seat=", seat)
 	return
 }
 ext_idle_notification_v1_destroy :: proc(connection: ^Connection, ext_idle_notification_v1: Ext_Idle_Notification_V1) {
@@ -3736,6 +3951,7 @@ ext_idle_notification_v1_destroy :: proc(connection: ^Connection, ext_idle_notif
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_idle_notification_v1@", ext_idle_notification_v1, ".destroy:")
 	return
 }
 ext_image_capture_source_v1_destroy :: proc(connection: ^Connection, ext_image_capture_source_v1: Ext_Image_Capture_Source_V1) {
@@ -3745,6 +3961,7 @@ ext_image_capture_source_v1_destroy :: proc(connection: ^Connection, ext_image_c
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_image_capture_source_v1@", ext_image_capture_source_v1, ".destroy:")
 	return
 }
 ext_output_image_capture_source_manager_v1_create_source :: proc(connection: ^Connection, ext_output_image_capture_source_manager_v1: Ext_Output_Image_Capture_Source_Manager_V1, output: Output) -> (source: Ext_Image_Capture_Source_V1) {
@@ -3758,6 +3975,7 @@ ext_output_image_capture_source_manager_v1_create_source :: proc(connection: ^Co
 	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	output := output
 	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_debug_log(connection, "-> ext_output_image_capture_source_manager_v1@", ext_output_image_capture_source_manager_v1, ".create_source:", " source=", source, " output=", output)
 	return
 }
 ext_output_image_capture_source_manager_v1_destroy :: proc(connection: ^Connection, ext_output_image_capture_source_manager_v1: Ext_Output_Image_Capture_Source_Manager_V1) {
@@ -3767,6 +3985,7 @@ ext_output_image_capture_source_manager_v1_destroy :: proc(connection: ^Connecti
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_output_image_capture_source_manager_v1@", ext_output_image_capture_source_manager_v1, ".destroy:")
 	return
 }
 ext_foreign_toplevel_image_capture_source_manager_v1_create_source :: proc(connection: ^Connection, ext_foreign_toplevel_image_capture_source_manager_v1: Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1, toplevel_handle: Ext_Foreign_Toplevel_Handle_V1) -> (source: Ext_Image_Capture_Source_V1) {
@@ -3780,6 +3999,7 @@ ext_foreign_toplevel_image_capture_source_manager_v1_create_source :: proc(conne
 	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	toplevel_handle := toplevel_handle
 	bytes.buffer_write_ptr(&connection.buffer, &toplevel_handle, size_of(toplevel_handle))
+	_debug_log(connection, "-> ext_foreign_toplevel_image_capture_source_manager_v1@", ext_foreign_toplevel_image_capture_source_manager_v1, ".create_source:", " source=", source, " toplevel_handle=", toplevel_handle)
 	return
 }
 ext_foreign_toplevel_image_capture_source_manager_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_image_capture_source_manager_v1: Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1) {
@@ -3789,6 +4009,7 @@ ext_foreign_toplevel_image_capture_source_manager_v1_destroy :: proc(connection:
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_foreign_toplevel_image_capture_source_manager_v1@", ext_foreign_toplevel_image_capture_source_manager_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_manager_v1_create_session :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1, source: Ext_Image_Capture_Source_V1, options: Ext_Image_Copy_Capture_Manager_V1_Options) -> (session: Ext_Image_Copy_Capture_Session_V1) {
@@ -3804,6 +4025,7 @@ ext_image_copy_capture_manager_v1_create_session :: proc(connection: ^Connection
 	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	options := options
 	bytes.buffer_write_ptr(&connection.buffer, &options, size_of(options))
+	_debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".create_session:", " session=", session, " source=", source, " options=", options)
 	return
 }
 ext_image_copy_capture_manager_v1_create_pointer_cursor_session :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1, source: Ext_Image_Capture_Source_V1, pointer: Pointer) -> (session: Ext_Image_Copy_Capture_Cursor_Session_V1) {
@@ -3819,6 +4041,7 @@ ext_image_copy_capture_manager_v1_create_pointer_cursor_session :: proc(connecti
 	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	pointer := pointer
 	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
+	_debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".create_pointer_cursor_session:", " session=", session, " source=", source, " pointer=", pointer)
 	return
 }
 ext_image_copy_capture_manager_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1) {
@@ -3828,6 +4051,7 @@ ext_image_copy_capture_manager_v1_destroy :: proc(connection: ^Connection, ext_i
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_session_v1_create_frame :: proc(connection: ^Connection, ext_image_copy_capture_session_v1: Ext_Image_Copy_Capture_Session_V1) -> (frame: Ext_Image_Copy_Capture_Frame_V1) {
@@ -3839,6 +4063,7 @@ ext_image_copy_capture_session_v1_create_frame :: proc(connection: ^Connection, 
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	frame = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Frame_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &frame, size_of(frame))
+	_debug_log(connection, "-> ext_image_copy_capture_session_v1@", ext_image_copy_capture_session_v1, ".create_frame:", " frame=", frame)
 	return
 }
 ext_image_copy_capture_session_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_session_v1: Ext_Image_Copy_Capture_Session_V1) {
@@ -3848,6 +4073,7 @@ ext_image_copy_capture_session_v1_destroy :: proc(connection: ^Connection, ext_i
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_image_copy_capture_session_v1@", ext_image_copy_capture_session_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_frame_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1) {
@@ -3857,6 +4083,7 @@ ext_image_copy_capture_frame_v1_destroy :: proc(connection: ^Connection, ext_ima
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_frame_v1_attach_buffer :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1, buffer: Buffer) {
@@ -3868,6 +4095,7 @@ ext_image_copy_capture_frame_v1_attach_buffer :: proc(connection: ^Connection, e
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	buffer := buffer
 	bytes.buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
+	_debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".attach_buffer:", " buffer=", buffer)
 	return
 }
 ext_image_copy_capture_frame_v1_damage_buffer :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1, x: i32, y: i32, width: i32, height: i32) {
@@ -3885,6 +4113,7 @@ ext_image_copy_capture_frame_v1_damage_buffer :: proc(connection: ^Connection, e
 	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
 	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".damage_buffer:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 ext_image_copy_capture_frame_v1_capture :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1) {
@@ -3894,6 +4123,7 @@ ext_image_copy_capture_frame_v1_capture :: proc(connection: ^Connection, ext_ima
 	opcode: u16 = 3
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".capture:")
 	return
 }
 ext_image_copy_capture_cursor_session_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_cursor_session_v1: Ext_Image_Copy_Capture_Cursor_Session_V1) {
@@ -3903,6 +4133,7 @@ ext_image_copy_capture_cursor_session_v1_destroy :: proc(connection: ^Connection
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_image_copy_capture_cursor_session_v1@", ext_image_copy_capture_cursor_session_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_cursor_session_v1_get_capture_session :: proc(connection: ^Connection, ext_image_copy_capture_cursor_session_v1: Ext_Image_Copy_Capture_Cursor_Session_V1) -> (session: Ext_Image_Copy_Capture_Session_V1) {
@@ -3914,6 +4145,7 @@ ext_image_copy_capture_cursor_session_v1_get_capture_session :: proc(connection:
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	session = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Session_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &session, size_of(session))
+	_debug_log(connection, "-> ext_image_copy_capture_cursor_session_v1@", ext_image_copy_capture_cursor_session_v1, ".get_capture_session:", " session=", session)
 	return
 }
 ext_session_lock_manager_v1_destroy :: proc(connection: ^Connection, ext_session_lock_manager_v1: Ext_Session_Lock_Manager_V1) {
@@ -3923,6 +4155,7 @@ ext_session_lock_manager_v1_destroy :: proc(connection: ^Connection, ext_session
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_session_lock_manager_v1@", ext_session_lock_manager_v1, ".destroy:")
 	return
 }
 ext_session_lock_manager_v1_lock :: proc(connection: ^Connection, ext_session_lock_manager_v1: Ext_Session_Lock_Manager_V1) -> (id: Ext_Session_Lock_V1) {
@@ -3934,6 +4167,7 @@ ext_session_lock_manager_v1_lock :: proc(connection: ^Connection, ext_session_lo
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Session_Lock_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> ext_session_lock_manager_v1@", ext_session_lock_manager_v1, ".lock:", " id=", id)
 	return
 }
 ext_session_lock_v1_destroy :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1) {
@@ -3943,6 +4177,7 @@ ext_session_lock_v1_destroy :: proc(connection: ^Connection, ext_session_lock_v1
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".destroy:")
 	return
 }
 ext_session_lock_v1_get_lock_surface :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1, surface: Surface, output: Output) -> (id: Ext_Session_Lock_Surface_V1) {
@@ -3958,6 +4193,7 @@ ext_session_lock_v1_get_lock_surface :: proc(connection: ^Connection, ext_sessio
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	output := output
 	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".get_lock_surface:", " id=", id, " surface=", surface, " output=", output)
 	return
 }
 ext_session_lock_v1_unlock_and_destroy :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1) {
@@ -3967,6 +4203,7 @@ ext_session_lock_v1_unlock_and_destroy :: proc(connection: ^Connection, ext_sess
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".unlock_and_destroy:")
 	return
 }
 ext_session_lock_surface_v1_destroy :: proc(connection: ^Connection, ext_session_lock_surface_v1: Ext_Session_Lock_Surface_V1) {
@@ -3976,6 +4213,7 @@ ext_session_lock_surface_v1_destroy :: proc(connection: ^Connection, ext_session
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_session_lock_surface_v1@", ext_session_lock_surface_v1, ".destroy:")
 	return
 }
 ext_session_lock_surface_v1_ack_configure :: proc(connection: ^Connection, ext_session_lock_surface_v1: Ext_Session_Lock_Surface_V1, serial: u32) {
@@ -3987,6 +4225,7 @@ ext_session_lock_surface_v1_ack_configure :: proc(connection: ^Connection, ext_s
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> ext_session_lock_surface_v1@", ext_session_lock_surface_v1, ".ack_configure:", " serial=", serial)
 	return
 }
 ext_transient_seat_manager_v1_create :: proc(connection: ^Connection, ext_transient_seat_manager_v1: Ext_Transient_Seat_Manager_V1) -> (seat: Ext_Transient_Seat_V1) {
@@ -3998,6 +4237,7 @@ ext_transient_seat_manager_v1_create :: proc(connection: ^Connection, ext_transi
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat = auto_cast generate_id(connection, .Ext_Transient_Seat_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_debug_log(connection, "-> ext_transient_seat_manager_v1@", ext_transient_seat_manager_v1, ".create:", " seat=", seat)
 	return
 }
 ext_transient_seat_manager_v1_destroy :: proc(connection: ^Connection, ext_transient_seat_manager_v1: Ext_Transient_Seat_Manager_V1) {
@@ -4007,6 +4247,7 @@ ext_transient_seat_manager_v1_destroy :: proc(connection: ^Connection, ext_trans
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_transient_seat_manager_v1@", ext_transient_seat_manager_v1, ".destroy:")
 	return
 }
 ext_transient_seat_v1_destroy :: proc(connection: ^Connection, ext_transient_seat_v1: Ext_Transient_Seat_V1) {
@@ -4016,6 +4257,7 @@ ext_transient_seat_v1_destroy :: proc(connection: ^Connection, ext_transient_sea
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_transient_seat_v1@", ext_transient_seat_v1, ".destroy:")
 	return
 }
 ext_workspace_manager_v1_commit :: proc(connection: ^Connection, ext_workspace_manager_v1: Ext_Workspace_Manager_V1) {
@@ -4025,6 +4267,7 @@ ext_workspace_manager_v1_commit :: proc(connection: ^Connection, ext_workspace_m
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_workspace_manager_v1@", ext_workspace_manager_v1, ".commit:")
 	return
 }
 ext_workspace_manager_v1_stop :: proc(connection: ^Connection, ext_workspace_manager_v1: Ext_Workspace_Manager_V1) {
@@ -4034,6 +4277,7 @@ ext_workspace_manager_v1_stop :: proc(connection: ^Connection, ext_workspace_man
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_workspace_manager_v1@", ext_workspace_manager_v1, ".stop:")
 	return
 }
 ext_workspace_group_handle_v1_create_workspace :: proc(connection: ^Connection, ext_workspace_group_handle_v1: Ext_Workspace_Group_Handle_V1, workspace: string) {
@@ -4048,6 +4292,7 @@ ext_workspace_group_handle_v1_create_workspace :: proc(connection: ^Connection, 
 	bytes.buffer_write_string(&connection.buffer, workspace)
 	for _ in len(workspace) ..< (len(workspace) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> ext_workspace_group_handle_v1@", ext_workspace_group_handle_v1, ".create_workspace:", " workspace=", workspace)
 	return
 }
 ext_workspace_group_handle_v1_destroy :: proc(connection: ^Connection, ext_workspace_group_handle_v1: Ext_Workspace_Group_Handle_V1) {
@@ -4057,6 +4302,7 @@ ext_workspace_group_handle_v1_destroy :: proc(connection: ^Connection, ext_works
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_workspace_group_handle_v1@", ext_workspace_group_handle_v1, ".destroy:")
 	return
 }
 ext_workspace_handle_v1_destroy :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
@@ -4066,6 +4312,7 @@ ext_workspace_handle_v1_destroy :: proc(connection: ^Connection, ext_workspace_h
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".destroy:")
 	return
 }
 ext_workspace_handle_v1_activate :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
@@ -4075,6 +4322,7 @@ ext_workspace_handle_v1_activate :: proc(connection: ^Connection, ext_workspace_
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".activate:")
 	return
 }
 ext_workspace_handle_v1_deactivate :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
@@ -4084,6 +4332,7 @@ ext_workspace_handle_v1_deactivate :: proc(connection: ^Connection, ext_workspac
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".deactivate:")
 	return
 }
 ext_workspace_handle_v1_assign :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1, workspace_group: Ext_Workspace_Group_Handle_V1) {
@@ -4095,6 +4344,7 @@ ext_workspace_handle_v1_assign :: proc(connection: ^Connection, ext_workspace_ha
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	workspace_group := workspace_group
 	bytes.buffer_write_ptr(&connection.buffer, &workspace_group, size_of(workspace_group))
+	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".assign:", " workspace_group=", workspace_group)
 	return
 }
 ext_workspace_handle_v1_remove :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
@@ -4104,6 +4354,7 @@ ext_workspace_handle_v1_remove :: proc(connection: ^Connection, ext_workspace_ha
 	opcode: u16 = 4
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".remove:")
 	return
 }
 wp_fifo_manager_v1_destroy :: proc(connection: ^Connection, wp_fifo_manager_v1: Wp_Fifo_Manager_V1) {
@@ -4113,6 +4364,7 @@ wp_fifo_manager_v1_destroy :: proc(connection: ^Connection, wp_fifo_manager_v1: 
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_fifo_manager_v1@", wp_fifo_manager_v1, ".destroy:")
 	return
 }
 wp_fifo_manager_v1_get_fifo :: proc(connection: ^Connection, wp_fifo_manager_v1: Wp_Fifo_Manager_V1, surface: Surface) -> (id: Wp_Fifo_V1) {
@@ -4126,6 +4378,7 @@ wp_fifo_manager_v1_get_fifo :: proc(connection: ^Connection, wp_fifo_manager_v1:
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_fifo_manager_v1@", wp_fifo_manager_v1, ".get_fifo:", " id=", id, " surface=", surface)
 	return
 }
 wp_fifo_v1_set_barrier :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
@@ -4135,6 +4388,7 @@ wp_fifo_v1_set_barrier :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) 
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".set_barrier:")
 	return
 }
 wp_fifo_v1_wait_barrier :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
@@ -4144,6 +4398,7 @@ wp_fifo_v1_wait_barrier :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1)
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".wait_barrier:")
 	return
 }
 wp_fifo_v1_destroy :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
@@ -4153,6 +4408,7 @@ wp_fifo_v1_destroy :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".destroy:")
 	return
 }
 wp_fractional_scale_manager_v1_destroy :: proc(connection: ^Connection, wp_fractional_scale_manager_v1: Wp_Fractional_Scale_Manager_V1) {
@@ -4162,6 +4418,7 @@ wp_fractional_scale_manager_v1_destroy :: proc(connection: ^Connection, wp_fract
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_fractional_scale_manager_v1@", wp_fractional_scale_manager_v1, ".destroy:")
 	return
 }
 wp_fractional_scale_manager_v1_get_fractional_scale :: proc(connection: ^Connection, wp_fractional_scale_manager_v1: Wp_Fractional_Scale_Manager_V1, surface: Surface) -> (id: Wp_Fractional_Scale_V1) {
@@ -4175,6 +4432,7 @@ wp_fractional_scale_manager_v1_get_fractional_scale :: proc(connection: ^Connect
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_fractional_scale_manager_v1@", wp_fractional_scale_manager_v1, ".get_fractional_scale:", " id=", id, " surface=", surface)
 	return
 }
 wp_fractional_scale_v1_destroy :: proc(connection: ^Connection, wp_fractional_scale_v1: Wp_Fractional_Scale_V1) {
@@ -4184,6 +4442,7 @@ wp_fractional_scale_v1_destroy :: proc(connection: ^Connection, wp_fractional_sc
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_fractional_scale_v1@", wp_fractional_scale_v1, ".destroy:")
 	return
 }
 wp_linux_drm_syncobj_manager_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1) {
@@ -4193,6 +4452,7 @@ wp_linux_drm_syncobj_manager_v1_destroy :: proc(connection: ^Connection, wp_linu
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".destroy:")
 	return
 }
 wp_linux_drm_syncobj_manager_v1_get_surface :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1, surface: Surface) -> (id: Wp_Linux_Drm_Syncobj_Surface_V1) {
@@ -4206,6 +4466,7 @@ wp_linux_drm_syncobj_manager_v1_get_surface :: proc(connection: ^Connection, wp_
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
 	return
 }
 wp_linux_drm_syncobj_manager_v1_import_timeline :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1, fd: Fd) -> (id: Wp_Linux_Drm_Syncobj_Timeline_V1) {
@@ -4218,6 +4479,7 @@ wp_linux_drm_syncobj_manager_v1_import_timeline :: proc(connection: ^Connection,
 	id = auto_cast generate_id(connection, .Wp_Linux_Drm_Syncobj_Timeline_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	append(&connection.fds_out, fd)
+	_debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".import_timeline:", " id=", id, " fd=", fd)
 	return
 }
 wp_linux_drm_syncobj_timeline_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_timeline_v1: Wp_Linux_Drm_Syncobj_Timeline_V1) {
@@ -4227,6 +4489,7 @@ wp_linux_drm_syncobj_timeline_v1_destroy :: proc(connection: ^Connection, wp_lin
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_linux_drm_syncobj_timeline_v1@", wp_linux_drm_syncobj_timeline_v1, ".destroy:")
 	return
 }
 wp_linux_drm_syncobj_surface_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1) {
@@ -4236,6 +4499,7 @@ wp_linux_drm_syncobj_surface_v1_destroy :: proc(connection: ^Connection, wp_linu
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".destroy:")
 	return
 }
 wp_linux_drm_syncobj_surface_v1_set_acquire_point :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1, timeline: Wp_Linux_Drm_Syncobj_Timeline_V1, point_hi: u32, point_lo: u32) {
@@ -4251,6 +4515,7 @@ wp_linux_drm_syncobj_surface_v1_set_acquire_point :: proc(connection: ^Connectio
 	bytes.buffer_write_ptr(&connection.buffer, &point_hi, size_of(point_hi))
 	point_lo := point_lo
 	bytes.buffer_write_ptr(&connection.buffer, &point_lo, size_of(point_lo))
+	_debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".set_acquire_point:", " timeline=", timeline, " point_hi=", point_hi, " point_lo=", point_lo)
 	return
 }
 wp_linux_drm_syncobj_surface_v1_set_release_point :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1, timeline: Wp_Linux_Drm_Syncobj_Timeline_V1, point_hi: u32, point_lo: u32) {
@@ -4266,6 +4531,7 @@ wp_linux_drm_syncobj_surface_v1_set_release_point :: proc(connection: ^Connectio
 	bytes.buffer_write_ptr(&connection.buffer, &point_hi, size_of(point_hi))
 	point_lo := point_lo
 	bytes.buffer_write_ptr(&connection.buffer, &point_lo, size_of(point_lo))
+	_debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".set_release_point:", " timeline=", timeline, " point_hi=", point_hi, " point_lo=", point_lo)
 	return
 }
 wp_pointer_warp_v1_destroy :: proc(connection: ^Connection, wp_pointer_warp_v1: Wp_Pointer_Warp_V1) {
@@ -4275,6 +4541,7 @@ wp_pointer_warp_v1_destroy :: proc(connection: ^Connection, wp_pointer_warp_v1: 
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_pointer_warp_v1@", wp_pointer_warp_v1, ".destroy:")
 	return
 }
 wp_pointer_warp_v1_warp_pointer :: proc(connection: ^Connection, wp_pointer_warp_v1: Wp_Pointer_Warp_V1, surface: Surface, pointer: Pointer, x: f64, y: f64, serial: u32) {
@@ -4294,6 +4561,7 @@ wp_pointer_warp_v1_warp_pointer :: proc(connection: ^Connection, wp_pointer_warp
 	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	serial := serial
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_debug_log(connection, "-> wp_pointer_warp_v1@", wp_pointer_warp_v1, ".warp_pointer:", " surface=", surface, " pointer=", pointer, " x=", x, " y=", y, " serial=", serial)
 	return
 }
 wp_security_context_manager_v1_destroy :: proc(connection: ^Connection, wp_security_context_manager_v1: Wp_Security_Context_Manager_V1) {
@@ -4303,6 +4571,7 @@ wp_security_context_manager_v1_destroy :: proc(connection: ^Connection, wp_secur
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_security_context_manager_v1@", wp_security_context_manager_v1, ".destroy:")
 	return
 }
 wp_security_context_manager_v1_create_listener :: proc(connection: ^Connection, wp_security_context_manager_v1: Wp_Security_Context_Manager_V1, listen_fd: Fd, close_fd: Fd) -> (id: Wp_Security_Context_V1) {
@@ -4316,6 +4585,7 @@ wp_security_context_manager_v1_create_listener :: proc(connection: ^Connection, 
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	append(&connection.fds_out, listen_fd)
 	append(&connection.fds_out, close_fd)
+	_debug_log(connection, "-> wp_security_context_manager_v1@", wp_security_context_manager_v1, ".create_listener:", " id=", id, " listen_fd=", listen_fd, " close_fd=", close_fd)
 	return
 }
 wp_security_context_v1_destroy :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1) {
@@ -4325,6 +4595,7 @@ wp_security_context_v1_destroy :: proc(connection: ^Connection, wp_security_cont
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".destroy:")
 	return
 }
 wp_security_context_v1_set_sandbox_engine :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, name: string) {
@@ -4339,6 +4610,7 @@ wp_security_context_v1_set_sandbox_engine :: proc(connection: ^Connection, wp_se
 	bytes.buffer_write_string(&connection.buffer, name)
 	for _ in len(name) ..< (len(name) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_sandbox_engine:", " name=", name)
 	return
 }
 wp_security_context_v1_set_app_id :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, app_id: string) {
@@ -4353,6 +4625,7 @@ wp_security_context_v1_set_app_id :: proc(connection: ^Connection, wp_security_c
 	bytes.buffer_write_string(&connection.buffer, app_id)
 	for _ in len(app_id) ..< (len(app_id) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_app_id:", " app_id=", app_id)
 	return
 }
 wp_security_context_v1_set_instance_id :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, instance_id: string) {
@@ -4367,6 +4640,7 @@ wp_security_context_v1_set_instance_id :: proc(connection: ^Connection, wp_secur
 	bytes.buffer_write_string(&connection.buffer, instance_id)
 	for _ in len(instance_id) ..< (len(instance_id) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_instance_id:", " instance_id=", instance_id)
 	return
 }
 wp_security_context_v1_commit :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1) {
@@ -4376,6 +4650,7 @@ wp_security_context_v1_commit :: proc(connection: ^Connection, wp_security_conte
 	opcode: u16 = 4
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".commit:")
 	return
 }
 wp_single_pixel_buffer_manager_v1_destroy :: proc(connection: ^Connection, wp_single_pixel_buffer_manager_v1: Wp_Single_Pixel_Buffer_Manager_V1) {
@@ -4385,6 +4660,7 @@ wp_single_pixel_buffer_manager_v1_destroy :: proc(connection: ^Connection, wp_si
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_single_pixel_buffer_manager_v1@", wp_single_pixel_buffer_manager_v1, ".destroy:")
 	return
 }
 wp_single_pixel_buffer_manager_v1_create_u32_rgba_buffer :: proc(connection: ^Connection, wp_single_pixel_buffer_manager_v1: Wp_Single_Pixel_Buffer_Manager_V1, r: u32, g: u32, b: u32, a: u32) -> (id: Buffer) {
@@ -4404,6 +4680,7 @@ wp_single_pixel_buffer_manager_v1_create_u32_rgba_buffer :: proc(connection: ^Co
 	bytes.buffer_write_ptr(&connection.buffer, &b, size_of(b))
 	a := a
 	bytes.buffer_write_ptr(&connection.buffer, &a, size_of(a))
+	_debug_log(connection, "-> wp_single_pixel_buffer_manager_v1@", wp_single_pixel_buffer_manager_v1, ".create_u32_rgba_buffer:", " id=", id, " r=", r, " g=", g, " b=", b, " a=", a)
 	return
 }
 wp_tearing_control_manager_v1_destroy :: proc(connection: ^Connection, wp_tearing_control_manager_v1: Wp_Tearing_Control_Manager_V1) {
@@ -4413,6 +4690,7 @@ wp_tearing_control_manager_v1_destroy :: proc(connection: ^Connection, wp_tearin
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_tearing_control_manager_v1@", wp_tearing_control_manager_v1, ".destroy:")
 	return
 }
 wp_tearing_control_manager_v1_get_tearing_control :: proc(connection: ^Connection, wp_tearing_control_manager_v1: Wp_Tearing_Control_Manager_V1, surface: Surface) -> (id: Wp_Tearing_Control_V1) {
@@ -4426,6 +4704,7 @@ wp_tearing_control_manager_v1_get_tearing_control :: proc(connection: ^Connectio
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> wp_tearing_control_manager_v1@", wp_tearing_control_manager_v1, ".get_tearing_control:", " id=", id, " surface=", surface)
 	return
 }
 wp_tearing_control_v1_set_presentation_hint :: proc(connection: ^Connection, wp_tearing_control_v1: Wp_Tearing_Control_V1, hint: Wp_Tearing_Control_V1_Presentation_Hint) {
@@ -4437,6 +4716,7 @@ wp_tearing_control_v1_set_presentation_hint :: proc(connection: ^Connection, wp_
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	hint := hint
 	bytes.buffer_write_ptr(&connection.buffer, &hint, size_of(hint))
+	_debug_log(connection, "-> wp_tearing_control_v1@", wp_tearing_control_v1, ".set_presentation_hint:", " hint=", hint)
 	return
 }
 wp_tearing_control_v1_destroy :: proc(connection: ^Connection, wp_tearing_control_v1: Wp_Tearing_Control_V1) {
@@ -4446,6 +4726,7 @@ wp_tearing_control_v1_destroy :: proc(connection: ^Connection, wp_tearing_contro
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> wp_tearing_control_v1@", wp_tearing_control_v1, ".destroy:")
 	return
 }
 xdg_activation_v1_destroy :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1) {
@@ -4455,6 +4736,7 @@ xdg_activation_v1_destroy :: proc(connection: ^Connection, xdg_activation_v1: Xd
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".destroy:")
 	return
 }
 xdg_activation_v1_get_activation_token :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1) -> (id: Xdg_Activation_Token_V1) {
@@ -4466,6 +4748,7 @@ xdg_activation_v1_get_activation_token :: proc(connection: ^Connection, xdg_acti
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Activation_Token_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".get_activation_token:", " id=", id)
 	return
 }
 xdg_activation_v1_activate :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1, token: string, surface: Surface) {
@@ -4482,6 +4765,7 @@ xdg_activation_v1_activate :: proc(connection: ^Connection, xdg_activation_v1: X
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".activate:", " token=", token, " surface=", surface)
 	return
 }
 xdg_activation_token_v1_set_serial :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, serial: u32, seat: Seat) {
@@ -4495,6 +4779,7 @@ xdg_activation_token_v1_set_serial :: proc(connection: ^Connection, xdg_activati
 	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	seat := seat
 	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_serial:", " serial=", serial, " seat=", seat)
 	return
 }
 xdg_activation_token_v1_set_app_id :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, app_id: string) {
@@ -4509,6 +4794,7 @@ xdg_activation_token_v1_set_app_id :: proc(connection: ^Connection, xdg_activati
 	bytes.buffer_write_string(&connection.buffer, app_id)
 	for _ in len(app_id) ..< (len(app_id) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_app_id:", " app_id=", app_id)
 	return
 }
 xdg_activation_token_v1_set_surface :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, surface: Surface) {
@@ -4520,6 +4806,7 @@ xdg_activation_token_v1_set_surface :: proc(connection: ^Connection, xdg_activat
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_surface:", " surface=", surface)
 	return
 }
 xdg_activation_token_v1_commit :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1) {
@@ -4529,6 +4816,7 @@ xdg_activation_token_v1_commit :: proc(connection: ^Connection, xdg_activation_t
 	opcode: u16 = 3
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".commit:")
 	return
 }
 xdg_activation_token_v1_destroy :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1) {
@@ -4538,6 +4826,7 @@ xdg_activation_token_v1_destroy :: proc(connection: ^Connection, xdg_activation_
 	opcode: u16 = 4
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".destroy:")
 	return
 }
 xdg_wm_dialog_v1_destroy :: proc(connection: ^Connection, xdg_wm_dialog_v1: Xdg_Wm_Dialog_V1) {
@@ -4547,6 +4836,7 @@ xdg_wm_dialog_v1_destroy :: proc(connection: ^Connection, xdg_wm_dialog_v1: Xdg_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_wm_dialog_v1@", xdg_wm_dialog_v1, ".destroy:")
 	return
 }
 xdg_wm_dialog_v1_get_xdg_dialog :: proc(connection: ^Connection, xdg_wm_dialog_v1: Xdg_Wm_Dialog_V1, toplevel: Xdg_Toplevel) -> (id: Xdg_Dialog_V1) {
@@ -4560,6 +4850,7 @@ xdg_wm_dialog_v1_get_xdg_dialog :: proc(connection: ^Connection, xdg_wm_dialog_v
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	toplevel := toplevel
 	bytes.buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
+	_debug_log(connection, "-> xdg_wm_dialog_v1@", xdg_wm_dialog_v1, ".get_xdg_dialog:", " id=", id, " toplevel=", toplevel)
 	return
 }
 xdg_dialog_v1_destroy :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
@@ -4569,6 +4860,7 @@ xdg_dialog_v1_destroy :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".destroy:")
 	return
 }
 xdg_dialog_v1_set_modal :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
@@ -4578,6 +4870,7 @@ xdg_dialog_v1_set_modal :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dial
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".set_modal:")
 	return
 }
 xdg_dialog_v1_unset_modal :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
@@ -4587,6 +4880,7 @@ xdg_dialog_v1_unset_modal :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Di
 	opcode: u16 = 2
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".unset_modal:")
 	return
 }
 xdg_system_bell_v1_destroy :: proc(connection: ^Connection, xdg_system_bell_v1: Xdg_System_Bell_V1) {
@@ -4596,6 +4890,7 @@ xdg_system_bell_v1_destroy :: proc(connection: ^Connection, xdg_system_bell_v1: 
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_system_bell_v1@", xdg_system_bell_v1, ".destroy:")
 	return
 }
 xdg_system_bell_v1_ring :: proc(connection: ^Connection, xdg_system_bell_v1: Xdg_System_Bell_V1, surface: Surface) {
@@ -4607,6 +4902,7 @@ xdg_system_bell_v1_ring :: proc(connection: ^Connection, xdg_system_bell_v1: Xdg
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> xdg_system_bell_v1@", xdg_system_bell_v1, ".ring:", " surface=", surface)
 	return
 }
 xdg_toplevel_drag_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_drag_manager_v1: Xdg_Toplevel_Drag_Manager_V1) {
@@ -4616,6 +4912,7 @@ xdg_toplevel_drag_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplev
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel_drag_manager_v1@", xdg_toplevel_drag_manager_v1, ".destroy:")
 	return
 }
 xdg_toplevel_drag_manager_v1_get_xdg_toplevel_drag :: proc(connection: ^Connection, xdg_toplevel_drag_manager_v1: Xdg_Toplevel_Drag_Manager_V1, data_source: Data_Source) -> (id: Xdg_Toplevel_Drag_V1) {
@@ -4629,6 +4926,7 @@ xdg_toplevel_drag_manager_v1_get_xdg_toplevel_drag :: proc(connection: ^Connecti
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	data_source := data_source
 	bytes.buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
+	_debug_log(connection, "-> xdg_toplevel_drag_manager_v1@", xdg_toplevel_drag_manager_v1, ".get_xdg_toplevel_drag:", " id=", id, " data_source=", data_source)
 	return
 }
 xdg_toplevel_drag_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_drag_v1: Xdg_Toplevel_Drag_V1) {
@@ -4638,6 +4936,7 @@ xdg_toplevel_drag_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_drag_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel_drag_v1@", xdg_toplevel_drag_v1, ".destroy:")
 	return
 }
 xdg_toplevel_drag_v1_attach :: proc(connection: ^Connection, xdg_toplevel_drag_v1: Xdg_Toplevel_Drag_V1, toplevel: Xdg_Toplevel, x_offset: i32, y_offset: i32) {
@@ -4653,6 +4952,7 @@ xdg_toplevel_drag_v1_attach :: proc(connection: ^Connection, xdg_toplevel_drag_v
 	bytes.buffer_write_ptr(&connection.buffer, &x_offset, size_of(x_offset))
 	y_offset := y_offset
 	bytes.buffer_write_ptr(&connection.buffer, &y_offset, size_of(y_offset))
+	_debug_log(connection, "-> xdg_toplevel_drag_v1@", xdg_toplevel_drag_v1, ".attach:", " toplevel=", toplevel, " x_offset=", x_offset, " y_offset=", y_offset)
 	return
 }
 xdg_toplevel_icon_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1) {
@@ -4662,6 +4962,7 @@ xdg_toplevel_icon_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplev
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".destroy:")
 	return
 }
 xdg_toplevel_icon_manager_v1_create_icon :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1) -> (id: Xdg_Toplevel_Icon_V1) {
@@ -4673,6 +4974,7 @@ xdg_toplevel_icon_manager_v1_create_icon :: proc(connection: ^Connection, xdg_to
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Toplevel_Icon_V1)
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".create_icon:", " id=", id)
 	return
 }
 xdg_toplevel_icon_manager_v1_set_icon :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1, toplevel: Xdg_Toplevel, icon: Xdg_Toplevel_Icon_V1) {
@@ -4686,6 +4988,7 @@ xdg_toplevel_icon_manager_v1_set_icon :: proc(connection: ^Connection, xdg_tople
 	bytes.buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
 	icon := icon
 	bytes.buffer_write_ptr(&connection.buffer, &icon, size_of(icon))
+	_debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".set_icon:", " toplevel=", toplevel, " icon=", icon)
 	return
 }
 xdg_toplevel_icon_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1) {
@@ -4695,6 +4998,7 @@ xdg_toplevel_icon_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_icon_
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".destroy:")
 	return
 }
 xdg_toplevel_icon_v1_set_name :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1, icon_name: string) {
@@ -4709,6 +5013,7 @@ xdg_toplevel_icon_v1_set_name :: proc(connection: ^Connection, xdg_toplevel_icon
 	bytes.buffer_write_string(&connection.buffer, icon_name)
 	for _ in len(icon_name) ..< (len(icon_name) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".set_name:", " icon_name=", icon_name)
 	return
 }
 xdg_toplevel_icon_v1_add_buffer :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1, buffer: Buffer, scale: i32) {
@@ -4722,6 +5027,7 @@ xdg_toplevel_icon_v1_add_buffer :: proc(connection: ^Connection, xdg_toplevel_ic
 	bytes.buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
 	scale := scale
 	bytes.buffer_write_ptr(&connection.buffer, &scale, size_of(scale))
+	_debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".add_buffer:", " buffer=", buffer, " scale=", scale)
 	return
 }
 xdg_toplevel_tag_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1) {
@@ -4731,6 +5037,7 @@ xdg_toplevel_tag_manager_v1_destroy :: proc(connection: ^Connection, xdg_topleve
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".destroy:")
 	return
 }
 xdg_toplevel_tag_manager_v1_set_toplevel_tag :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1, toplevel: Xdg_Toplevel, tag: string) {
@@ -4747,6 +5054,7 @@ xdg_toplevel_tag_manager_v1_set_toplevel_tag :: proc(connection: ^Connection, xd
 	bytes.buffer_write_string(&connection.buffer, tag)
 	for _ in len(tag) ..< (len(tag) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".set_toplevel_tag:", " toplevel=", toplevel, " tag=", tag)
 	return
 }
 xdg_toplevel_tag_manager_v1_set_toplevel_description :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1, toplevel: Xdg_Toplevel, description: string) {
@@ -4763,6 +5071,7 @@ xdg_toplevel_tag_manager_v1_set_toplevel_description :: proc(connection: ^Connec
 	bytes.buffer_write_string(&connection.buffer, description)
 	for _ in len(description) ..< (len(description) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
 	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".set_toplevel_description:", " toplevel=", toplevel, " description=", description)
 	return
 }
 xwayland_shell_v1_destroy :: proc(connection: ^Connection, xwayland_shell_v1: Xwayland_Shell_V1) {
@@ -4772,6 +5081,7 @@ xwayland_shell_v1_destroy :: proc(connection: ^Connection, xwayland_shell_v1: Xw
 	opcode: u16 = 0
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xwayland_shell_v1@", xwayland_shell_v1, ".destroy:")
 	return
 }
 xwayland_shell_v1_get_xwayland_surface :: proc(connection: ^Connection, xwayland_shell_v1: Xwayland_Shell_V1, surface: Surface) -> (id: Xwayland_Surface_V1) {
@@ -4785,6 +5095,7 @@ xwayland_shell_v1_get_xwayland_surface :: proc(connection: ^Connection, xwayland
 	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
 	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_debug_log(connection, "-> xwayland_shell_v1@", xwayland_shell_v1, ".get_xwayland_surface:", " id=", id, " surface=", surface)
 	return
 }
 xwayland_surface_v1_set_serial :: proc(connection: ^Connection, xwayland_surface_v1: Xwayland_Surface_V1, serial_lo: u32, serial_hi: u32) {
@@ -4798,6 +5109,7 @@ xwayland_surface_v1_set_serial :: proc(connection: ^Connection, xwayland_surface
 	bytes.buffer_write_ptr(&connection.buffer, &serial_lo, size_of(serial_lo))
 	serial_hi := serial_hi
 	bytes.buffer_write_ptr(&connection.buffer, &serial_hi, size_of(serial_hi))
+	_debug_log(connection, "-> xwayland_surface_v1@", xwayland_surface_v1, ".set_serial:", " serial_lo=", serial_lo, " serial_hi=", serial_hi)
 	return
 }
 xwayland_surface_v1_destroy :: proc(connection: ^Connection, xwayland_surface_v1: Xwayland_Surface_V1) {
@@ -4807,6 +5119,7 @@ xwayland_surface_v1_destroy :: proc(connection: ^Connection, xwayland_surface_v1
 	opcode: u16 = 1
 	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
 	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_debug_log(connection, "-> xwayland_surface_v1@", xwayland_surface_v1, ".destroy:")
 	return
 }
 
@@ -6047,12 +6360,14 @@ parse_wl_display_error :: proc(connection: ^Connection, object: u32) -> (event: 
 	read(connection, &event.object_id) or_return
 	read(connection, &event.code) or_return
 	read(connection, &event.message) or_return
+	_debug_log(connection, "<- wl_display@", object, ".error:", " object_id=", event.object_id, " code=", event.code, " message=", event.message)
 	ok = true
 	return
 }
 parse_wl_display_delete_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Delete_Id, ok: bool) {
 	event.object = Display(object)
 	read(connection, &event.id) or_return
+	_debug_log(connection, "<- wl_display@", object, ".delete_id:", " id=", event.id)
 	ok = true
 	return
 }
@@ -6061,53 +6376,62 @@ parse_wl_registry_global :: proc(connection: ^Connection, object: u32) -> (event
 	read(connection, &event.name) or_return
 	read(connection, &event.interface) or_return
 	read(connection, &event.version) or_return
+	_debug_log(connection, "<- wl_registry@", object, ".global:", " name=", event.name, " interface=", event.interface, " version=", event.version)
 	ok = true
 	return
 }
 parse_wl_registry_global_remove :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global_Remove, ok: bool) {
 	event.object = Registry(object)
 	read(connection, &event.name) or_return
+	_debug_log(connection, "<- wl_registry@", object, ".global_remove:", " name=", event.name)
 	ok = true
 	return
 }
 parse_wl_callback_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Callback_Done, ok: bool) {
 	event.object = Callback(object)
 	read(connection, &event.callback_data) or_return
+	_debug_log(connection, "<- wl_callback@", object, ".done:", " callback_data=", event.callback_data)
 	ok = true
 	return
 }
 parse_wl_shm_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Shm_Format, ok: bool) {
 	event.object = Shm(object)
 	read(connection, &event.format) or_return
+	_debug_log(connection, "<- wl_shm@", object, ".format:", " format=", event.format)
 	ok = true
 	return
 }
 parse_wl_buffer_release :: proc(connection: ^Connection, object: u32) -> (event: Event_Buffer_Release, ok: bool) {
 	event.object = Buffer(object)
+	_debug_log(connection, "<- wl_buffer@", object, ".release:")
 	ok = true
 	return
 }
 parse_wl_data_offer_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Offer, ok: bool) {
 	event.object = Data_Offer(object)
 	read(connection, &event.mime_type) or_return
+	_debug_log(connection, "<- wl_data_offer@", object, ".offer:", " mime_type=", event.mime_type)
 	ok = true
 	return
 }
 parse_wl_data_offer_source_actions :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Source_Actions, ok: bool) {
 	event.object = Data_Offer(object)
 	read(connection, &event.source_actions) or_return
+	_debug_log(connection, "<- wl_data_offer@", object, ".source_actions:", " source_actions=", event.source_actions)
 	ok = true
 	return
 }
 parse_wl_data_offer_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Action, ok: bool) {
 	event.object = Data_Offer(object)
 	read(connection, &event.dnd_action) or_return
+	_debug_log(connection, "<- wl_data_offer@", object, ".action:", " dnd_action=", event.dnd_action)
 	ok = true
 	return
 }
 parse_wl_data_source_target :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Target, ok: bool) {
 	event.object = Data_Source(object)
 	read(connection, &event.mime_type) or_return
+	_debug_log(connection, "<- wl_data_source@", object, ".target:", " mime_type=", event.mime_type)
 	ok = true
 	return
 }
@@ -6115,27 +6439,32 @@ parse_wl_data_source_send :: proc(connection: ^Connection, object: u32) -> (even
 	event.object = Data_Source(object)
 	read(connection, &event.mime_type) or_return
 	read(connection, &event.fd) or_return
+	_debug_log(connection, "<- wl_data_source@", object, ".send:", " mime_type=", event.mime_type, " fd=", event.fd)
 	ok = true
 	return
 }
 parse_wl_data_source_cancelled :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Cancelled, ok: bool) {
 	event.object = Data_Source(object)
+	_debug_log(connection, "<- wl_data_source@", object, ".cancelled:")
 	ok = true
 	return
 }
 parse_wl_data_source_dnd_drop_performed :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Drop_Performed, ok: bool) {
 	event.object = Data_Source(object)
+	_debug_log(connection, "<- wl_data_source@", object, ".dnd_drop_performed:")
 	ok = true
 	return
 }
 parse_wl_data_source_dnd_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Finished, ok: bool) {
 	event.object = Data_Source(object)
+	_debug_log(connection, "<- wl_data_source@", object, ".dnd_finished:")
 	ok = true
 	return
 }
 parse_wl_data_source_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Action, ok: bool) {
 	event.object = Data_Source(object)
 	read(connection, &event.dnd_action) or_return
+	_debug_log(connection, "<- wl_data_source@", object, ".action:", " dnd_action=", event.dnd_action)
 	ok = true
 	return
 }
@@ -6144,6 +6473,7 @@ parse_wl_data_device_data_offer :: proc(connection: ^Connection, object: u32) ->
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Data_Offer
+	_debug_log(connection, "<- wl_data_device@", object, ".data_offer:", " id=", event.id)
 	ok = true
 	return
 }
@@ -6154,11 +6484,13 @@ parse_wl_data_device_enter :: proc(connection: ^Connection, object: u32) -> (eve
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
 	read(connection, &event.id) or_return
+	_debug_log(connection, "<- wl_data_device@", object, ".enter:", " serial=", event.serial, " surface=", event.surface, " x=", event.x, " y=", event.y, " id=", event.id)
 	ok = true
 	return
 }
 parse_wl_data_device_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Leave, ok: bool) {
 	event.object = Data_Device(object)
+	_debug_log(connection, "<- wl_data_device@", object, ".leave:")
 	ok = true
 	return
 }
@@ -6167,23 +6499,27 @@ parse_wl_data_device_motion :: proc(connection: ^Connection, object: u32) -> (ev
 	read(connection, &event.time) or_return
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
+	_debug_log(connection, "<- wl_data_device@", object, ".motion:", " time=", event.time, " x=", event.x, " y=", event.y)
 	ok = true
 	return
 }
 parse_wl_data_device_drop :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Drop, ok: bool) {
 	event.object = Data_Device(object)
+	_debug_log(connection, "<- wl_data_device@", object, ".drop:")
 	ok = true
 	return
 }
 parse_wl_data_device_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Selection, ok: bool) {
 	event.object = Data_Device(object)
 	read(connection, &event.id) or_return
+	_debug_log(connection, "<- wl_data_device@", object, ".selection:", " id=", event.id)
 	ok = true
 	return
 }
 parse_wl_shell_surface_ping :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Ping, ok: bool) {
 	event.object = Shell_Surface(object)
 	read(connection, &event.serial) or_return
+	_debug_log(connection, "<- wl_shell_surface@", object, ".ping:", " serial=", event.serial)
 	ok = true
 	return
 }
@@ -6192,47 +6528,55 @@ parse_wl_shell_surface_configure :: proc(connection: ^Connection, object: u32) -
 	read(connection, &event.edges) or_return
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
+	_debug_log(connection, "<- wl_shell_surface@", object, ".configure:", " edges=", event.edges, " width=", event.width, " height=", event.height)
 	ok = true
 	return
 }
 parse_wl_shell_surface_popup_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Popup_Done, ok: bool) {
 	event.object = Shell_Surface(object)
+	_debug_log(connection, "<- wl_shell_surface@", object, ".popup_done:")
 	ok = true
 	return
 }
 parse_wl_surface_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Enter, ok: bool) {
 	event.object = Surface(object)
 	read(connection, &event.output) or_return
+	_debug_log(connection, "<- wl_surface@", object, ".enter:", " output=", event.output)
 	ok = true
 	return
 }
 parse_wl_surface_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Leave, ok: bool) {
 	event.object = Surface(object)
 	read(connection, &event.output) or_return
+	_debug_log(connection, "<- wl_surface@", object, ".leave:", " output=", event.output)
 	ok = true
 	return
 }
 parse_wl_surface_preferred_buffer_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Scale, ok: bool) {
 	event.object = Surface(object)
 	read(connection, &event.factor) or_return
+	_debug_log(connection, "<- wl_surface@", object, ".preferred_buffer_scale:", " factor=", event.factor)
 	ok = true
 	return
 }
 parse_wl_surface_preferred_buffer_transform :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Transform, ok: bool) {
 	event.object = Surface(object)
 	read(connection, &event.transform) or_return
+	_debug_log(connection, "<- wl_surface@", object, ".preferred_buffer_transform:", " transform=", event.transform)
 	ok = true
 	return
 }
 parse_wl_seat_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Capabilities, ok: bool) {
 	event.object = Seat(object)
 	read(connection, &event.capabilities) or_return
+	_debug_log(connection, "<- wl_seat@", object, ".capabilities:", " capabilities=", event.capabilities)
 	ok = true
 	return
 }
 parse_wl_seat_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Name, ok: bool) {
 	event.object = Seat(object)
 	read(connection, &event.name) or_return
+	_debug_log(connection, "<- wl_seat@", object, ".name:", " name=", event.name)
 	ok = true
 	return
 }
@@ -6242,6 +6586,7 @@ parse_wl_pointer_enter :: proc(connection: ^Connection, object: u32) -> (event: 
 	read(connection, &event.surface) or_return
 	read(connection, &event.surface_x) or_return
 	read(connection, &event.surface_y) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".enter:", " serial=", event.serial, " surface=", event.surface, " surface_x=", event.surface_x, " surface_y=", event.surface_y)
 	ok = true
 	return
 }
@@ -6249,6 +6594,7 @@ parse_wl_pointer_leave :: proc(connection: ^Connection, object: u32) -> (event: 
 	event.object = Pointer(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".leave:", " serial=", event.serial, " surface=", event.surface)
 	ok = true
 	return
 }
@@ -6257,6 +6603,7 @@ parse_wl_pointer_motion :: proc(connection: ^Connection, object: u32) -> (event:
 	read(connection, &event.time) or_return
 	read(connection, &event.surface_x) or_return
 	read(connection, &event.surface_y) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".motion:", " time=", event.time, " surface_x=", event.surface_x, " surface_y=", event.surface_y)
 	ok = true
 	return
 }
@@ -6266,6 +6613,7 @@ parse_wl_pointer_button :: proc(connection: ^Connection, object: u32) -> (event:
 	read(connection, &event.time) or_return
 	read(connection, &event.button) or_return
 	read(connection, &event.state) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".button:", " serial=", event.serial, " time=", event.time, " button=", event.button, " state=", event.state)
 	ok = true
 	return
 }
@@ -6274,17 +6622,20 @@ parse_wl_pointer_axis :: proc(connection: ^Connection, object: u32) -> (event: E
 	read(connection, &event.time) or_return
 	read(connection, &event.axis) or_return
 	read(connection, &event.value) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".axis:", " time=", event.time, " axis=", event.axis, " value=", event.value)
 	ok = true
 	return
 }
 parse_wl_pointer_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Frame, ok: bool) {
 	event.object = Pointer(object)
+	_debug_log(connection, "<- wl_pointer@", object, ".frame:")
 	ok = true
 	return
 }
 parse_wl_pointer_axis_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Source, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.axis_source) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".axis_source:", " axis_source=", event.axis_source)
 	ok = true
 	return
 }
@@ -6292,6 +6643,7 @@ parse_wl_pointer_axis_stop :: proc(connection: ^Connection, object: u32) -> (eve
 	event.object = Pointer(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.axis) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".axis_stop:", " time=", event.time, " axis=", event.axis)
 	ok = true
 	return
 }
@@ -6299,6 +6651,7 @@ parse_wl_pointer_axis_discrete :: proc(connection: ^Connection, object: u32) -> 
 	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.discrete) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".axis_discrete:", " axis=", event.axis, " discrete=", event.discrete)
 	ok = true
 	return
 }
@@ -6306,6 +6659,7 @@ parse_wl_pointer_axis_value120 :: proc(connection: ^Connection, object: u32) -> 
 	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.value120) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".axis_value120:", " axis=", event.axis, " value120=", event.value120)
 	ok = true
 	return
 }
@@ -6313,6 +6667,7 @@ parse_wl_pointer_axis_relative_direction :: proc(connection: ^Connection, object
 	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.direction) or_return
+	_debug_log(connection, "<- wl_pointer@", object, ".axis_relative_direction:", " axis=", event.axis, " direction=", event.direction)
 	ok = true
 	return
 }
@@ -6321,6 +6676,7 @@ parse_wl_keyboard_keymap :: proc(connection: ^Connection, object: u32) -> (event
 	read(connection, &event.format) or_return
 	read(connection, &event.fd) or_return
 	read(connection, &event.size) or_return
+	_debug_log(connection, "<- wl_keyboard@", object, ".keymap:", " format=", event.format, " fd=", event.fd, " size=", event.size)
 	ok = true
 	return
 }
@@ -6329,6 +6685,7 @@ parse_wl_keyboard_enter :: proc(connection: ^Connection, object: u32) -> (event:
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
 	read(connection, &event.keys) or_return
+	_debug_log(connection, "<- wl_keyboard@", object, ".enter:", " serial=", event.serial, " surface=", event.surface, " keys=", event.keys)
 	ok = true
 	return
 }
@@ -6336,6 +6693,7 @@ parse_wl_keyboard_leave :: proc(connection: ^Connection, object: u32) -> (event:
 	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
+	_debug_log(connection, "<- wl_keyboard@", object, ".leave:", " serial=", event.serial, " surface=", event.surface)
 	ok = true
 	return
 }
@@ -6345,6 +6703,7 @@ parse_wl_keyboard_key :: proc(connection: ^Connection, object: u32) -> (event: E
 	read(connection, &event.time) or_return
 	read(connection, &event.key) or_return
 	read(connection, &event.state) or_return
+	_debug_log(connection, "<- wl_keyboard@", object, ".key:", " serial=", event.serial, " time=", event.time, " key=", event.key, " state=", event.state)
 	ok = true
 	return
 }
@@ -6355,6 +6714,7 @@ parse_wl_keyboard_modifiers :: proc(connection: ^Connection, object: u32) -> (ev
 	read(connection, &event.mods_latched) or_return
 	read(connection, &event.mods_locked) or_return
 	read(connection, &event.group) or_return
+	_debug_log(connection, "<- wl_keyboard@", object, ".modifiers:", " serial=", event.serial, " mods_depressed=", event.mods_depressed, " mods_latched=", event.mods_latched, " mods_locked=", event.mods_locked, " group=", event.group)
 	ok = true
 	return
 }
@@ -6362,6 +6722,7 @@ parse_wl_keyboard_repeat_info :: proc(connection: ^Connection, object: u32) -> (
 	event.object = Keyboard(object)
 	read(connection, &event.rate) or_return
 	read(connection, &event.delay) or_return
+	_debug_log(connection, "<- wl_keyboard@", object, ".repeat_info:", " rate=", event.rate, " delay=", event.delay)
 	ok = true
 	return
 }
@@ -6373,6 +6734,7 @@ parse_wl_touch_down :: proc(connection: ^Connection, object: u32) -> (event: Eve
 	read(connection, &event.id) or_return
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
+	_debug_log(connection, "<- wl_touch@", object, ".down:", " serial=", event.serial, " time=", event.time, " surface=", event.surface, " id=", event.id, " x=", event.x, " y=", event.y)
 	ok = true
 	return
 }
@@ -6381,6 +6743,7 @@ parse_wl_touch_up :: proc(connection: ^Connection, object: u32) -> (event: Event
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
 	read(connection, &event.id) or_return
+	_debug_log(connection, "<- wl_touch@", object, ".up:", " serial=", event.serial, " time=", event.time, " id=", event.id)
 	ok = true
 	return
 }
@@ -6390,16 +6753,19 @@ parse_wl_touch_motion :: proc(connection: ^Connection, object: u32) -> (event: E
 	read(connection, &event.id) or_return
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
+	_debug_log(connection, "<- wl_touch@", object, ".motion:", " time=", event.time, " id=", event.id, " x=", event.x, " y=", event.y)
 	ok = true
 	return
 }
 parse_wl_touch_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Frame, ok: bool) {
 	event.object = Touch(object)
+	_debug_log(connection, "<- wl_touch@", object, ".frame:")
 	ok = true
 	return
 }
 parse_wl_touch_cancel :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Cancel, ok: bool) {
 	event.object = Touch(object)
+	_debug_log(connection, "<- wl_touch@", object, ".cancel:")
 	ok = true
 	return
 }
@@ -6408,6 +6774,7 @@ parse_wl_touch_shape :: proc(connection: ^Connection, object: u32) -> (event: Ev
 	read(connection, &event.id) or_return
 	read(connection, &event.major) or_return
 	read(connection, &event.minor) or_return
+	_debug_log(connection, "<- wl_touch@", object, ".shape:", " id=", event.id, " major=", event.major, " minor=", event.minor)
 	ok = true
 	return
 }
@@ -6415,6 +6782,7 @@ parse_wl_touch_orientation :: proc(connection: ^Connection, object: u32) -> (eve
 	event.object = Touch(object)
 	read(connection, &event.id) or_return
 	read(connection, &event.orientation) or_return
+	_debug_log(connection, "<- wl_touch@", object, ".orientation:", " id=", event.id, " orientation=", event.orientation)
 	ok = true
 	return
 }
@@ -6428,6 +6796,7 @@ parse_wl_output_geometry :: proc(connection: ^Connection, object: u32) -> (event
 	read(connection, &event.make) or_return
 	read(connection, &event.model) or_return
 	read(connection, &event.transform) or_return
+	_debug_log(connection, "<- wl_output@", object, ".geometry:", " x=", event.x, " y=", event.y, " physical_width=", event.physical_width, " physical_height=", event.physical_height, " subpixel=", event.subpixel, " make=", event.make, " model=", event.model, " transform=", event.transform)
 	ok = true
 	return
 }
@@ -6437,35 +6806,41 @@ parse_wl_output_mode :: proc(connection: ^Connection, object: u32) -> (event: Ev
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
 	read(connection, &event.refresh) or_return
+	_debug_log(connection, "<- wl_output@", object, ".mode:", " flags=", event.flags, " width=", event.width, " height=", event.height, " refresh=", event.refresh)
 	ok = true
 	return
 }
 parse_wl_output_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Done, ok: bool) {
 	event.object = Output(object)
+	_debug_log(connection, "<- wl_output@", object, ".done:")
 	ok = true
 	return
 }
 parse_wl_output_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Scale, ok: bool) {
 	event.object = Output(object)
 	read(connection, &event.factor) or_return
+	_debug_log(connection, "<- wl_output@", object, ".scale:", " factor=", event.factor)
 	ok = true
 	return
 }
 parse_wl_output_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Name, ok: bool) {
 	event.object = Output(object)
 	read(connection, &event.name) or_return
+	_debug_log(connection, "<- wl_output@", object, ".name:", " name=", event.name)
 	ok = true
 	return
 }
 parse_wl_output_description :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Description, ok: bool) {
 	event.object = Output(object)
 	read(connection, &event.description) or_return
+	_debug_log(connection, "<- wl_output@", object, ".description:", " description=", event.description)
 	ok = true
 	return
 }
 parse_zwp_linux_dmabuf_v1_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_V1_Format, ok: bool) {
 	event.object = Zwp_Linux_Dmabuf_V1(object)
 	read(connection, &event.format) or_return
+	_debug_log(connection, "<- zwp_linux_dmabuf_v1@", object, ".format:", " format=", event.format)
 	ok = true
 	return
 }
@@ -6474,6 +6849,7 @@ parse_zwp_linux_dmabuf_v1_modifier :: proc(connection: ^Connection, object: u32)
 	read(connection, &event.format) or_return
 	read(connection, &event.modifier_hi) or_return
 	read(connection, &event.modifier_lo) or_return
+	_debug_log(connection, "<- zwp_linux_dmabuf_v1@", object, ".modifier:", " format=", event.format, " modifier_hi=", event.modifier_hi, " modifier_lo=", event.modifier_lo)
 	ok = true
 	return
 }
@@ -6482,16 +6858,19 @@ parse_zwp_linux_buffer_params_v1_created :: proc(connection: ^Connection, object
 	read(connection, &event.buffer) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.buffer) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.buffer) - SERVER_ID_START] = .Buffer
+	_debug_log(connection, "<- zwp_linux_buffer_params_v1@", object, ".created:", " buffer=", event.buffer)
 	ok = true
 	return
 }
 parse_zwp_linux_buffer_params_v1_failed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Buffer_Params_V1_Failed, ok: bool) {
 	event.object = Zwp_Linux_Buffer_Params_V1(object)
+	_debug_log(connection, "<- zwp_linux_buffer_params_v1@", object, ".failed:")
 	ok = true
 	return
 }
 parse_zwp_linux_dmabuf_feedback_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Done, ok: bool) {
 	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
+	_debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".done:")
 	ok = true
 	return
 }
@@ -6499,47 +6878,55 @@ parse_zwp_linux_dmabuf_feedback_v1_format_table :: proc(connection: ^Connection,
 	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.fd) or_return
 	read(connection, &event.size) or_return
+	_debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".format_table:", " fd=", event.fd, " size=", event.size)
 	ok = true
 	return
 }
 parse_zwp_linux_dmabuf_feedback_v1_main_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Main_Device, ok: bool) {
 	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.device) or_return
+	_debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".main_device:", " device=", event.device)
 	ok = true
 	return
 }
 parse_zwp_linux_dmabuf_feedback_v1_tranche_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Done, ok: bool) {
 	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
+	_debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".tranche_done:")
 	ok = true
 	return
 }
 parse_zwp_linux_dmabuf_feedback_v1_tranche_target_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Target_Device, ok: bool) {
 	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.device) or_return
+	_debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".tranche_target_device:", " device=", event.device)
 	ok = true
 	return
 }
 parse_zwp_linux_dmabuf_feedback_v1_tranche_formats :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Formats, ok: bool) {
 	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.indices) or_return
+	_debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".tranche_formats:", " indices=", event.indices)
 	ok = true
 	return
 }
 parse_zwp_linux_dmabuf_feedback_v1_tranche_flags :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags, ok: bool) {
 	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
 	read(connection, &event.flags) or_return
+	_debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".tranche_flags:", " flags=", event.flags)
 	ok = true
 	return
 }
 parse_wp_presentation_clock_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Clock_Id, ok: bool) {
 	event.object = Wp_Presentation(object)
 	read(connection, &event.clk_id) or_return
+	_debug_log(connection, "<- wp_presentation@", object, ".clock_id:", " clk_id=", event.clk_id)
 	ok = true
 	return
 }
 parse_wp_presentation_feedback_sync_output :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Feedback_Sync_Output, ok: bool) {
 	event.object = Wp_Presentation_Feedback(object)
 	read(connection, &event.output) or_return
+	_debug_log(connection, "<- wp_presentation_feedback@", object, ".sync_output:", " output=", event.output)
 	ok = true
 	return
 }
@@ -6552,11 +6939,13 @@ parse_wp_presentation_feedback_presented :: proc(connection: ^Connection, object
 	read(connection, &event.seq_hi) or_return
 	read(connection, &event.seq_lo) or_return
 	read(connection, &event.flags) or_return
+	_debug_log(connection, "<- wp_presentation_feedback@", object, ".presented:", " tv_sec_hi=", event.tv_sec_hi, " tv_sec_lo=", event.tv_sec_lo, " tv_nsec=", event.tv_nsec, " refresh=", event.refresh, " seq_hi=", event.seq_hi, " seq_lo=", event.seq_lo, " flags=", event.flags)
 	ok = true
 	return
 }
 parse_wp_presentation_feedback_discarded :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Feedback_Discarded, ok: bool) {
 	event.object = Wp_Presentation_Feedback(object)
+	_debug_log(connection, "<- wp_presentation_feedback@", object, ".discarded:")
 	ok = true
 	return
 }
@@ -6565,6 +6954,7 @@ parse_zwp_tablet_seat_v2_tablet_added :: proc(connection: ^Connection, object: u
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_V2
+	_debug_log(connection, "<- zwp_tablet_seat_v2@", object, ".tablet_added:", " id=", event.id)
 	ok = true
 	return
 }
@@ -6573,6 +6963,7 @@ parse_zwp_tablet_seat_v2_tool_added :: proc(connection: ^Connection, object: u32
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_Tool_V2
+	_debug_log(connection, "<- zwp_tablet_seat_v2@", object, ".tool_added:", " id=", event.id)
 	ok = true
 	return
 }
@@ -6581,12 +6972,14 @@ parse_zwp_tablet_seat_v2_pad_added :: proc(connection: ^Connection, object: u32)
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_Pad_V2
+	_debug_log(connection, "<- zwp_tablet_seat_v2@", object, ".pad_added:", " id=", event.id)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_type :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Type, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.tool_type) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".type:", " tool_type=", event.tool_type)
 	ok = true
 	return
 }
@@ -6594,6 +6987,7 @@ parse_zwp_tablet_tool_v2_hardware_serial :: proc(connection: ^Connection, object
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.hardware_serial_hi) or_return
 	read(connection, &event.hardware_serial_lo) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".hardware_serial:", " hardware_serial_hi=", event.hardware_serial_hi, " hardware_serial_lo=", event.hardware_serial_lo)
 	ok = true
 	return
 }
@@ -6601,22 +6995,26 @@ parse_zwp_tablet_tool_v2_hardware_id_wacom :: proc(connection: ^Connection, obje
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.hardware_id_hi) or_return
 	read(connection, &event.hardware_id_lo) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".hardware_id_wacom:", " hardware_id_hi=", event.hardware_id_hi, " hardware_id_lo=", event.hardware_id_lo)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_capability :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Capability, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.capability) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".capability:", " capability=", event.capability)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Done, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".done:")
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Removed, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".removed:")
 	ok = true
 	return
 }
@@ -6625,22 +7023,26 @@ parse_zwp_tablet_tool_v2_proximity_in :: proc(connection: ^Connection, object: u
 	read(connection, &event.serial) or_return
 	read(connection, &event.tablet) or_return
 	read(connection, &event.surface) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".proximity_in:", " serial=", event.serial, " tablet=", event.tablet, " surface=", event.surface)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_proximity_out :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Proximity_Out, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".proximity_out:")
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_down :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Down, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.serial) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".down:", " serial=", event.serial)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_up :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Up, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".up:")
 	ok = true
 	return
 }
@@ -6648,18 +7050,21 @@ parse_zwp_tablet_tool_v2_motion :: proc(connection: ^Connection, object: u32) ->
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".motion:", " x=", event.x, " y=", event.y)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_pressure :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Pressure, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.pressure) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".pressure:", " pressure=", event.pressure)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_distance :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Distance, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.distance) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".distance:", " distance=", event.distance)
 	ok = true
 	return
 }
@@ -6667,18 +7072,21 @@ parse_zwp_tablet_tool_v2_tilt :: proc(connection: ^Connection, object: u32) -> (
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.tilt_x) or_return
 	read(connection, &event.tilt_y) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".tilt:", " tilt_x=", event.tilt_x, " tilt_y=", event.tilt_y)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_rotation :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Rotation, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.degrees) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".rotation:", " degrees=", event.degrees)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_slider :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Slider, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.position) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".slider:", " position=", event.position)
 	ok = true
 	return
 }
@@ -6686,6 +7094,7 @@ parse_zwp_tablet_tool_v2_wheel :: proc(connection: ^Connection, object: u32) -> 
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.degrees) or_return
 	read(connection, &event.clicks) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".wheel:", " degrees=", event.degrees, " clicks=", event.clicks)
 	ok = true
 	return
 }
@@ -6694,18 +7103,21 @@ parse_zwp_tablet_tool_v2_button :: proc(connection: ^Connection, object: u32) ->
 	read(connection, &event.serial) or_return
 	read(connection, &event.button) or_return
 	read(connection, &event.state) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".button:", " serial=", event.serial, " button=", event.button, " state=", event.state)
 	ok = true
 	return
 }
 parse_zwp_tablet_tool_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Frame, ok: bool) {
 	event.object = Zwp_Tablet_Tool_V2(object)
 	read(connection, &event.time) or_return
+	_debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".frame:", " time=", event.time)
 	ok = true
 	return
 }
 parse_zwp_tablet_v2_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Name, ok: bool) {
 	event.object = Zwp_Tablet_V2(object)
 	read(connection, &event.name) or_return
+	_debug_log(connection, "<- zwp_tablet_v2@", object, ".name:", " name=", event.name)
 	ok = true
 	return
 }
@@ -6713,80 +7125,94 @@ parse_zwp_tablet_v2_id :: proc(connection: ^Connection, object: u32) -> (event: 
 	event.object = Zwp_Tablet_V2(object)
 	read(connection, &event.vid) or_return
 	read(connection, &event.pid) or_return
+	_debug_log(connection, "<- zwp_tablet_v2@", object, ".id:", " vid=", event.vid, " pid=", event.pid)
 	ok = true
 	return
 }
 parse_zwp_tablet_v2_path :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Path, ok: bool) {
 	event.object = Zwp_Tablet_V2(object)
 	read(connection, &event.path) or_return
+	_debug_log(connection, "<- zwp_tablet_v2@", object, ".path:", " path=", event.path)
 	ok = true
 	return
 }
 parse_zwp_tablet_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Done, ok: bool) {
 	event.object = Zwp_Tablet_V2(object)
+	_debug_log(connection, "<- zwp_tablet_v2@", object, ".done:")
 	ok = true
 	return
 }
 parse_zwp_tablet_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Removed, ok: bool) {
 	event.object = Zwp_Tablet_V2(object)
+	_debug_log(connection, "<- zwp_tablet_v2@", object, ".removed:")
 	ok = true
 	return
 }
 parse_zwp_tablet_v2_bustype :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Bustype, ok: bool) {
 	event.object = Zwp_Tablet_V2(object)
 	read(connection, &event.bustype) or_return
+	_debug_log(connection, "<- zwp_tablet_v2@", object, ".bustype:", " bustype=", event.bustype)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_ring_v2_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Source, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Ring_V2(object)
 	read(connection, &event.source) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_ring_v2@", object, ".source:", " source=", event.source)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_ring_v2_angle :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Angle, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Ring_V2(object)
 	read(connection, &event.degrees) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_ring_v2@", object, ".angle:", " degrees=", event.degrees)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_ring_v2_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Stop, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Ring_V2(object)
+	_debug_log(connection, "<- zwp_tablet_pad_ring_v2@", object, ".stop:")
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_ring_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Frame, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Ring_V2(object)
 	read(connection, &event.time) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_ring_v2@", object, ".frame:", " time=", event.time)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_strip_v2_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Source, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Strip_V2(object)
 	read(connection, &event.source) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_strip_v2@", object, ".source:", " source=", event.source)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_strip_v2_position :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Position, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Strip_V2(object)
 	read(connection, &event.position) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_strip_v2@", object, ".position:", " position=", event.position)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_strip_v2_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Stop, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Strip_V2(object)
+	_debug_log(connection, "<- zwp_tablet_pad_strip_v2@", object, ".stop:")
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_strip_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Frame, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Strip_V2(object)
 	read(connection, &event.time) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_strip_v2@", object, ".frame:", " time=", event.time)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_group_v2_buttons :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Buttons, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	read(connection, &event.buttons) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".buttons:", " buttons=", event.buttons)
 	ok = true
 	return
 }
@@ -6795,6 +7221,7 @@ parse_zwp_tablet_pad_group_v2_ring :: proc(connection: ^Connection, object: u32)
 	read(connection, &event.ring) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.ring) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.ring) - SERVER_ID_START] = .Zwp_Tablet_Pad_Ring_V2
+	_debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".ring:", " ring=", event.ring)
 	ok = true
 	return
 }
@@ -6803,17 +7230,20 @@ parse_zwp_tablet_pad_group_v2_strip :: proc(connection: ^Connection, object: u32
 	read(connection, &event.strip) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.strip) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.strip) - SERVER_ID_START] = .Zwp_Tablet_Pad_Strip_V2
+	_debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".strip:", " strip=", event.strip)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_group_v2_modes :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Modes, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Group_V2(object)
 	read(connection, &event.modes) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".modes:", " modes=", event.modes)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_group_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Done, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Group_V2(object)
+	_debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".done:")
 	ok = true
 	return
 }
@@ -6822,6 +7252,7 @@ parse_zwp_tablet_pad_group_v2_mode_switch :: proc(connection: ^Connection, objec
 	read(connection, &event.time) or_return
 	read(connection, &event.serial) or_return
 	read(connection, &event.mode) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".mode_switch:", " time=", event.time, " serial=", event.serial, " mode=", event.mode)
 	ok = true
 	return
 }
@@ -6830,6 +7261,7 @@ parse_zwp_tablet_pad_group_v2_dial :: proc(connection: ^Connection, object: u32)
 	read(connection, &event.dial) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.dial) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.dial) - SERVER_ID_START] = .Zwp_Tablet_Pad_Dial_V2
+	_debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".dial:", " dial=", event.dial)
 	ok = true
 	return
 }
@@ -6838,23 +7270,27 @@ parse_zwp_tablet_pad_v2_group :: proc(connection: ^Connection, object: u32) -> (
 	read(connection, &event.pad_group) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.pad_group) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.pad_group) - SERVER_ID_START] = .Zwp_Tablet_Pad_Group_V2
+	_debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".group:", " pad_group=", event.pad_group)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_v2_path :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Path, ok: bool) {
 	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.path) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".path:", " path=", event.path)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_v2_buttons :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Buttons, ok: bool) {
 	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.buttons) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".buttons:", " buttons=", event.buttons)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Done, ok: bool) {
 	event.object = Zwp_Tablet_Pad_V2(object)
+	_debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".done:")
 	ok = true
 	return
 }
@@ -6863,6 +7299,7 @@ parse_zwp_tablet_pad_v2_button :: proc(connection: ^Connection, object: u32) -> 
 	read(connection, &event.time) or_return
 	read(connection, &event.button) or_return
 	read(connection, &event.state) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".button:", " time=", event.time, " button=", event.button, " state=", event.state)
 	ok = true
 	return
 }
@@ -6871,6 +7308,7 @@ parse_zwp_tablet_pad_v2_enter :: proc(connection: ^Connection, object: u32) -> (
 	read(connection, &event.serial) or_return
 	read(connection, &event.tablet) or_return
 	read(connection, &event.surface) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".enter:", " serial=", event.serial, " tablet=", event.tablet, " surface=", event.surface)
 	ok = true
 	return
 }
@@ -6878,35 +7316,41 @@ parse_zwp_tablet_pad_v2_leave :: proc(connection: ^Connection, object: u32) -> (
 	event.object = Zwp_Tablet_Pad_V2(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".leave:", " serial=", event.serial, " surface=", event.surface)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Removed, ok: bool) {
 	event.object = Zwp_Tablet_Pad_V2(object)
+	_debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".removed:")
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_dial_v2_delta :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Dial_V2_Delta, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Dial_V2(object)
 	read(connection, &event.value120) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_dial_v2@", object, ".delta:", " value120=", event.value120)
 	ok = true
 	return
 }
 parse_zwp_tablet_pad_dial_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Dial_V2_Frame, ok: bool) {
 	event.object = Zwp_Tablet_Pad_Dial_V2(object)
 	read(connection, &event.time) or_return
+	_debug_log(connection, "<- zwp_tablet_pad_dial_v2@", object, ".frame:", " time=", event.time)
 	ok = true
 	return
 }
 parse_xdg_wm_base_ping :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Wm_Base_Ping, ok: bool) {
 	event.object = Xdg_Wm_Base(object)
 	read(connection, &event.serial) or_return
+	_debug_log(connection, "<- xdg_wm_base@", object, ".ping:", " serial=", event.serial)
 	ok = true
 	return
 }
 parse_xdg_surface_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Surface_Configure, ok: bool) {
 	event.object = Xdg_Surface(object)
 	read(connection, &event.serial) or_return
+	_debug_log(connection, "<- xdg_surface@", object, ".configure:", " serial=", event.serial)
 	ok = true
 	return
 }
@@ -6915,11 +7359,13 @@ parse_xdg_toplevel_configure :: proc(connection: ^Connection, object: u32) -> (e
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
 	read(connection, &event.states) or_return
+	_debug_log(connection, "<- xdg_toplevel@", object, ".configure:", " width=", event.width, " height=", event.height, " states=", event.states)
 	ok = true
 	return
 }
 parse_xdg_toplevel_close :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Close, ok: bool) {
 	event.object = Xdg_Toplevel(object)
+	_debug_log(connection, "<- xdg_toplevel@", object, ".close:")
 	ok = true
 	return
 }
@@ -6927,12 +7373,14 @@ parse_xdg_toplevel_configure_bounds :: proc(connection: ^Connection, object: u32
 	event.object = Xdg_Toplevel(object)
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
+	_debug_log(connection, "<- xdg_toplevel@", object, ".configure_bounds:", " width=", event.width, " height=", event.height)
 	ok = true
 	return
 }
 parse_xdg_toplevel_wm_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Wm_Capabilities, ok: bool) {
 	event.object = Xdg_Toplevel(object)
 	read(connection, &event.capabilities) or_return
+	_debug_log(connection, "<- xdg_toplevel@", object, ".wm_capabilities:", " capabilities=", event.capabilities)
 	ok = true
 	return
 }
@@ -6942,57 +7390,67 @@ parse_xdg_popup_configure :: proc(connection: ^Connection, object: u32) -> (even
 	read(connection, &event.y) or_return
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
+	_debug_log(connection, "<- xdg_popup@", object, ".configure:", " x=", event.x, " y=", event.y, " width=", event.width, " height=", event.height)
 	ok = true
 	return
 }
 parse_xdg_popup_popup_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Popup_Popup_Done, ok: bool) {
 	event.object = Xdg_Popup(object)
+	_debug_log(connection, "<- xdg_popup@", object, ".popup_done:")
 	ok = true
 	return
 }
 parse_xdg_popup_repositioned :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Popup_Repositioned, ok: bool) {
 	event.object = Xdg_Popup(object)
 	read(connection, &event.token) or_return
+	_debug_log(connection, "<- xdg_popup@", object, ".repositioned:", " token=", event.token)
 	ok = true
 	return
 }
 parse_wp_color_manager_v1_supported_intent :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Intent, ok: bool) {
 	event.object = Wp_Color_Manager_V1(object)
 	read(connection, &event.render_intent) or_return
+	_debug_log(connection, "<- wp_color_manager_v1@", object, ".supported_intent:", " render_intent=", event.render_intent)
 	ok = true
 	return
 }
 parse_wp_color_manager_v1_supported_feature :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Feature, ok: bool) {
 	event.object = Wp_Color_Manager_V1(object)
 	read(connection, &event.feature) or_return
+	_debug_log(connection, "<- wp_color_manager_v1@", object, ".supported_feature:", " feature=", event.feature)
 	ok = true
 	return
 }
 parse_wp_color_manager_v1_supported_tf_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Tf_Named, ok: bool) {
 	event.object = Wp_Color_Manager_V1(object)
 	read(connection, &event.tf) or_return
+	_debug_log(connection, "<- wp_color_manager_v1@", object, ".supported_tf_named:", " tf=", event.tf)
 	ok = true
 	return
 }
 parse_wp_color_manager_v1_supported_primaries_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Primaries_Named, ok: bool) {
 	event.object = Wp_Color_Manager_V1(object)
 	read(connection, &event.primaries) or_return
+	_debug_log(connection, "<- wp_color_manager_v1@", object, ".supported_primaries_named:", " primaries=", event.primaries)
 	ok = true
 	return
 }
 parse_wp_color_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Done, ok: bool) {
 	event.object = Wp_Color_Manager_V1(object)
+	_debug_log(connection, "<- wp_color_manager_v1@", object, ".done:")
 	ok = true
 	return
 }
 parse_wp_color_management_output_v1_image_description_changed :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Management_Output_V1_Image_Description_Changed, ok: bool) {
 	event.object = Wp_Color_Management_Output_V1(object)
+	_debug_log(connection, "<- wp_color_management_output_v1@", object, ".image_description_changed:")
 	ok = true
 	return
 }
 parse_wp_color_management_surface_feedback_v1_preferred_changed :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed, ok: bool) {
 	event.object = Wp_Color_Management_Surface_Feedback_V1(object)
 	read(connection, &event.identity) or_return
+	_debug_log(connection, "<- wp_color_management_surface_feedback_v1@", object, ".preferred_changed:", " identity=", event.identity)
 	ok = true
 	return
 }
@@ -7000,6 +7458,7 @@ parse_wp_color_management_surface_feedback_v1_preferred_changed2 :: proc(connect
 	event.object = Wp_Color_Management_Surface_Feedback_V1(object)
 	read(connection, &event.identity_hi) or_return
 	read(connection, &event.identity_lo) or_return
+	_debug_log(connection, "<- wp_color_management_surface_feedback_v1@", object, ".preferred_changed2:", " identity_hi=", event.identity_hi, " identity_lo=", event.identity_lo)
 	ok = true
 	return
 }
@@ -7007,12 +7466,14 @@ parse_wp_image_description_v1_failed :: proc(connection: ^Connection, object: u3
 	event.object = Wp_Image_Description_V1(object)
 	read(connection, &event.cause) or_return
 	read(connection, &event.msg) or_return
+	_debug_log(connection, "<- wp_image_description_v1@", object, ".failed:", " cause=", event.cause, " msg=", event.msg)
 	ok = true
 	return
 }
 parse_wp_image_description_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_V1_Ready, ok: bool) {
 	event.object = Wp_Image_Description_V1(object)
 	read(connection, &event.identity) or_return
+	_debug_log(connection, "<- wp_image_description_v1@", object, ".ready:", " identity=", event.identity)
 	ok = true
 	return
 }
@@ -7020,11 +7481,13 @@ parse_wp_image_description_v1_ready2 :: proc(connection: ^Connection, object: u3
 	event.object = Wp_Image_Description_V1(object)
 	read(connection, &event.identity_hi) or_return
 	read(connection, &event.identity_lo) or_return
+	_debug_log(connection, "<- wp_image_description_v1@", object, ".ready2:", " identity_hi=", event.identity_hi, " identity_lo=", event.identity_lo)
 	ok = true
 	return
 }
 parse_wp_image_description_info_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Done, ok: bool) {
 	event.object = Wp_Image_Description_Info_V1(object)
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".done:")
 	ok = true
 	return
 }
@@ -7032,6 +7495,7 @@ parse_wp_image_description_info_v1_icc_file :: proc(connection: ^Connection, obj
 	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.icc) or_return
 	read(connection, &event.icc_size) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".icc_file:", " icc=", event.icc, " icc_size=", event.icc_size)
 	ok = true
 	return
 }
@@ -7045,24 +7509,28 @@ parse_wp_image_description_info_v1_primaries :: proc(connection: ^Connection, ob
 	read(connection, &event.b_y) or_return
 	read(connection, &event.w_x) or_return
 	read(connection, &event.w_y) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".primaries:", " r_x=", event.r_x, " r_y=", event.r_y, " g_x=", event.g_x, " g_y=", event.g_y, " b_x=", event.b_x, " b_y=", event.b_y, " w_x=", event.w_x, " w_y=", event.w_y)
 	ok = true
 	return
 }
 parse_wp_image_description_info_v1_primaries_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Primaries_Named, ok: bool) {
 	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.primaries) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".primaries_named:", " primaries=", event.primaries)
 	ok = true
 	return
 }
 parse_wp_image_description_info_v1_tf_power :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Tf_Power, ok: bool) {
 	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.eexp) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".tf_power:", " eexp=", event.eexp)
 	ok = true
 	return
 }
 parse_wp_image_description_info_v1_tf_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Tf_Named, ok: bool) {
 	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.tf) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".tf_named:", " tf=", event.tf)
 	ok = true
 	return
 }
@@ -7071,6 +7539,7 @@ parse_wp_image_description_info_v1_luminances :: proc(connection: ^Connection, o
 	read(connection, &event.min_lum) or_return
 	read(connection, &event.max_lum) or_return
 	read(connection, &event.reference_lum) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".luminances:", " min_lum=", event.min_lum, " max_lum=", event.max_lum, " reference_lum=", event.reference_lum)
 	ok = true
 	return
 }
@@ -7084,6 +7553,7 @@ parse_wp_image_description_info_v1_target_primaries :: proc(connection: ^Connect
 	read(connection, &event.b_y) or_return
 	read(connection, &event.w_x) or_return
 	read(connection, &event.w_y) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".target_primaries:", " r_x=", event.r_x, " r_y=", event.r_y, " g_x=", event.g_x, " g_y=", event.g_y, " b_x=", event.b_x, " b_y=", event.b_y, " w_x=", event.w_x, " w_y=", event.w_y)
 	ok = true
 	return
 }
@@ -7091,24 +7561,28 @@ parse_wp_image_description_info_v1_target_luminance :: proc(connection: ^Connect
 	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.min_lum) or_return
 	read(connection, &event.max_lum) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".target_luminance:", " min_lum=", event.min_lum, " max_lum=", event.max_lum)
 	ok = true
 	return
 }
 parse_wp_image_description_info_v1_target_max_cll :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Max_Cll, ok: bool) {
 	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.max_cll) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".target_max_cll:", " max_cll=", event.max_cll)
 	ok = true
 	return
 }
 parse_wp_image_description_info_v1_target_max_fall :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Max_Fall, ok: bool) {
 	event.object = Wp_Image_Description_Info_V1(object)
 	read(connection, &event.max_fall) or_return
+	_debug_log(connection, "<- wp_image_description_info_v1@", object, ".target_max_fall:", " max_fall=", event.max_fall)
 	ok = true
 	return
 }
 parse_wp_color_representation_manager_v1_supported_alpha_mode :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Representation_Manager_V1_Supported_Alpha_Mode, ok: bool) {
 	event.object = Wp_Color_Representation_Manager_V1(object)
 	read(connection, &event.alpha_mode) or_return
+	_debug_log(connection, "<- wp_color_representation_manager_v1@", object, ".supported_alpha_mode:", " alpha_mode=", event.alpha_mode)
 	ok = true
 	return
 }
@@ -7116,17 +7590,20 @@ parse_wp_color_representation_manager_v1_supported_coefficients_and_ranges :: pr
 	event.object = Wp_Color_Representation_Manager_V1(object)
 	read(connection, &event.coefficients) or_return
 	read(connection, &event.range) or_return
+	_debug_log(connection, "<- wp_color_representation_manager_v1@", object, ".supported_coefficients_and_ranges:", " coefficients=", event.coefficients, " range=", event.range)
 	ok = true
 	return
 }
 parse_wp_color_representation_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Representation_Manager_V1_Done, ok: bool) {
 	event.object = Wp_Color_Representation_Manager_V1(object)
+	_debug_log(connection, "<- wp_color_representation_manager_v1@", object, ".done:")
 	ok = true
 	return
 }
 parse_wp_drm_lease_device_v1_drm_fd :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Drm_Fd, ok: bool) {
 	event.object = Wp_Drm_Lease_Device_V1(object)
 	read(connection, &event.fd) or_return
+	_debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".drm_fd:", " fd=", event.fd)
 	ok = true
 	return
 }
@@ -7135,61 +7612,72 @@ parse_wp_drm_lease_device_v1_connector :: proc(connection: ^Connection, object: 
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Wp_Drm_Lease_Connector_V1
+	_debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".connector:", " id=", event.id)
 	ok = true
 	return
 }
 parse_wp_drm_lease_device_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Done, ok: bool) {
 	event.object = Wp_Drm_Lease_Device_V1(object)
+	_debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".done:")
 	ok = true
 	return
 }
 parse_wp_drm_lease_device_v1_released :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Released, ok: bool) {
 	event.object = Wp_Drm_Lease_Device_V1(object)
+	_debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".released:")
 	ok = true
 	return
 }
 parse_wp_drm_lease_connector_v1_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Name, ok: bool) {
 	event.object = Wp_Drm_Lease_Connector_V1(object)
 	read(connection, &event.name) or_return
+	_debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".name:", " name=", event.name)
 	ok = true
 	return
 }
 parse_wp_drm_lease_connector_v1_description :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Description, ok: bool) {
 	event.object = Wp_Drm_Lease_Connector_V1(object)
 	read(connection, &event.description) or_return
+	_debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".description:", " description=", event.description)
 	ok = true
 	return
 }
 parse_wp_drm_lease_connector_v1_connector_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Connector_Id, ok: bool) {
 	event.object = Wp_Drm_Lease_Connector_V1(object)
 	read(connection, &event.connector_id) or_return
+	_debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".connector_id:", " connector_id=", event.connector_id)
 	ok = true
 	return
 }
 parse_wp_drm_lease_connector_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Done, ok: bool) {
 	event.object = Wp_Drm_Lease_Connector_V1(object)
+	_debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".done:")
 	ok = true
 	return
 }
 parse_wp_drm_lease_connector_v1_withdrawn :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Withdrawn, ok: bool) {
 	event.object = Wp_Drm_Lease_Connector_V1(object)
+	_debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".withdrawn:")
 	ok = true
 	return
 }
 parse_wp_drm_lease_v1_lease_fd :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_V1_Lease_Fd, ok: bool) {
 	event.object = Wp_Drm_Lease_V1(object)
 	read(connection, &event.leased_fd) or_return
+	_debug_log(connection, "<- wp_drm_lease_v1@", object, ".lease_fd:", " leased_fd=", event.leased_fd)
 	ok = true
 	return
 }
 parse_wp_drm_lease_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_V1_Finished, ok: bool) {
 	event.object = Wp_Drm_Lease_V1(object)
+	_debug_log(connection, "<- wp_drm_lease_v1@", object, ".finished:")
 	ok = true
 	return
 }
 parse_ext_background_effect_manager_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Background_Effect_Manager_V1_Capabilities, ok: bool) {
 	event.object = Ext_Background_Effect_Manager_V1(object)
 	read(connection, &event.flags) or_return
+	_debug_log(connection, "<- ext_background_effect_manager_v1@", object, ".capabilities:", " flags=", event.flags)
 	ok = true
 	return
 }
@@ -7198,23 +7686,27 @@ parse_ext_data_control_device_v1_data_offer :: proc(connection: ^Connection, obj
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Ext_Data_Control_Offer_V1
+	_debug_log(connection, "<- ext_data_control_device_v1@", object, ".data_offer:", " id=", event.id)
 	ok = true
 	return
 }
 parse_ext_data_control_device_v1_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Selection, ok: bool) {
 	event.object = Ext_Data_Control_Device_V1(object)
 	read(connection, &event.id) or_return
+	_debug_log(connection, "<- ext_data_control_device_v1@", object, ".selection:", " id=", event.id)
 	ok = true
 	return
 }
 parse_ext_data_control_device_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Finished, ok: bool) {
 	event.object = Ext_Data_Control_Device_V1(object)
+	_debug_log(connection, "<- ext_data_control_device_v1@", object, ".finished:")
 	ok = true
 	return
 }
 parse_ext_data_control_device_v1_primary_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Primary_Selection, ok: bool) {
 	event.object = Ext_Data_Control_Device_V1(object)
 	read(connection, &event.id) or_return
+	_debug_log(connection, "<- ext_data_control_device_v1@", object, ".primary_selection:", " id=", event.id)
 	ok = true
 	return
 }
@@ -7222,17 +7714,20 @@ parse_ext_data_control_source_v1_send :: proc(connection: ^Connection, object: u
 	event.object = Ext_Data_Control_Source_V1(object)
 	read(connection, &event.mime_type) or_return
 	read(connection, &event.fd) or_return
+	_debug_log(connection, "<- ext_data_control_source_v1@", object, ".send:", " mime_type=", event.mime_type, " fd=", event.fd)
 	ok = true
 	return
 }
 parse_ext_data_control_source_v1_cancelled :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Source_V1_Cancelled, ok: bool) {
 	event.object = Ext_Data_Control_Source_V1(object)
+	_debug_log(connection, "<- ext_data_control_source_v1@", object, ".cancelled:")
 	ok = true
 	return
 }
 parse_ext_data_control_offer_v1_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Offer_V1_Offer, ok: bool) {
 	event.object = Ext_Data_Control_Offer_V1(object)
 	read(connection, &event.mime_type) or_return
+	_debug_log(connection, "<- ext_data_control_offer_v1@", object, ".offer:", " mime_type=", event.mime_type)
 	ok = true
 	return
 }
@@ -7241,49 +7736,58 @@ parse_ext_foreign_toplevel_list_v1_toplevel :: proc(connection: ^Connection, obj
 	read(connection, &event.toplevel) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.toplevel) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.toplevel) - SERVER_ID_START] = .Ext_Foreign_Toplevel_Handle_V1
+	_debug_log(connection, "<- ext_foreign_toplevel_list_v1@", object, ".toplevel:", " toplevel=", event.toplevel)
 	ok = true
 	return
 }
 parse_ext_foreign_toplevel_list_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_List_V1_Finished, ok: bool) {
 	event.object = Ext_Foreign_Toplevel_List_V1(object)
+	_debug_log(connection, "<- ext_foreign_toplevel_list_v1@", object, ".finished:")
 	ok = true
 	return
 }
 parse_ext_foreign_toplevel_handle_v1_closed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Closed, ok: bool) {
 	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
+	_debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".closed:")
 	ok = true
 	return
 }
 parse_ext_foreign_toplevel_handle_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Done, ok: bool) {
 	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
+	_debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".done:")
 	ok = true
 	return
 }
 parse_ext_foreign_toplevel_handle_v1_title :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Title, ok: bool) {
 	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
 	read(connection, &event.title) or_return
+	_debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".title:", " title=", event.title)
 	ok = true
 	return
 }
 parse_ext_foreign_toplevel_handle_v1_app_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_App_Id, ok: bool) {
 	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
 	read(connection, &event.app_id) or_return
+	_debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".app_id:", " app_id=", event.app_id)
 	ok = true
 	return
 }
 parse_ext_foreign_toplevel_handle_v1_identifier :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Identifier, ok: bool) {
 	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
 	read(connection, &event.identifier) or_return
+	_debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".identifier:", " identifier=", event.identifier)
 	ok = true
 	return
 }
 parse_ext_idle_notification_v1_idled :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Idle_Notification_V1_Idled, ok: bool) {
 	event.object = Ext_Idle_Notification_V1(object)
+	_debug_log(connection, "<- ext_idle_notification_v1@", object, ".idled:")
 	ok = true
 	return
 }
 parse_ext_idle_notification_v1_resumed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Idle_Notification_V1_Resumed, ok: bool) {
 	event.object = Ext_Idle_Notification_V1(object)
+	_debug_log(connection, "<- ext_idle_notification_v1@", object, ".resumed:")
 	ok = true
 	return
 }
@@ -7291,18 +7795,21 @@ parse_ext_image_copy_capture_session_v1_buffer_size :: proc(connection: ^Connect
 	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".buffer_size:", " width=", event.width, " height=", event.height)
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_session_v1_shm_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Shm_Format, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	read(connection, &event.format) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".shm_format:", " format=", event.format)
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_session_v1_dmabuf_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Device, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	read(connection, &event.device) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".dmabuf_device:", " device=", event.device)
 	ok = true
 	return
 }
@@ -7310,22 +7817,26 @@ parse_ext_image_copy_capture_session_v1_dmabuf_format :: proc(connection: ^Conne
 	event.object = Ext_Image_Copy_Capture_Session_V1(object)
 	read(connection, &event.format) or_return
 	read(connection, &event.modifiers) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".dmabuf_format:", " format=", event.format, " modifiers=", event.modifiers)
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_session_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Done, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Session_V1(object)
+	_debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".done:")
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_session_v1_stopped :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Stopped, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Session_V1(object)
+	_debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".stopped:")
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_frame_v1_transform :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Transform, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
 	read(connection, &event.transform) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".transform:", " transform=", event.transform)
 	ok = true
 	return
 }
@@ -7335,6 +7846,7 @@ parse_ext_image_copy_capture_frame_v1_damage :: proc(connection: ^Connection, ob
 	read(connection, &event.y) or_return
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".damage:", " x=", event.x, " y=", event.y, " width=", event.width, " height=", event.height)
 	ok = true
 	return
 }
@@ -7343,27 +7855,32 @@ parse_ext_image_copy_capture_frame_v1_presentation_time :: proc(connection: ^Con
 	read(connection, &event.tv_sec_hi) or_return
 	read(connection, &event.tv_sec_lo) or_return
 	read(connection, &event.tv_nsec) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".presentation_time:", " tv_sec_hi=", event.tv_sec_hi, " tv_sec_lo=", event.tv_sec_lo, " tv_nsec=", event.tv_nsec)
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_frame_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Ready, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
+	_debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".ready:")
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_frame_v1_failed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Failed, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
 	read(connection, &event.reason) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".failed:", " reason=", event.reason)
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_cursor_session_v1_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Enter, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
+	_debug_log(connection, "<- ext_image_copy_capture_cursor_session_v1@", object, ".enter:")
 	ok = true
 	return
 }
 parse_ext_image_copy_capture_cursor_session_v1_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Leave, ok: bool) {
 	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
+	_debug_log(connection, "<- ext_image_copy_capture_cursor_session_v1@", object, ".leave:")
 	ok = true
 	return
 }
@@ -7371,6 +7888,7 @@ parse_ext_image_copy_capture_cursor_session_v1_position :: proc(connection: ^Con
 	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_cursor_session_v1@", object, ".position:", " x=", event.x, " y=", event.y)
 	ok = true
 	return
 }
@@ -7378,16 +7896,19 @@ parse_ext_image_copy_capture_cursor_session_v1_hotspot :: proc(connection: ^Conn
 	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
+	_debug_log(connection, "<- ext_image_copy_capture_cursor_session_v1@", object, ".hotspot:", " x=", event.x, " y=", event.y)
 	ok = true
 	return
 }
 parse_ext_session_lock_v1_locked :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Session_Lock_V1_Locked, ok: bool) {
 	event.object = Ext_Session_Lock_V1(object)
+	_debug_log(connection, "<- ext_session_lock_v1@", object, ".locked:")
 	ok = true
 	return
 }
 parse_ext_session_lock_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Session_Lock_V1_Finished, ok: bool) {
 	event.object = Ext_Session_Lock_V1(object)
+	_debug_log(connection, "<- ext_session_lock_v1@", object, ".finished:")
 	ok = true
 	return
 }
@@ -7396,17 +7917,20 @@ parse_ext_session_lock_surface_v1_configure :: proc(connection: ^Connection, obj
 	read(connection, &event.serial) or_return
 	read(connection, &event.width) or_return
 	read(connection, &event.height) or_return
+	_debug_log(connection, "<- ext_session_lock_surface_v1@", object, ".configure:", " serial=", event.serial, " width=", event.width, " height=", event.height)
 	ok = true
 	return
 }
 parse_ext_transient_seat_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Transient_Seat_V1_Ready, ok: bool) {
 	event.object = Ext_Transient_Seat_V1(object)
 	read(connection, &event.global_name) or_return
+	_debug_log(connection, "<- ext_transient_seat_v1@", object, ".ready:", " global_name=", event.global_name)
 	ok = true
 	return
 }
 parse_ext_transient_seat_v1_denied :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Transient_Seat_V1_Denied, ok: bool) {
 	event.object = Ext_Transient_Seat_V1(object)
+	_debug_log(connection, "<- ext_transient_seat_v1@", object, ".denied:")
 	ok = true
 	return
 }
@@ -7415,6 +7939,7 @@ parse_ext_workspace_manager_v1_workspace_group :: proc(connection: ^Connection, 
 	read(connection, &event.workspace_group) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.workspace_group) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.workspace_group) - SERVER_ID_START] = .Ext_Workspace_Group_Handle_V1
+	_debug_log(connection, "<- ext_workspace_manager_v1@", object, ".workspace_group:", " workspace_group=", event.workspace_group)
 	ok = true
 	return
 }
@@ -7423,109 +7948,128 @@ parse_ext_workspace_manager_v1_workspace :: proc(connection: ^Connection, object
 	read(connection, &event.workspace) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.workspace) - SERVER_ID_START + 1))
 	connection.server_object_types[u32(event.workspace) - SERVER_ID_START] = .Ext_Workspace_Handle_V1
+	_debug_log(connection, "<- ext_workspace_manager_v1@", object, ".workspace:", " workspace=", event.workspace)
 	ok = true
 	return
 }
 parse_ext_workspace_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Done, ok: bool) {
 	event.object = Ext_Workspace_Manager_V1(object)
+	_debug_log(connection, "<- ext_workspace_manager_v1@", object, ".done:")
 	ok = true
 	return
 }
 parse_ext_workspace_manager_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Finished, ok: bool) {
 	event.object = Ext_Workspace_Manager_V1(object)
+	_debug_log(connection, "<- ext_workspace_manager_v1@", object, ".finished:")
 	ok = true
 	return
 }
 parse_ext_workspace_group_handle_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Capabilities, ok: bool) {
 	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.capabilities) or_return
+	_debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".capabilities:", " capabilities=", event.capabilities)
 	ok = true
 	return
 }
 parse_ext_workspace_group_handle_v1_output_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Output_Enter, ok: bool) {
 	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.output) or_return
+	_debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".output_enter:", " output=", event.output)
 	ok = true
 	return
 }
 parse_ext_workspace_group_handle_v1_output_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Output_Leave, ok: bool) {
 	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.output) or_return
+	_debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".output_leave:", " output=", event.output)
 	ok = true
 	return
 }
 parse_ext_workspace_group_handle_v1_workspace_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Workspace_Enter, ok: bool) {
 	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.workspace) or_return
+	_debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".workspace_enter:", " workspace=", event.workspace)
 	ok = true
 	return
 }
 parse_ext_workspace_group_handle_v1_workspace_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Workspace_Leave, ok: bool) {
 	event.object = Ext_Workspace_Group_Handle_V1(object)
 	read(connection, &event.workspace) or_return
+	_debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".workspace_leave:", " workspace=", event.workspace)
 	ok = true
 	return
 }
 parse_ext_workspace_group_handle_v1_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Removed, ok: bool) {
 	event.object = Ext_Workspace_Group_Handle_V1(object)
+	_debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".removed:")
 	ok = true
 	return
 }
 parse_ext_workspace_handle_v1_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Id, ok: bool) {
 	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.id) or_return
+	_debug_log(connection, "<- ext_workspace_handle_v1@", object, ".id:", " id=", event.id)
 	ok = true
 	return
 }
 parse_ext_workspace_handle_v1_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Name, ok: bool) {
 	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.name) or_return
+	_debug_log(connection, "<- ext_workspace_handle_v1@", object, ".name:", " name=", event.name)
 	ok = true
 	return
 }
 parse_ext_workspace_handle_v1_coordinates :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Coordinates, ok: bool) {
 	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.coordinates) or_return
+	_debug_log(connection, "<- ext_workspace_handle_v1@", object, ".coordinates:", " coordinates=", event.coordinates)
 	ok = true
 	return
 }
 parse_ext_workspace_handle_v1_state :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_State, ok: bool) {
 	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.state) or_return
+	_debug_log(connection, "<- ext_workspace_handle_v1@", object, ".state:", " state=", event.state)
 	ok = true
 	return
 }
 parse_ext_workspace_handle_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Capabilities, ok: bool) {
 	event.object = Ext_Workspace_Handle_V1(object)
 	read(connection, &event.capabilities) or_return
+	_debug_log(connection, "<- ext_workspace_handle_v1@", object, ".capabilities:", " capabilities=", event.capabilities)
 	ok = true
 	return
 }
 parse_ext_workspace_handle_v1_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Removed, ok: bool) {
 	event.object = Ext_Workspace_Handle_V1(object)
+	_debug_log(connection, "<- ext_workspace_handle_v1@", object, ".removed:")
 	ok = true
 	return
 }
 parse_wp_fractional_scale_v1_preferred_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Fractional_Scale_V1_Preferred_Scale, ok: bool) {
 	event.object = Wp_Fractional_Scale_V1(object)
 	read(connection, &event.scale) or_return
+	_debug_log(connection, "<- wp_fractional_scale_v1@", object, ".preferred_scale:", " scale=", event.scale)
 	ok = true
 	return
 }
 parse_xdg_activation_token_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Activation_Token_V1_Done, ok: bool) {
 	event.object = Xdg_Activation_Token_V1(object)
 	read(connection, &event.token) or_return
+	_debug_log(connection, "<- xdg_activation_token_v1@", object, ".done:", " token=", event.token)
 	ok = true
 	return
 }
 parse_xdg_toplevel_icon_manager_v1_icon_size :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Icon_Manager_V1_Icon_Size, ok: bool) {
 	event.object = Xdg_Toplevel_Icon_Manager_V1(object)
 	read(connection, &event.size) or_return
+	_debug_log(connection, "<- xdg_toplevel_icon_manager_v1@", object, ".icon_size:", " size=", event.size)
 	ok = true
 	return
 }
 parse_xdg_toplevel_icon_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Icon_Manager_V1_Done, ok: bool) {
 	event.object = Xdg_Toplevel_Icon_Manager_V1(object)
+	_debug_log(connection, "<- xdg_toplevel_icon_manager_v1@", object, ".done:")
 	ok = true
 	return
 }
