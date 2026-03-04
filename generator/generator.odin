@@ -139,10 +139,10 @@ main :: proc() {
 			fmt.sbprint(&sizes, "\t_size: u16 = 8")
 			
 			fmt.sbprintfln(&body, "\t%v := %v", ctx.object_name, ctx.object_name)
-			fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", ctx.object_name, ctx.object_name)
+			fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", ctx.object_name, ctx.object_name)
 			fmt.sbprintfln(&body, "\topcode: u16 = %d", opcode)
-			fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))")
-			fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))")
+			fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))")
+			fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))")
 
 			fmt.sbprintf(&debug_log, `	_debug_log(connection, "-> %s@", %s, ".%s:"`, ctx.raw_object_name, ctx.object_name, request_name)
 
@@ -159,10 +159,7 @@ main :: proc() {
 
 				generate_write_string :: proc(body, sizes: ^strings.Builder, name: string) {
 					fmt.sbprintf(sizes, " + 4 + u16((len(%v) + 1 + 3) & -4)", name)
-					fmt.sbprintfln(body, "\t_%v_len := u32(len(%v)) + 1", name, name)
-					fmt.sbprintfln(body, "\tbytes.buffer_write_ptr(&connection.buffer, &_%v_len, 4)", name)
-					fmt.sbprintfln(body, "\tbytes.buffer_write_string(&connection.buffer, %v)", name)
-					fmt.sbprintfln(body, "\tfor _ in len(%v) ..< (len(%v) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)", name, name)
+					fmt.sbprintfln(body, "\t_buffer_write_string(&connection.buffer, %v)", name)
 				}
 
 				switch type {
@@ -173,19 +170,18 @@ main :: proc() {
 					generate_write_string(&body, &sizes, "interface")
 
 					fmt.sbprintfln(&body, "\tversion := version")
-					fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &version, size_of(version))")
+					fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer, &version, size_of(version))")
 					fmt.sbprintf(&sizes, " + size_of(version)")
 
 					fmt.sbprintfln(&body, "\t_type := resolve_type(T, interface, _location)")
 					fmt.sbprintfln(&body, "\t%v = auto_cast generate_id(connection, _type)", name)
-					fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", name, name)
+					fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", name, name)
 					fmt.sbprintf(&sizes, " + size_of(%v)", name)
 				case "string":
 					generate_write_string(&body, &sizes, name)
-					fmt.sbprintfln(&body, "\tassert(bytes.buffer_length(&connection.buffer) %% 4 == 0)")
 				case "array":
 					fmt.sbprintfln(&sizes, " + 4 + u16((len(%v) + 3) & -4)", name)
-					fmt.sbprintfln(&body, "\tbytes.buffer_write(&connection.buffer, %v)", name)
+					fmt.sbprintfln(&body, "\t_buffer_write(&connection.buffer, %v)", name)
 					fmt.sbprintfln(&body, "\tunimplemented()")
 				case:
 					if new_id {
@@ -193,7 +189,7 @@ main :: proc() {
 					} else {
 						fmt.sbprintfln(&body, "\t%v := %v", name, name)
 					}
-					fmt.sbprintfln(&body, "\tbytes.buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", name, name)
+					fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer, &%v, size_of(%v))", name, name)
 					fmt.sbprintf(&sizes, " + size_of(%v)", name)
 				}
 
@@ -437,8 +433,6 @@ main :: proc() {
 
 	fmt.wprintln(output_writer,
 `package wayland
-
-import "core:bytes"
 
 import "base:intrinsics"
 `)

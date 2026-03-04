@@ -1,7 +1,5 @@
 package wayland
 
-import "core:bytes"
-
 import "base:intrinsics"
 
 Display_Error :: enum u32 {
@@ -1194,180 +1192,169 @@ Xwayland_Surface_V1_Error :: enum u32 {
 display_sync :: proc(connection: ^Connection, display: Display) -> (callback: Callback) {
 	_size: u16 = 8 + size_of(callback)
 	display := display
-	bytes.buffer_write_ptr(&connection.buffer, &display, size_of(display))
+	_buffer_write_ptr(&connection.buffer, &display, size_of(display))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	callback = auto_cast generate_id(connection, .Callback)
-	bytes.buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
+	_buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
 	_debug_log(connection, "-> wl_display@", display, ".sync:", " callback=", callback)
 	return
 }
 display_get_registry :: proc(connection: ^Connection, display: Display) -> (registry: Registry) {
 	_size: u16 = 8 + size_of(registry)
 	display := display
-	bytes.buffer_write_ptr(&connection.buffer, &display, size_of(display))
+	_buffer_write_ptr(&connection.buffer, &display, size_of(display))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	registry = auto_cast generate_id(connection, .Registry)
-	bytes.buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
+	_buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
 	_debug_log(connection, "-> wl_display@", display, ".get_registry:", " registry=", registry)
 	return
 }
 registry_bind :: proc(connection: ^Connection, registry: Registry, name: u32, interface: string, version: u32, $T: typeid, _location := #caller_location) -> (id: T) where intrinsics.type_is_named(T), intrinsics.type_base_type(T) == u32 {
 	_size: u16 = 8 + size_of(name) + 4 + u16((len(interface) + 1 + 3) & -4) + size_of(version) + size_of(id)
 	registry := registry
-	bytes.buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
+	_buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	name := name
-	bytes.buffer_write_ptr(&connection.buffer, &name, size_of(name))
-	_interface_len := u32(len(interface)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_interface_len, 4)
-	bytes.buffer_write_string(&connection.buffer, interface)
-	for _ in len(interface) ..< (len(interface) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
+	_buffer_write_ptr(&connection.buffer, &name, size_of(name))
+	_buffer_write_string(&connection.buffer, interface)
 	version := version
-	bytes.buffer_write_ptr(&connection.buffer, &version, size_of(version))
+	_buffer_write_ptr(&connection.buffer, &version, size_of(version))
 	_type := resolve_type(T, interface, _location)
 	id = auto_cast generate_id(connection, _type)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wl_registry@", registry, ".bind:", " name=", name, " id=", id)
 	return
 }
 compositor_create_surface :: proc(connection: ^Connection, compositor: Compositor) -> (id: Surface) {
 	_size: u16 = 8 + size_of(id)
 	compositor := compositor
-	bytes.buffer_write_ptr(&connection.buffer, &compositor, size_of(compositor))
+	_buffer_write_ptr(&connection.buffer, &compositor, size_of(compositor))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Surface)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wl_compositor@", compositor, ".create_surface:", " id=", id)
 	return
 }
 compositor_create_region :: proc(connection: ^Connection, compositor: Compositor) -> (id: Region) {
 	_size: u16 = 8 + size_of(id)
 	compositor := compositor
-	bytes.buffer_write_ptr(&connection.buffer, &compositor, size_of(compositor))
+	_buffer_write_ptr(&connection.buffer, &compositor, size_of(compositor))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Region)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wl_compositor@", compositor, ".create_region:", " id=", id)
 	return
 }
 shm_pool_create_buffer :: proc(connection: ^Connection, shm_pool: Shm_Pool, offset: i32, width: i32, height: i32, stride: i32, format: Shm_Format) -> (id: Buffer) {
 	_size: u16 = 8 + size_of(id) + size_of(offset) + size_of(width) + size_of(height) + size_of(stride) + size_of(format)
 	shm_pool := shm_pool
-	bytes.buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
+	_buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Buffer)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	offset := offset
-	bytes.buffer_write_ptr(&connection.buffer, &offset, size_of(offset))
+	_buffer_write_ptr(&connection.buffer, &offset, size_of(offset))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	stride := stride
-	bytes.buffer_write_ptr(&connection.buffer, &stride, size_of(stride))
+	_buffer_write_ptr(&connection.buffer, &stride, size_of(stride))
 	format := format
-	bytes.buffer_write_ptr(&connection.buffer, &format, size_of(format))
+	_buffer_write_ptr(&connection.buffer, &format, size_of(format))
 	_debug_log(connection, "-> wl_shm_pool@", shm_pool, ".create_buffer:", " id=", id, " offset=", offset, " width=", width, " height=", height, " stride=", stride, " format=", format)
 	return
 }
 shm_pool_destroy :: proc(connection: ^Connection, shm_pool: Shm_Pool) {
 	_size: u16 = 8
 	shm_pool := shm_pool
-	bytes.buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
+	_buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_shm_pool@", shm_pool, ".destroy:")
 	return
 }
 shm_pool_resize :: proc(connection: ^Connection, shm_pool: Shm_Pool, size: i32) {
 	_size: u16 = 8 + size_of(size)
 	shm_pool := shm_pool
-	bytes.buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
+	_buffer_write_ptr(&connection.buffer, &shm_pool, size_of(shm_pool))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	size := size
-	bytes.buffer_write_ptr(&connection.buffer, &size, size_of(size))
+	_buffer_write_ptr(&connection.buffer, &size, size_of(size))
 	_debug_log(connection, "-> wl_shm_pool@", shm_pool, ".resize:", " size=", size)
 	return
 }
 shm_create_pool :: proc(connection: ^Connection, shm: Shm, fd: Fd, size: i32) -> (id: Shm_Pool) {
 	_size: u16 = 8 + size_of(id) + size_of(size)
 	shm := shm
-	bytes.buffer_write_ptr(&connection.buffer, &shm, size_of(shm))
+	_buffer_write_ptr(&connection.buffer, &shm, size_of(shm))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Shm_Pool)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	append(&connection.fds_out, fd)
 	size := size
-	bytes.buffer_write_ptr(&connection.buffer, &size, size_of(size))
+	_buffer_write_ptr(&connection.buffer, &size, size_of(size))
 	_debug_log(connection, "-> wl_shm@", shm, ".create_pool:", " id=", id, " fd=", fd, " size=", size)
 	return
 }
 shm_release :: proc(connection: ^Connection, shm: Shm) {
 	_size: u16 = 8
 	shm := shm
-	bytes.buffer_write_ptr(&connection.buffer, &shm, size_of(shm))
+	_buffer_write_ptr(&connection.buffer, &shm, size_of(shm))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_shm@", shm, ".release:")
 	return
 }
 buffer_destroy :: proc(connection: ^Connection, buffer: Buffer) {
 	_size: u16 = 8
 	buffer := buffer
-	bytes.buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
+	_buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_buffer@", buffer, ".destroy:")
 	return
 }
 data_offer_accept :: proc(connection: ^Connection, data_offer: Data_Offer, serial: u32, mime_type: string) {
 	_size: u16 = 8 + size_of(serial) + 4 + u16((len(mime_type) + 1 + 3) & -4)
 	data_offer := data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
+	_buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
-	_mime_type_len := u32(len(mime_type)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_mime_type_len, 4)
-	bytes.buffer_write_string(&connection.buffer, mime_type)
-	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_string(&connection.buffer, mime_type)
 	_debug_log(connection, "-> wl_data_offer@", data_offer, ".accept:", " serial=", serial, " mime_type=", mime_type)
 	return
 }
 data_offer_receive :: proc(connection: ^Connection, data_offer: Data_Offer, mime_type: string, fd: Fd) {
 	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
 	data_offer := data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
+	_buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_mime_type_len := u32(len(mime_type)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_mime_type_len, 4)
-	bytes.buffer_write_string(&connection.buffer, mime_type)
-	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, mime_type)
 	append(&connection.fds_out, fd)
 	_debug_log(connection, "-> wl_data_offer@", data_offer, ".receive:", " mime_type=", mime_type, " fd=", fd)
 	return
@@ -1375,2489 +1362,2445 @@ data_offer_receive :: proc(connection: ^Connection, data_offer: Data_Offer, mime
 data_offer_destroy :: proc(connection: ^Connection, data_offer: Data_Offer) {
 	_size: u16 = 8
 	data_offer := data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
+	_buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_data_offer@", data_offer, ".destroy:")
 	return
 }
 data_offer_finish :: proc(connection: ^Connection, data_offer: Data_Offer) {
 	_size: u16 = 8
 	data_offer := data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
+	_buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_data_offer@", data_offer, ".finish:")
 	return
 }
 data_offer_set_actions :: proc(connection: ^Connection, data_offer: Data_Offer, dnd_actions: Data_Device_Manager_Dnd_Action, preferred_action: Data_Device_Manager_Dnd_Action) {
 	_size: u16 = 8 + size_of(dnd_actions) + size_of(preferred_action)
 	data_offer := data_offer
-	bytes.buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
+	_buffer_write_ptr(&connection.buffer, &data_offer, size_of(data_offer))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	dnd_actions := dnd_actions
-	bytes.buffer_write_ptr(&connection.buffer, &dnd_actions, size_of(dnd_actions))
+	_buffer_write_ptr(&connection.buffer, &dnd_actions, size_of(dnd_actions))
 	preferred_action := preferred_action
-	bytes.buffer_write_ptr(&connection.buffer, &preferred_action, size_of(preferred_action))
+	_buffer_write_ptr(&connection.buffer, &preferred_action, size_of(preferred_action))
 	_debug_log(connection, "-> wl_data_offer@", data_offer, ".set_actions:", " dnd_actions=", dnd_actions, " preferred_action=", preferred_action)
 	return
 }
 data_source_offer :: proc(connection: ^Connection, data_source: Data_Source, mime_type: string) {
 	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
 	data_source := data_source
-	bytes.buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
+	_buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_mime_type_len := u32(len(mime_type)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_mime_type_len, 4)
-	bytes.buffer_write_string(&connection.buffer, mime_type)
-	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, mime_type)
 	_debug_log(connection, "-> wl_data_source@", data_source, ".offer:", " mime_type=", mime_type)
 	return
 }
 data_source_destroy :: proc(connection: ^Connection, data_source: Data_Source) {
 	_size: u16 = 8
 	data_source := data_source
-	bytes.buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
+	_buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_data_source@", data_source, ".destroy:")
 	return
 }
 data_source_set_actions :: proc(connection: ^Connection, data_source: Data_Source, dnd_actions: Data_Device_Manager_Dnd_Action) {
 	_size: u16 = 8 + size_of(dnd_actions)
 	data_source := data_source
-	bytes.buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
+	_buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	dnd_actions := dnd_actions
-	bytes.buffer_write_ptr(&connection.buffer, &dnd_actions, size_of(dnd_actions))
+	_buffer_write_ptr(&connection.buffer, &dnd_actions, size_of(dnd_actions))
 	_debug_log(connection, "-> wl_data_source@", data_source, ".set_actions:", " dnd_actions=", dnd_actions)
 	return
 }
 data_device_start_drag :: proc(connection: ^Connection, data_device: Data_Device, source: Data_Source, origin: Surface, icon: Surface, serial: u32) {
 	_size: u16 = 8 + size_of(source) + size_of(origin) + size_of(icon) + size_of(serial)
 	data_device := data_device
-	bytes.buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
+	_buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	source := source
-	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	origin := origin
-	bytes.buffer_write_ptr(&connection.buffer, &origin, size_of(origin))
+	_buffer_write_ptr(&connection.buffer, &origin, size_of(origin))
 	icon := icon
-	bytes.buffer_write_ptr(&connection.buffer, &icon, size_of(icon))
+	_buffer_write_ptr(&connection.buffer, &icon, size_of(icon))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> wl_data_device@", data_device, ".start_drag:", " source=", source, " origin=", origin, " icon=", icon, " serial=", serial)
 	return
 }
 data_device_set_selection :: proc(connection: ^Connection, data_device: Data_Device, source: Data_Source, serial: u32) {
 	_size: u16 = 8 + size_of(source) + size_of(serial)
 	data_device := data_device
-	bytes.buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
+	_buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	source := source
-	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> wl_data_device@", data_device, ".set_selection:", " source=", source, " serial=", serial)
 	return
 }
 data_device_release :: proc(connection: ^Connection, data_device: Data_Device) {
 	_size: u16 = 8
 	data_device := data_device
-	bytes.buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
+	_buffer_write_ptr(&connection.buffer, &data_device, size_of(data_device))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_data_device@", data_device, ".release:")
 	return
 }
 data_device_manager_create_data_source :: proc(connection: ^Connection, data_device_manager: Data_Device_Manager) -> (id: Data_Source) {
 	_size: u16 = 8 + size_of(id)
 	data_device_manager := data_device_manager
-	bytes.buffer_write_ptr(&connection.buffer, &data_device_manager, size_of(data_device_manager))
+	_buffer_write_ptr(&connection.buffer, &data_device_manager, size_of(data_device_manager))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Data_Source)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wl_data_device_manager@", data_device_manager, ".create_data_source:", " id=", id)
 	return
 }
 data_device_manager_get_data_device :: proc(connection: ^Connection, data_device_manager: Data_Device_Manager, seat: Seat) -> (id: Data_Device) {
 	_size: u16 = 8 + size_of(id) + size_of(seat)
 	data_device_manager := data_device_manager
-	bytes.buffer_write_ptr(&connection.buffer, &data_device_manager, size_of(data_device_manager))
+	_buffer_write_ptr(&connection.buffer, &data_device_manager, size_of(data_device_manager))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Data_Device)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	_debug_log(connection, "-> wl_data_device_manager@", data_device_manager, ".get_data_device:", " id=", id, " seat=", seat)
 	return
 }
 shell_get_shell_surface :: proc(connection: ^Connection, shell: Shell, surface: Surface) -> (id: Shell_Surface) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	shell := shell
-	bytes.buffer_write_ptr(&connection.buffer, &shell, size_of(shell))
+	_buffer_write_ptr(&connection.buffer, &shell, size_of(shell))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Shell_Surface)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wl_shell@", shell, ".get_shell_surface:", " id=", id, " surface=", surface)
 	return
 }
 shell_surface_pong :: proc(connection: ^Connection, shell_surface: Shell_Surface, serial: u32) {
 	_size: u16 = 8 + size_of(serial)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".pong:", " serial=", serial)
 	return
 }
 shell_surface_move :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".move:", " seat=", seat, " serial=", serial)
 	return
 }
 shell_surface_resize :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32, edges: Shell_Surface_Resize) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(edges)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	edges := edges
-	bytes.buffer_write_ptr(&connection.buffer, &edges, size_of(edges))
+	_buffer_write_ptr(&connection.buffer, &edges, size_of(edges))
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".resize:", " seat=", seat, " serial=", serial, " edges=", edges)
 	return
 }
 shell_surface_set_toplevel :: proc(connection: ^Connection, shell_surface: Shell_Surface) {
 	_size: u16 = 8
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_toplevel:")
 	return
 }
 shell_surface_set_transient :: proc(connection: ^Connection, shell_surface: Shell_Surface, parent: Surface, x: i32, y: i32, flags: Shell_Surface_Transient) {
 	_size: u16 = 8 + size_of(parent) + size_of(x) + size_of(y) + size_of(flags)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	parent := parent
-	bytes.buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
+	_buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	flags := flags
-	bytes.buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
+	_buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_transient:", " parent=", parent, " x=", x, " y=", y, " flags=", flags)
 	return
 }
 shell_surface_set_fullscreen :: proc(connection: ^Connection, shell_surface: Shell_Surface, method: Shell_Surface_Fullscreen_Method, framerate: u32, output: Output) {
 	_size: u16 = 8 + size_of(method) + size_of(framerate) + size_of(output)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 5
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	method := method
-	bytes.buffer_write_ptr(&connection.buffer, &method, size_of(method))
+	_buffer_write_ptr(&connection.buffer, &method, size_of(method))
 	framerate := framerate
-	bytes.buffer_write_ptr(&connection.buffer, &framerate, size_of(framerate))
+	_buffer_write_ptr(&connection.buffer, &framerate, size_of(framerate))
 	output := output
-	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_buffer_write_ptr(&connection.buffer, &output, size_of(output))
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_fullscreen:", " method=", method, " framerate=", framerate, " output=", output)
 	return
 }
 shell_surface_set_popup :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32, parent: Surface, x: i32, y: i32, flags: Shell_Surface_Transient) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(parent) + size_of(x) + size_of(y) + size_of(flags)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 6
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	parent := parent
-	bytes.buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
+	_buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	flags := flags
-	bytes.buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
+	_buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_popup:", " seat=", seat, " serial=", serial, " parent=", parent, " x=", x, " y=", y, " flags=", flags)
 	return
 }
 shell_surface_set_maximized :: proc(connection: ^Connection, shell_surface: Shell_Surface, output: Output) {
 	_size: u16 = 8 + size_of(output)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 7
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	output := output
-	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_buffer_write_ptr(&connection.buffer, &output, size_of(output))
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_maximized:", " output=", output)
 	return
 }
 shell_surface_set_title :: proc(connection: ^Connection, shell_surface: Shell_Surface, title: string) {
 	_size: u16 = 8 + 4 + u16((len(title) + 1 + 3) & -4)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 8
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_title_len := u32(len(title)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_title_len, 4)
-	bytes.buffer_write_string(&connection.buffer, title)
-	for _ in len(title) ..< (len(title) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, title)
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_title:", " title=", title)
 	return
 }
 shell_surface_set_class :: proc(connection: ^Connection, shell_surface: Shell_Surface, class_: string) {
 	_size: u16 = 8 + 4 + u16((len(class_) + 1 + 3) & -4)
 	shell_surface := shell_surface
-	bytes.buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
+	_buffer_write_ptr(&connection.buffer, &shell_surface, size_of(shell_surface))
 	opcode: u16 = 9
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_class__len := u32(len(class_)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_class__len, 4)
-	bytes.buffer_write_string(&connection.buffer, class_)
-	for _ in len(class_) ..< (len(class_) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, class_)
 	_debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_class:", " class_=", class_)
 	return
 }
 surface_destroy :: proc(connection: ^Connection, surface: Surface) {
 	_size: u16 = 8
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_surface@", surface, ".destroy:")
 	return
 }
 surface_attach :: proc(connection: ^Connection, surface: Surface, buffer: Buffer, x: i32, y: i32) {
 	_size: u16 = 8 + size_of(buffer) + size_of(x) + size_of(y)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	buffer := buffer
-	bytes.buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
+	_buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	_debug_log(connection, "-> wl_surface@", surface, ".attach:", " buffer=", buffer, " x=", x, " y=", y)
 	return
 }
 surface_damage :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> wl_surface@", surface, ".damage:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 surface_frame :: proc(connection: ^Connection, surface: Surface) -> (callback: Callback) {
 	_size: u16 = 8 + size_of(callback)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	callback = auto_cast generate_id(connection, .Callback)
-	bytes.buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
+	_buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
 	_debug_log(connection, "-> wl_surface@", surface, ".frame:", " callback=", callback)
 	return
 }
 surface_set_opaque_region :: proc(connection: ^Connection, surface: Surface, region: Region) {
 	_size: u16 = 8 + size_of(region)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	region := region
-	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	_debug_log(connection, "-> wl_surface@", surface, ".set_opaque_region:", " region=", region)
 	return
 }
 surface_set_input_region :: proc(connection: ^Connection, surface: Surface, region: Region) {
 	_size: u16 = 8 + size_of(region)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 5
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	region := region
-	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	_debug_log(connection, "-> wl_surface@", surface, ".set_input_region:", " region=", region)
 	return
 }
 surface_commit :: proc(connection: ^Connection, surface: Surface) {
 	_size: u16 = 8
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 6
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_surface@", surface, ".commit:")
 	return
 }
 surface_set_buffer_transform :: proc(connection: ^Connection, surface: Surface, transform: Output_Transform) {
 	_size: u16 = 8 + size_of(transform)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 7
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	transform := transform
-	bytes.buffer_write_ptr(&connection.buffer, &transform, size_of(transform))
+	_buffer_write_ptr(&connection.buffer, &transform, size_of(transform))
 	_debug_log(connection, "-> wl_surface@", surface, ".set_buffer_transform:", " transform=", transform)
 	return
 }
 surface_set_buffer_scale :: proc(connection: ^Connection, surface: Surface, scale: i32) {
 	_size: u16 = 8 + size_of(scale)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 8
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	scale := scale
-	bytes.buffer_write_ptr(&connection.buffer, &scale, size_of(scale))
+	_buffer_write_ptr(&connection.buffer, &scale, size_of(scale))
 	_debug_log(connection, "-> wl_surface@", surface, ".set_buffer_scale:", " scale=", scale)
 	return
 }
 surface_damage_buffer :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 9
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> wl_surface@", surface, ".damage_buffer:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 surface_offset :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	opcode: u16 = 10
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	_debug_log(connection, "-> wl_surface@", surface, ".offset:", " x=", x, " y=", y)
 	return
 }
 seat_get_pointer :: proc(connection: ^Connection, seat: Seat) -> (id: Pointer) {
 	_size: u16 = 8 + size_of(id)
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Pointer)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wl_seat@", seat, ".get_pointer:", " id=", id)
 	return
 }
 seat_get_keyboard :: proc(connection: ^Connection, seat: Seat) -> (id: Keyboard) {
 	_size: u16 = 8 + size_of(id)
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Keyboard)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wl_seat@", seat, ".get_keyboard:", " id=", id)
 	return
 }
 seat_get_touch :: proc(connection: ^Connection, seat: Seat) -> (id: Touch) {
 	_size: u16 = 8 + size_of(id)
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Touch)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wl_seat@", seat, ".get_touch:", " id=", id)
 	return
 }
 seat_release :: proc(connection: ^Connection, seat: Seat) {
 	_size: u16 = 8
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_seat@", seat, ".release:")
 	return
 }
 pointer_set_cursor :: proc(connection: ^Connection, pointer: Pointer, serial: u32, surface: Surface, hotspot_x: i32, hotspot_y: i32) {
 	_size: u16 = 8 + size_of(serial) + size_of(surface) + size_of(hotspot_x) + size_of(hotspot_y)
 	pointer := pointer
-	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
+	_buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	hotspot_x := hotspot_x
-	bytes.buffer_write_ptr(&connection.buffer, &hotspot_x, size_of(hotspot_x))
+	_buffer_write_ptr(&connection.buffer, &hotspot_x, size_of(hotspot_x))
 	hotspot_y := hotspot_y
-	bytes.buffer_write_ptr(&connection.buffer, &hotspot_y, size_of(hotspot_y))
+	_buffer_write_ptr(&connection.buffer, &hotspot_y, size_of(hotspot_y))
 	_debug_log(connection, "-> wl_pointer@", pointer, ".set_cursor:", " serial=", serial, " surface=", surface, " hotspot_x=", hotspot_x, " hotspot_y=", hotspot_y)
 	return
 }
 pointer_release :: proc(connection: ^Connection, pointer: Pointer) {
 	_size: u16 = 8
 	pointer := pointer
-	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
+	_buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_pointer@", pointer, ".release:")
 	return
 }
 keyboard_release :: proc(connection: ^Connection, keyboard: Keyboard) {
 	_size: u16 = 8
 	keyboard := keyboard
-	bytes.buffer_write_ptr(&connection.buffer, &keyboard, size_of(keyboard))
+	_buffer_write_ptr(&connection.buffer, &keyboard, size_of(keyboard))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_keyboard@", keyboard, ".release:")
 	return
 }
 touch_release :: proc(connection: ^Connection, touch: Touch) {
 	_size: u16 = 8
 	touch := touch
-	bytes.buffer_write_ptr(&connection.buffer, &touch, size_of(touch))
+	_buffer_write_ptr(&connection.buffer, &touch, size_of(touch))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_touch@", touch, ".release:")
 	return
 }
 output_release :: proc(connection: ^Connection, output: Output) {
 	_size: u16 = 8
 	output := output
-	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_buffer_write_ptr(&connection.buffer, &output, size_of(output))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_output@", output, ".release:")
 	return
 }
 region_destroy :: proc(connection: ^Connection, region: Region) {
 	_size: u16 = 8
 	region := region
-	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_region@", region, ".destroy:")
 	return
 }
 region_add :: proc(connection: ^Connection, region: Region, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
 	region := region
-	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> wl_region@", region, ".add:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 region_subtract :: proc(connection: ^Connection, region: Region, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
 	region := region
-	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> wl_region@", region, ".subtract:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 subcompositor_destroy :: proc(connection: ^Connection, subcompositor: Subcompositor) {
 	_size: u16 = 8
 	subcompositor := subcompositor
-	bytes.buffer_write_ptr(&connection.buffer, &subcompositor, size_of(subcompositor))
+	_buffer_write_ptr(&connection.buffer, &subcompositor, size_of(subcompositor))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_subcompositor@", subcompositor, ".destroy:")
 	return
 }
 subcompositor_get_subsurface :: proc(connection: ^Connection, subcompositor: Subcompositor, surface: Surface, parent: Surface) -> (id: Subsurface) {
 	_size: u16 = 8 + size_of(id) + size_of(surface) + size_of(parent)
 	subcompositor := subcompositor
-	bytes.buffer_write_ptr(&connection.buffer, &subcompositor, size_of(subcompositor))
+	_buffer_write_ptr(&connection.buffer, &subcompositor, size_of(subcompositor))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Subsurface)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	parent := parent
-	bytes.buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
+	_buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
 	_debug_log(connection, "-> wl_subcompositor@", subcompositor, ".get_subsurface:", " id=", id, " surface=", surface, " parent=", parent)
 	return
 }
 subsurface_destroy :: proc(connection: ^Connection, subsurface: Subsurface) {
 	_size: u16 = 8
 	subsurface := subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
+	_buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_subsurface@", subsurface, ".destroy:")
 	return
 }
 subsurface_set_position :: proc(connection: ^Connection, subsurface: Subsurface, x: i32, y: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y)
 	subsurface := subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
+	_buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	_debug_log(connection, "-> wl_subsurface@", subsurface, ".set_position:", " x=", x, " y=", y)
 	return
 }
 subsurface_place_above :: proc(connection: ^Connection, subsurface: Subsurface, sibling: Surface) {
 	_size: u16 = 8 + size_of(sibling)
 	subsurface := subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
+	_buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	sibling := sibling
-	bytes.buffer_write_ptr(&connection.buffer, &sibling, size_of(sibling))
+	_buffer_write_ptr(&connection.buffer, &sibling, size_of(sibling))
 	_debug_log(connection, "-> wl_subsurface@", subsurface, ".place_above:", " sibling=", sibling)
 	return
 }
 subsurface_place_below :: proc(connection: ^Connection, subsurface: Subsurface, sibling: Surface) {
 	_size: u16 = 8 + size_of(sibling)
 	subsurface := subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
+	_buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	sibling := sibling
-	bytes.buffer_write_ptr(&connection.buffer, &sibling, size_of(sibling))
+	_buffer_write_ptr(&connection.buffer, &sibling, size_of(sibling))
 	_debug_log(connection, "-> wl_subsurface@", subsurface, ".place_below:", " sibling=", sibling)
 	return
 }
 subsurface_set_sync :: proc(connection: ^Connection, subsurface: Subsurface) {
 	_size: u16 = 8
 	subsurface := subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
+	_buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_subsurface@", subsurface, ".set_sync:")
 	return
 }
 subsurface_set_desync :: proc(connection: ^Connection, subsurface: Subsurface) {
 	_size: u16 = 8
 	subsurface := subsurface
-	bytes.buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
+	_buffer_write_ptr(&connection.buffer, &subsurface, size_of(subsurface))
 	opcode: u16 = 5
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_subsurface@", subsurface, ".set_desync:")
 	return
 }
 fixes_destroy :: proc(connection: ^Connection, fixes: Fixes) {
 	_size: u16 = 8
 	fixes := fixes
-	bytes.buffer_write_ptr(&connection.buffer, &fixes, size_of(fixes))
+	_buffer_write_ptr(&connection.buffer, &fixes, size_of(fixes))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wl_fixes@", fixes, ".destroy:")
 	return
 }
 fixes_destroy_registry :: proc(connection: ^Connection, fixes: Fixes, registry: Registry) {
 	_size: u16 = 8 + size_of(registry)
 	fixes := fixes
-	bytes.buffer_write_ptr(&connection.buffer, &fixes, size_of(fixes))
+	_buffer_write_ptr(&connection.buffer, &fixes, size_of(fixes))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	registry := registry
-	bytes.buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
+	_buffer_write_ptr(&connection.buffer, &registry, size_of(registry))
 	_debug_log(connection, "-> wl_fixes@", fixes, ".destroy_registry:", " registry=", registry)
 	return
 }
 zwp_linux_dmabuf_v1_destroy :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) {
 	_size: u16 = 8
 	zwp_linux_dmabuf_v1 := zwp_linux_dmabuf_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".destroy:")
 	return
 }
 zwp_linux_dmabuf_v1_create_params :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) -> (params_id: Zwp_Linux_Buffer_Params_V1) {
 	_size: u16 = 8 + size_of(params_id)
 	zwp_linux_dmabuf_v1 := zwp_linux_dmabuf_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	params_id = auto_cast generate_id(connection, .Zwp_Linux_Buffer_Params_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &params_id, size_of(params_id))
+	_buffer_write_ptr(&connection.buffer, &params_id, size_of(params_id))
 	_debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".create_params:", " params_id=", params_id)
 	return
 }
 zwp_linux_dmabuf_v1_get_default_feedback :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) -> (id: Zwp_Linux_Dmabuf_Feedback_V1) {
 	_size: u16 = 8 + size_of(id)
 	zwp_linux_dmabuf_v1 := zwp_linux_dmabuf_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Zwp_Linux_Dmabuf_Feedback_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".get_default_feedback:", " id=", id)
 	return
 }
 zwp_linux_dmabuf_v1_get_surface_feedback :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1, surface: Surface) -> (id: Zwp_Linux_Dmabuf_Feedback_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	zwp_linux_dmabuf_v1 := zwp_linux_dmabuf_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Zwp_Linux_Dmabuf_Feedback_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".get_surface_feedback:", " id=", id, " surface=", surface)
 	return
 }
 zwp_linux_buffer_params_v1_destroy :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1) {
 	_size: u16 = 8
 	zwp_linux_buffer_params_v1 := zwp_linux_buffer_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".destroy:")
 	return
 }
 zwp_linux_buffer_params_v1_add :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, fd: Fd, plane_idx: u32, offset: u32, stride: u32, modifier_hi: u32, modifier_lo: u32) {
 	_size: u16 = 8 + size_of(plane_idx) + size_of(offset) + size_of(stride) + size_of(modifier_hi) + size_of(modifier_lo)
 	zwp_linux_buffer_params_v1 := zwp_linux_buffer_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	append(&connection.fds_out, fd)
 	plane_idx := plane_idx
-	bytes.buffer_write_ptr(&connection.buffer, &plane_idx, size_of(plane_idx))
+	_buffer_write_ptr(&connection.buffer, &plane_idx, size_of(plane_idx))
 	offset := offset
-	bytes.buffer_write_ptr(&connection.buffer, &offset, size_of(offset))
+	_buffer_write_ptr(&connection.buffer, &offset, size_of(offset))
 	stride := stride
-	bytes.buffer_write_ptr(&connection.buffer, &stride, size_of(stride))
+	_buffer_write_ptr(&connection.buffer, &stride, size_of(stride))
 	modifier_hi := modifier_hi
-	bytes.buffer_write_ptr(&connection.buffer, &modifier_hi, size_of(modifier_hi))
+	_buffer_write_ptr(&connection.buffer, &modifier_hi, size_of(modifier_hi))
 	modifier_lo := modifier_lo
-	bytes.buffer_write_ptr(&connection.buffer, &modifier_lo, size_of(modifier_lo))
+	_buffer_write_ptr(&connection.buffer, &modifier_lo, size_of(modifier_lo))
 	_debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".add:", " fd=", fd, " plane_idx=", plane_idx, " offset=", offset, " stride=", stride, " modifier_hi=", modifier_hi, " modifier_lo=", modifier_lo)
 	return
 }
 zwp_linux_buffer_params_v1_create :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, width: i32, height: i32, format: u32, flags: Zwp_Linux_Buffer_Params_V1_Flags) {
 	_size: u16 = 8 + size_of(width) + size_of(height) + size_of(format) + size_of(flags)
 	zwp_linux_buffer_params_v1 := zwp_linux_buffer_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	format := format
-	bytes.buffer_write_ptr(&connection.buffer, &format, size_of(format))
+	_buffer_write_ptr(&connection.buffer, &format, size_of(format))
 	flags := flags
-	bytes.buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
+	_buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
 	_debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".create:", " width=", width, " height=", height, " format=", format, " flags=", flags)
 	return
 }
 zwp_linux_buffer_params_v1_create_immed :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, width: i32, height: i32, format: u32, flags: Zwp_Linux_Buffer_Params_V1_Flags) -> (buffer_id: Buffer) {
 	_size: u16 = 8 + size_of(buffer_id) + size_of(width) + size_of(height) + size_of(format) + size_of(flags)
 	zwp_linux_buffer_params_v1 := zwp_linux_buffer_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	buffer_id = auto_cast generate_id(connection, .Buffer)
-	bytes.buffer_write_ptr(&connection.buffer, &buffer_id, size_of(buffer_id))
+	_buffer_write_ptr(&connection.buffer, &buffer_id, size_of(buffer_id))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	format := format
-	bytes.buffer_write_ptr(&connection.buffer, &format, size_of(format))
+	_buffer_write_ptr(&connection.buffer, &format, size_of(format))
 	flags := flags
-	bytes.buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
+	_buffer_write_ptr(&connection.buffer, &flags, size_of(flags))
 	_debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".create_immed:", " buffer_id=", buffer_id, " width=", width, " height=", height, " format=", format, " flags=", flags)
 	return
 }
 zwp_linux_dmabuf_feedback_v1_destroy :: proc(connection: ^Connection, zwp_linux_dmabuf_feedback_v1: Zwp_Linux_Dmabuf_Feedback_V1) {
 	_size: u16 = 8
 	zwp_linux_dmabuf_feedback_v1 := zwp_linux_dmabuf_feedback_v1
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_feedback_v1, size_of(zwp_linux_dmabuf_feedback_v1))
+	_buffer_write_ptr(&connection.buffer, &zwp_linux_dmabuf_feedback_v1, size_of(zwp_linux_dmabuf_feedback_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_linux_dmabuf_feedback_v1@", zwp_linux_dmabuf_feedback_v1, ".destroy:")
 	return
 }
 wp_presentation_destroy :: proc(connection: ^Connection, wp_presentation: Wp_Presentation) {
 	_size: u16 = 8
 	wp_presentation := wp_presentation
-	bytes.buffer_write_ptr(&connection.buffer, &wp_presentation, size_of(wp_presentation))
+	_buffer_write_ptr(&connection.buffer, &wp_presentation, size_of(wp_presentation))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_presentation@", wp_presentation, ".destroy:")
 	return
 }
 wp_presentation_feedback :: proc(connection: ^Connection, wp_presentation: Wp_Presentation, surface: Surface) -> (callback: Wp_Presentation_Feedback) {
 	_size: u16 = 8 + size_of(surface) + size_of(callback)
 	wp_presentation := wp_presentation
-	bytes.buffer_write_ptr(&connection.buffer, &wp_presentation, size_of(wp_presentation))
+	_buffer_write_ptr(&connection.buffer, &wp_presentation, size_of(wp_presentation))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	callback = auto_cast generate_id(connection, .Wp_Presentation_Feedback)
-	bytes.buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
+	_buffer_write_ptr(&connection.buffer, &callback, size_of(callback))
 	_debug_log(connection, "-> wp_presentation@", wp_presentation, ".feedback:", " surface=", surface, " callback=", callback)
 	return
 }
 zwp_tablet_manager_v2_get_tablet_seat :: proc(connection: ^Connection, zwp_tablet_manager_v2: Zwp_Tablet_Manager_V2, seat: Seat) -> (tablet_seat: Zwp_Tablet_Seat_V2) {
 	_size: u16 = 8 + size_of(tablet_seat) + size_of(seat)
 	zwp_tablet_manager_v2 := zwp_tablet_manager_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_manager_v2, size_of(zwp_tablet_manager_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_manager_v2, size_of(zwp_tablet_manager_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	tablet_seat = auto_cast generate_id(connection, .Zwp_Tablet_Seat_V2)
-	bytes.buffer_write_ptr(&connection.buffer, &tablet_seat, size_of(tablet_seat))
+	_buffer_write_ptr(&connection.buffer, &tablet_seat, size_of(tablet_seat))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	_debug_log(connection, "-> zwp_tablet_manager_v2@", zwp_tablet_manager_v2, ".get_tablet_seat:", " tablet_seat=", tablet_seat, " seat=", seat)
 	return
 }
 zwp_tablet_manager_v2_destroy :: proc(connection: ^Connection, zwp_tablet_manager_v2: Zwp_Tablet_Manager_V2) {
 	_size: u16 = 8
 	zwp_tablet_manager_v2 := zwp_tablet_manager_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_manager_v2, size_of(zwp_tablet_manager_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_manager_v2, size_of(zwp_tablet_manager_v2))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_manager_v2@", zwp_tablet_manager_v2, ".destroy:")
 	return
 }
 zwp_tablet_seat_v2_destroy :: proc(connection: ^Connection, zwp_tablet_seat_v2: Zwp_Tablet_Seat_V2) {
 	_size: u16 = 8
 	zwp_tablet_seat_v2 := zwp_tablet_seat_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_seat_v2, size_of(zwp_tablet_seat_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_seat_v2, size_of(zwp_tablet_seat_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_seat_v2@", zwp_tablet_seat_v2, ".destroy:")
 	return
 }
 zwp_tablet_tool_v2_set_cursor :: proc(connection: ^Connection, zwp_tablet_tool_v2: Zwp_Tablet_Tool_V2, serial: u32, surface: Surface, hotspot_x: i32, hotspot_y: i32) {
 	_size: u16 = 8 + size_of(serial) + size_of(surface) + size_of(hotspot_x) + size_of(hotspot_y)
 	zwp_tablet_tool_v2 := zwp_tablet_tool_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_tool_v2, size_of(zwp_tablet_tool_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_tool_v2, size_of(zwp_tablet_tool_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	hotspot_x := hotspot_x
-	bytes.buffer_write_ptr(&connection.buffer, &hotspot_x, size_of(hotspot_x))
+	_buffer_write_ptr(&connection.buffer, &hotspot_x, size_of(hotspot_x))
 	hotspot_y := hotspot_y
-	bytes.buffer_write_ptr(&connection.buffer, &hotspot_y, size_of(hotspot_y))
+	_buffer_write_ptr(&connection.buffer, &hotspot_y, size_of(hotspot_y))
 	_debug_log(connection, "-> zwp_tablet_tool_v2@", zwp_tablet_tool_v2, ".set_cursor:", " serial=", serial, " surface=", surface, " hotspot_x=", hotspot_x, " hotspot_y=", hotspot_y)
 	return
 }
 zwp_tablet_tool_v2_destroy :: proc(connection: ^Connection, zwp_tablet_tool_v2: Zwp_Tablet_Tool_V2) {
 	_size: u16 = 8
 	zwp_tablet_tool_v2 := zwp_tablet_tool_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_tool_v2, size_of(zwp_tablet_tool_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_tool_v2, size_of(zwp_tablet_tool_v2))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_tool_v2@", zwp_tablet_tool_v2, ".destroy:")
 	return
 }
 zwp_tablet_v2_destroy :: proc(connection: ^Connection, zwp_tablet_v2: Zwp_Tablet_V2) {
 	_size: u16 = 8
 	zwp_tablet_v2 := zwp_tablet_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_v2, size_of(zwp_tablet_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_v2, size_of(zwp_tablet_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_v2@", zwp_tablet_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_ring_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_ring_v2: Zwp_Tablet_Pad_Ring_V2, description: string, serial: u32) {
 	_size: u16 = 8 + 4 + u16((len(description) + 1 + 3) & -4) + size_of(serial)
 	zwp_tablet_pad_ring_v2 := zwp_tablet_pad_ring_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_ring_v2, size_of(zwp_tablet_pad_ring_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_ring_v2, size_of(zwp_tablet_pad_ring_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_description_len := u32(len(description)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_description_len, 4)
-	bytes.buffer_write_string(&connection.buffer, description)
-	for _ in len(description) ..< (len(description) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, description)
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> zwp_tablet_pad_ring_v2@", zwp_tablet_pad_ring_v2, ".set_feedback:", " description=", description, " serial=", serial)
 	return
 }
 zwp_tablet_pad_ring_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_ring_v2: Zwp_Tablet_Pad_Ring_V2) {
 	_size: u16 = 8
 	zwp_tablet_pad_ring_v2 := zwp_tablet_pad_ring_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_ring_v2, size_of(zwp_tablet_pad_ring_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_ring_v2, size_of(zwp_tablet_pad_ring_v2))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_pad_ring_v2@", zwp_tablet_pad_ring_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_strip_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_strip_v2: Zwp_Tablet_Pad_Strip_V2, description: string, serial: u32) {
 	_size: u16 = 8 + 4 + u16((len(description) + 1 + 3) & -4) + size_of(serial)
 	zwp_tablet_pad_strip_v2 := zwp_tablet_pad_strip_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_strip_v2, size_of(zwp_tablet_pad_strip_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_strip_v2, size_of(zwp_tablet_pad_strip_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_description_len := u32(len(description)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_description_len, 4)
-	bytes.buffer_write_string(&connection.buffer, description)
-	for _ in len(description) ..< (len(description) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, description)
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> zwp_tablet_pad_strip_v2@", zwp_tablet_pad_strip_v2, ".set_feedback:", " description=", description, " serial=", serial)
 	return
 }
 zwp_tablet_pad_strip_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_strip_v2: Zwp_Tablet_Pad_Strip_V2) {
 	_size: u16 = 8
 	zwp_tablet_pad_strip_v2 := zwp_tablet_pad_strip_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_strip_v2, size_of(zwp_tablet_pad_strip_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_strip_v2, size_of(zwp_tablet_pad_strip_v2))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_pad_strip_v2@", zwp_tablet_pad_strip_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_group_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_group_v2: Zwp_Tablet_Pad_Group_V2) {
 	_size: u16 = 8
 	zwp_tablet_pad_group_v2 := zwp_tablet_pad_group_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_group_v2, size_of(zwp_tablet_pad_group_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_group_v2, size_of(zwp_tablet_pad_group_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_pad_group_v2@", zwp_tablet_pad_group_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_v2: Zwp_Tablet_Pad_V2, button: u32, description: string, serial: u32) {
 	_size: u16 = 8 + size_of(button) + 4 + u16((len(description) + 1 + 3) & -4) + size_of(serial)
 	zwp_tablet_pad_v2 := zwp_tablet_pad_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_v2, size_of(zwp_tablet_pad_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_v2, size_of(zwp_tablet_pad_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	button := button
-	bytes.buffer_write_ptr(&connection.buffer, &button, size_of(button))
-	_description_len := u32(len(description)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_description_len, 4)
-	bytes.buffer_write_string(&connection.buffer, description)
-	for _ in len(description) ..< (len(description) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &button, size_of(button))
+	_buffer_write_string(&connection.buffer, description)
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> zwp_tablet_pad_v2@", zwp_tablet_pad_v2, ".set_feedback:", " button=", button, " description=", description, " serial=", serial)
 	return
 }
 zwp_tablet_pad_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_v2: Zwp_Tablet_Pad_V2) {
 	_size: u16 = 8
 	zwp_tablet_pad_v2 := zwp_tablet_pad_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_v2, size_of(zwp_tablet_pad_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_v2, size_of(zwp_tablet_pad_v2))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_pad_v2@", zwp_tablet_pad_v2, ".destroy:")
 	return
 }
 zwp_tablet_pad_dial_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_dial_v2: Zwp_Tablet_Pad_Dial_V2, description: string, serial: u32) {
 	_size: u16 = 8 + 4 + u16((len(description) + 1 + 3) & -4) + size_of(serial)
 	zwp_tablet_pad_dial_v2 := zwp_tablet_pad_dial_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_dial_v2, size_of(zwp_tablet_pad_dial_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_dial_v2, size_of(zwp_tablet_pad_dial_v2))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_description_len := u32(len(description)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_description_len, 4)
-	bytes.buffer_write_string(&connection.buffer, description)
-	for _ in len(description) ..< (len(description) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, description)
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> zwp_tablet_pad_dial_v2@", zwp_tablet_pad_dial_v2, ".set_feedback:", " description=", description, " serial=", serial)
 	return
 }
 zwp_tablet_pad_dial_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_dial_v2: Zwp_Tablet_Pad_Dial_V2) {
 	_size: u16 = 8
 	zwp_tablet_pad_dial_v2 := zwp_tablet_pad_dial_v2
-	bytes.buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_dial_v2, size_of(zwp_tablet_pad_dial_v2))
+	_buffer_write_ptr(&connection.buffer, &zwp_tablet_pad_dial_v2, size_of(zwp_tablet_pad_dial_v2))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> zwp_tablet_pad_dial_v2@", zwp_tablet_pad_dial_v2, ".destroy:")
 	return
 }
 wp_viewporter_destroy :: proc(connection: ^Connection, wp_viewporter: Wp_Viewporter) {
 	_size: u16 = 8
 	wp_viewporter := wp_viewporter
-	bytes.buffer_write_ptr(&connection.buffer, &wp_viewporter, size_of(wp_viewporter))
+	_buffer_write_ptr(&connection.buffer, &wp_viewporter, size_of(wp_viewporter))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_viewporter@", wp_viewporter, ".destroy:")
 	return
 }
 wp_viewporter_get_viewport :: proc(connection: ^Connection, wp_viewporter: Wp_Viewporter, surface: Surface) -> (id: Wp_Viewport) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_viewporter := wp_viewporter
-	bytes.buffer_write_ptr(&connection.buffer, &wp_viewporter, size_of(wp_viewporter))
+	_buffer_write_ptr(&connection.buffer, &wp_viewporter, size_of(wp_viewporter))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Viewport)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_viewporter@", wp_viewporter, ".get_viewport:", " id=", id, " surface=", surface)
 	return
 }
 wp_viewport_destroy :: proc(connection: ^Connection, wp_viewport: Wp_Viewport) {
 	_size: u16 = 8
 	wp_viewport := wp_viewport
-	bytes.buffer_write_ptr(&connection.buffer, &wp_viewport, size_of(wp_viewport))
+	_buffer_write_ptr(&connection.buffer, &wp_viewport, size_of(wp_viewport))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_viewport@", wp_viewport, ".destroy:")
 	return
 }
 wp_viewport_set_source :: proc(connection: ^Connection, wp_viewport: Wp_Viewport, x: f64, y: f64, width: f64, height: f64) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
 	wp_viewport := wp_viewport
-	bytes.buffer_write_ptr(&connection.buffer, &wp_viewport, size_of(wp_viewport))
+	_buffer_write_ptr(&connection.buffer, &wp_viewport, size_of(wp_viewport))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> wp_viewport@", wp_viewport, ".set_source:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 wp_viewport_set_destination :: proc(connection: ^Connection, wp_viewport: Wp_Viewport, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(width) + size_of(height)
 	wp_viewport := wp_viewport
-	bytes.buffer_write_ptr(&connection.buffer, &wp_viewport, size_of(wp_viewport))
+	_buffer_write_ptr(&connection.buffer, &wp_viewport, size_of(wp_viewport))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> wp_viewport@", wp_viewport, ".set_destination:", " width=", width, " height=", height)
 	return
 }
 xdg_wm_base_destroy :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base) {
 	_size: u16 = 8
 	xdg_wm_base := xdg_wm_base
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_wm_base, size_of(xdg_wm_base))
+	_buffer_write_ptr(&connection.buffer, &xdg_wm_base, size_of(xdg_wm_base))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".destroy:")
 	return
 }
 xdg_wm_base_create_positioner :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base) -> (id: Xdg_Positioner) {
 	_size: u16 = 8 + size_of(id)
 	xdg_wm_base := xdg_wm_base
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_wm_base, size_of(xdg_wm_base))
+	_buffer_write_ptr(&connection.buffer, &xdg_wm_base, size_of(xdg_wm_base))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Positioner)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".create_positioner:", " id=", id)
 	return
 }
 xdg_wm_base_get_xdg_surface :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base, surface: Surface) -> (id: Xdg_Surface) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	xdg_wm_base := xdg_wm_base
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_wm_base, size_of(xdg_wm_base))
+	_buffer_write_ptr(&connection.buffer, &xdg_wm_base, size_of(xdg_wm_base))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Surface)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".get_xdg_surface:", " id=", id, " surface=", surface)
 	return
 }
 xdg_wm_base_pong :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base, serial: u32) {
 	_size: u16 = 8 + size_of(serial)
 	xdg_wm_base := xdg_wm_base
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_wm_base, size_of(xdg_wm_base))
+	_buffer_write_ptr(&connection.buffer, &xdg_wm_base, size_of(xdg_wm_base))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".pong:", " serial=", serial)
 	return
 }
 xdg_positioner_destroy :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner) {
 	_size: u16 = 8
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".destroy:")
 	return
 }
 xdg_positioner_set_size :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(width) + size_of(height)
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_size:", " width=", width, " height=", height)
 	return
 }
 xdg_positioner_set_anchor_rect :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_anchor_rect:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 xdg_positioner_set_anchor :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, anchor: Xdg_Positioner_Anchor) {
 	_size: u16 = 8 + size_of(anchor)
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	anchor := anchor
-	bytes.buffer_write_ptr(&connection.buffer, &anchor, size_of(anchor))
+	_buffer_write_ptr(&connection.buffer, &anchor, size_of(anchor))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_anchor:", " anchor=", anchor)
 	return
 }
 xdg_positioner_set_gravity :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, gravity: Xdg_Positioner_Gravity) {
 	_size: u16 = 8 + size_of(gravity)
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	gravity := gravity
-	bytes.buffer_write_ptr(&connection.buffer, &gravity, size_of(gravity))
+	_buffer_write_ptr(&connection.buffer, &gravity, size_of(gravity))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_gravity:", " gravity=", gravity)
 	return
 }
 xdg_positioner_set_constraint_adjustment :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, constraint_adjustment: Xdg_Positioner_Constraint_Adjustment) {
 	_size: u16 = 8 + size_of(constraint_adjustment)
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 5
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	constraint_adjustment := constraint_adjustment
-	bytes.buffer_write_ptr(&connection.buffer, &constraint_adjustment, size_of(constraint_adjustment))
+	_buffer_write_ptr(&connection.buffer, &constraint_adjustment, size_of(constraint_adjustment))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_constraint_adjustment:", " constraint_adjustment=", constraint_adjustment)
 	return
 }
 xdg_positioner_set_offset :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, x: i32, y: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y)
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 6
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_offset:", " x=", x, " y=", y)
 	return
 }
 xdg_positioner_set_reactive :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner) {
 	_size: u16 = 8
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 7
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_reactive:")
 	return
 }
 xdg_positioner_set_parent_size :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, parent_width: i32, parent_height: i32) {
 	_size: u16 = 8 + size_of(parent_width) + size_of(parent_height)
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 8
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	parent_width := parent_width
-	bytes.buffer_write_ptr(&connection.buffer, &parent_width, size_of(parent_width))
+	_buffer_write_ptr(&connection.buffer, &parent_width, size_of(parent_width))
 	parent_height := parent_height
-	bytes.buffer_write_ptr(&connection.buffer, &parent_height, size_of(parent_height))
+	_buffer_write_ptr(&connection.buffer, &parent_height, size_of(parent_height))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_parent_size:", " parent_width=", parent_width, " parent_height=", parent_height)
 	return
 }
 xdg_positioner_set_parent_configure :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, serial: u32) {
 	_size: u16 = 8 + size_of(serial)
 	xdg_positioner := xdg_positioner
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
+	_buffer_write_ptr(&connection.buffer, &xdg_positioner, size_of(xdg_positioner))
 	opcode: u16 = 9
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_parent_configure:", " serial=", serial)
 	return
 }
 xdg_surface_destroy :: proc(connection: ^Connection, xdg_surface: Xdg_Surface) {
 	_size: u16 = 8
 	xdg_surface := xdg_surface
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
+	_buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".destroy:")
 	return
 }
 xdg_surface_get_toplevel :: proc(connection: ^Connection, xdg_surface: Xdg_Surface) -> (id: Xdg_Toplevel) {
 	_size: u16 = 8 + size_of(id)
 	xdg_surface := xdg_surface
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
+	_buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Toplevel)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".get_toplevel:", " id=", id)
 	return
 }
 xdg_surface_get_popup :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, parent: Xdg_Surface, positioner: Xdg_Positioner) -> (id: Xdg_Popup) {
 	_size: u16 = 8 + size_of(id) + size_of(parent) + size_of(positioner)
 	xdg_surface := xdg_surface
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
+	_buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Popup)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	parent := parent
-	bytes.buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
+	_buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
 	positioner := positioner
-	bytes.buffer_write_ptr(&connection.buffer, &positioner, size_of(positioner))
+	_buffer_write_ptr(&connection.buffer, &positioner, size_of(positioner))
 	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".get_popup:", " id=", id, " parent=", parent, " positioner=", positioner)
 	return
 }
 xdg_surface_set_window_geometry :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
 	xdg_surface := xdg_surface
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
+	_buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".set_window_geometry:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 xdg_surface_ack_configure :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, serial: u32) {
 	_size: u16 = 8 + size_of(serial)
 	xdg_surface := xdg_surface
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
+	_buffer_write_ptr(&connection.buffer, &xdg_surface, size_of(xdg_surface))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> xdg_surface@", xdg_surface, ".ack_configure:", " serial=", serial)
 	return
 }
 xdg_toplevel_destroy :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
 	_size: u16 = 8
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".destroy:")
 	return
 }
 xdg_toplevel_set_parent :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, parent: Xdg_Toplevel) {
 	_size: u16 = 8 + size_of(parent)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	parent := parent
-	bytes.buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
+	_buffer_write_ptr(&connection.buffer, &parent, size_of(parent))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_parent:", " parent=", parent)
 	return
 }
 xdg_toplevel_set_title :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, title: string) {
 	_size: u16 = 8 + 4 + u16((len(title) + 1 + 3) & -4)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_title_len := u32(len(title)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_title_len, 4)
-	bytes.buffer_write_string(&connection.buffer, title)
-	for _ in len(title) ..< (len(title) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, title)
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_title:", " title=", title)
 	return
 }
 xdg_toplevel_set_app_id :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, app_id: string) {
 	_size: u16 = 8 + 4 + u16((len(app_id) + 1 + 3) & -4)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_app_id_len := u32(len(app_id)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_app_id_len, 4)
-	bytes.buffer_write_string(&connection.buffer, app_id)
-	for _ in len(app_id) ..< (len(app_id) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, app_id)
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_app_id:", " app_id=", app_id)
 	return
 }
 xdg_toplevel_show_window_menu :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32, x: i32, y: i32) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(x) + size_of(y)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".show_window_menu:", " seat=", seat, " serial=", serial, " x=", x, " y=", y)
 	return
 }
 xdg_toplevel_move :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 5
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".move:", " seat=", seat, " serial=", serial)
 	return
 }
 xdg_toplevel_resize :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32, edges: Xdg_Toplevel_Resize_Edge) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(edges)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 6
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	edges := edges
-	bytes.buffer_write_ptr(&connection.buffer, &edges, size_of(edges))
+	_buffer_write_ptr(&connection.buffer, &edges, size_of(edges))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".resize:", " seat=", seat, " serial=", serial, " edges=", edges)
 	return
 }
 xdg_toplevel_set_max_size :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(width) + size_of(height)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 7
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_max_size:", " width=", width, " height=", height)
 	return
 }
 xdg_toplevel_set_min_size :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(width) + size_of(height)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 8
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_min_size:", " width=", width, " height=", height)
 	return
 }
 xdg_toplevel_set_maximized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
 	_size: u16 = 8
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 9
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_maximized:")
 	return
 }
 xdg_toplevel_unset_maximized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
 	_size: u16 = 8
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 10
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".unset_maximized:")
 	return
 }
 xdg_toplevel_set_fullscreen :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, output: Output) {
 	_size: u16 = 8 + size_of(output)
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 11
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	output := output
-	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_buffer_write_ptr(&connection.buffer, &output, size_of(output))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_fullscreen:", " output=", output)
 	return
 }
 xdg_toplevel_unset_fullscreen :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
 	_size: u16 = 8
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 12
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".unset_fullscreen:")
 	return
 }
 xdg_toplevel_set_minimized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
 	_size: u16 = 8
 	xdg_toplevel := xdg_toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel, size_of(xdg_toplevel))
 	opcode: u16 = 13
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_minimized:")
 	return
 }
 xdg_popup_destroy :: proc(connection: ^Connection, xdg_popup: Xdg_Popup) {
 	_size: u16 = 8
 	xdg_popup := xdg_popup
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_popup, size_of(xdg_popup))
+	_buffer_write_ptr(&connection.buffer, &xdg_popup, size_of(xdg_popup))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_popup@", xdg_popup, ".destroy:")
 	return
 }
 xdg_popup_grab :: proc(connection: ^Connection, xdg_popup: Xdg_Popup, seat: Seat, serial: u32) {
 	_size: u16 = 8 + size_of(seat) + size_of(serial)
 	xdg_popup := xdg_popup
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_popup, size_of(xdg_popup))
+	_buffer_write_ptr(&connection.buffer, &xdg_popup, size_of(xdg_popup))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> xdg_popup@", xdg_popup, ".grab:", " seat=", seat, " serial=", serial)
 	return
 }
 xdg_popup_reposition :: proc(connection: ^Connection, xdg_popup: Xdg_Popup, positioner: Xdg_Positioner, token: u32) {
 	_size: u16 = 8 + size_of(positioner) + size_of(token)
 	xdg_popup := xdg_popup
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_popup, size_of(xdg_popup))
+	_buffer_write_ptr(&connection.buffer, &xdg_popup, size_of(xdg_popup))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	positioner := positioner
-	bytes.buffer_write_ptr(&connection.buffer, &positioner, size_of(positioner))
+	_buffer_write_ptr(&connection.buffer, &positioner, size_of(positioner))
 	token := token
-	bytes.buffer_write_ptr(&connection.buffer, &token, size_of(token))
+	_buffer_write_ptr(&connection.buffer, &token, size_of(token))
 	_debug_log(connection, "-> xdg_popup@", xdg_popup, ".reposition:", " positioner=", positioner, " token=", token)
 	return
 }
 wp_alpha_modifier_v1_destroy :: proc(connection: ^Connection, wp_alpha_modifier_v1: Wp_Alpha_Modifier_V1) {
 	_size: u16 = 8
 	wp_alpha_modifier_v1 := wp_alpha_modifier_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_alpha_modifier_v1, size_of(wp_alpha_modifier_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_alpha_modifier_v1, size_of(wp_alpha_modifier_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_alpha_modifier_v1@", wp_alpha_modifier_v1, ".destroy:")
 	return
 }
 wp_alpha_modifier_v1_get_surface :: proc(connection: ^Connection, wp_alpha_modifier_v1: Wp_Alpha_Modifier_V1, surface: Surface) -> (id: Wp_Alpha_Modifier_Surface_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_alpha_modifier_v1 := wp_alpha_modifier_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_alpha_modifier_v1, size_of(wp_alpha_modifier_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_alpha_modifier_v1, size_of(wp_alpha_modifier_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Alpha_Modifier_Surface_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_alpha_modifier_v1@", wp_alpha_modifier_v1, ".get_surface:", " id=", id, " surface=", surface)
 	return
 }
 wp_alpha_modifier_surface_v1_destroy :: proc(connection: ^Connection, wp_alpha_modifier_surface_v1: Wp_Alpha_Modifier_Surface_V1) {
 	_size: u16 = 8
 	wp_alpha_modifier_surface_v1 := wp_alpha_modifier_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_alpha_modifier_surface_v1, size_of(wp_alpha_modifier_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_alpha_modifier_surface_v1, size_of(wp_alpha_modifier_surface_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_alpha_modifier_surface_v1@", wp_alpha_modifier_surface_v1, ".destroy:")
 	return
 }
 wp_alpha_modifier_surface_v1_set_multiplier :: proc(connection: ^Connection, wp_alpha_modifier_surface_v1: Wp_Alpha_Modifier_Surface_V1, factor: u32) {
 	_size: u16 = 8 + size_of(factor)
 	wp_alpha_modifier_surface_v1 := wp_alpha_modifier_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_alpha_modifier_surface_v1, size_of(wp_alpha_modifier_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_alpha_modifier_surface_v1, size_of(wp_alpha_modifier_surface_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	factor := factor
-	bytes.buffer_write_ptr(&connection.buffer, &factor, size_of(factor))
+	_buffer_write_ptr(&connection.buffer, &factor, size_of(factor))
 	_debug_log(connection, "-> wp_alpha_modifier_surface_v1@", wp_alpha_modifier_surface_v1, ".set_multiplier:", " factor=", factor)
 	return
 }
 wp_color_manager_v1_destroy :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) {
 	_size: u16 = 8
 	wp_color_manager_v1 := wp_color_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".destroy:")
 	return
 }
 wp_color_manager_v1_get_output :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, output: Output) -> (id: Wp_Color_Management_Output_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(output)
 	wp_color_manager_v1 := wp_color_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Color_Management_Output_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	output := output
-	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_buffer_write_ptr(&connection.buffer, &output, size_of(output))
 	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_output:", " id=", id, " output=", output)
 	return
 }
 wp_color_manager_v1_get_surface :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, surface: Surface) -> (id: Wp_Color_Management_Surface_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_color_manager_v1 := wp_color_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Color_Management_Surface_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
 	return
 }
 wp_color_manager_v1_get_surface_feedback :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, surface: Surface) -> (id: Wp_Color_Management_Surface_Feedback_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_color_manager_v1 := wp_color_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Color_Management_Surface_Feedback_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_surface_feedback:", " id=", id, " surface=", surface)
 	return
 }
 wp_color_manager_v1_create_icc_creator :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (obj: Wp_Image_Description_Creator_Icc_V1) {
 	_size: u16 = 8 + size_of(obj)
 	wp_color_manager_v1 := wp_color_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	obj = auto_cast generate_id(connection, .Wp_Image_Description_Creator_Icc_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &obj, size_of(obj))
+	_buffer_write_ptr(&connection.buffer, &obj, size_of(obj))
 	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_icc_creator:", " obj=", obj)
 	return
 }
 wp_color_manager_v1_create_parametric_creator :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (obj: Wp_Image_Description_Creator_Params_V1) {
 	_size: u16 = 8 + size_of(obj)
 	wp_color_manager_v1 := wp_color_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
 	opcode: u16 = 5
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	obj = auto_cast generate_id(connection, .Wp_Image_Description_Creator_Params_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &obj, size_of(obj))
+	_buffer_write_ptr(&connection.buffer, &obj, size_of(obj))
 	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_parametric_creator:", " obj=", obj)
 	return
 }
 wp_color_manager_v1_create_windows_scrgb :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (image_description: Wp_Image_Description_V1) {
 	_size: u16 = 8 + size_of(image_description)
 	wp_color_manager_v1 := wp_color_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
 	opcode: u16 = 6
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_windows_scrgb:", " image_description=", image_description)
 	return
 }
 wp_color_manager_v1_get_image_description :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, reference: Wp_Image_Description_Reference_V1) -> (image_description: Wp_Image_Description_V1) {
 	_size: u16 = 8 + size_of(image_description) + size_of(reference)
 	wp_color_manager_v1 := wp_color_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_manager_v1, size_of(wp_color_manager_v1))
 	opcode: u16 = 7
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	reference := reference
-	bytes.buffer_write_ptr(&connection.buffer, &reference, size_of(reference))
+	_buffer_write_ptr(&connection.buffer, &reference, size_of(reference))
 	_debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_image_description:", " image_description=", image_description, " reference=", reference)
 	return
 }
 wp_color_management_output_v1_destroy :: proc(connection: ^Connection, wp_color_management_output_v1: Wp_Color_Management_Output_V1) {
 	_size: u16 = 8
 	wp_color_management_output_v1 := wp_color_management_output_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_management_output_v1, size_of(wp_color_management_output_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_management_output_v1, size_of(wp_color_management_output_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_color_management_output_v1@", wp_color_management_output_v1, ".destroy:")
 	return
 }
 wp_color_management_output_v1_get_image_description :: proc(connection: ^Connection, wp_color_management_output_v1: Wp_Color_Management_Output_V1) -> (image_description: Wp_Image_Description_V1) {
 	_size: u16 = 8 + size_of(image_description)
 	wp_color_management_output_v1 := wp_color_management_output_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_management_output_v1, size_of(wp_color_management_output_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_management_output_v1, size_of(wp_color_management_output_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	_debug_log(connection, "-> wp_color_management_output_v1@", wp_color_management_output_v1, ".get_image_description:", " image_description=", image_description)
 	return
 }
 wp_color_management_surface_v1_destroy :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1) {
 	_size: u16 = 8
 	wp_color_management_surface_v1 := wp_color_management_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".destroy:")
 	return
 }
 wp_color_management_surface_v1_set_image_description :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1, image_description: Wp_Image_Description_V1, render_intent: Wp_Color_Manager_V1_Render_Intent) {
 	_size: u16 = 8 + size_of(image_description) + size_of(render_intent)
 	wp_color_management_surface_v1 := wp_color_management_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description := image_description
-	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	render_intent := render_intent
-	bytes.buffer_write_ptr(&connection.buffer, &render_intent, size_of(render_intent))
+	_buffer_write_ptr(&connection.buffer, &render_intent, size_of(render_intent))
 	_debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".set_image_description:", " image_description=", image_description, " render_intent=", render_intent)
 	return
 }
 wp_color_management_surface_v1_unset_image_description :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1) {
 	_size: u16 = 8
 	wp_color_management_surface_v1 := wp_color_management_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".unset_image_description:")
 	return
 }
 wp_color_management_surface_feedback_v1_destroy :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) {
 	_size: u16 = 8
 	wp_color_management_surface_feedback_v1 := wp_color_management_surface_feedback_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".destroy:")
 	return
 }
 wp_color_management_surface_feedback_v1_get_preferred :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) -> (image_description: Wp_Image_Description_V1) {
 	_size: u16 = 8 + size_of(image_description)
 	wp_color_management_surface_feedback_v1 := wp_color_management_surface_feedback_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	_debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".get_preferred:", " image_description=", image_description)
 	return
 }
 wp_color_management_surface_feedback_v1_get_preferred_parametric :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) -> (image_description: Wp_Image_Description_V1) {
 	_size: u16 = 8 + size_of(image_description)
 	wp_color_management_surface_feedback_v1 := wp_color_management_surface_feedback_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	_debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".get_preferred_parametric:", " image_description=", image_description)
 	return
 }
 wp_image_description_creator_icc_v1_create :: proc(connection: ^Connection, wp_image_description_creator_icc_v1: Wp_Image_Description_Creator_Icc_V1) -> (image_description: Wp_Image_Description_V1) {
 	_size: u16 = 8 + size_of(image_description)
 	wp_image_description_creator_icc_v1 := wp_image_description_creator_icc_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_icc_v1, size_of(wp_image_description_creator_icc_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_icc_v1, size_of(wp_image_description_creator_icc_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	_debug_log(connection, "-> wp_image_description_creator_icc_v1@", wp_image_description_creator_icc_v1, ".create:", " image_description=", image_description)
 	return
 }
 wp_image_description_creator_icc_v1_set_icc_file :: proc(connection: ^Connection, wp_image_description_creator_icc_v1: Wp_Image_Description_Creator_Icc_V1, icc_profile: Fd, offset: u32, length: u32) {
 	_size: u16 = 8 + size_of(offset) + size_of(length)
 	wp_image_description_creator_icc_v1 := wp_image_description_creator_icc_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_icc_v1, size_of(wp_image_description_creator_icc_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_icc_v1, size_of(wp_image_description_creator_icc_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	append(&connection.fds_out, icc_profile)
 	offset := offset
-	bytes.buffer_write_ptr(&connection.buffer, &offset, size_of(offset))
+	_buffer_write_ptr(&connection.buffer, &offset, size_of(offset))
 	length := length
-	bytes.buffer_write_ptr(&connection.buffer, &length, size_of(length))
+	_buffer_write_ptr(&connection.buffer, &length, size_of(length))
 	_debug_log(connection, "-> wp_image_description_creator_icc_v1@", wp_image_description_creator_icc_v1, ".set_icc_file:", " icc_profile=", icc_profile, " offset=", offset, " length=", length)
 	return
 }
 wp_image_description_creator_params_v1_create :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1) -> (image_description: Wp_Image_Description_V1) {
 	_size: u16 = 8 + size_of(image_description)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
+	_buffer_write_ptr(&connection.buffer, &image_description, size_of(image_description))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".create:", " image_description=", image_description)
 	return
 }
 wp_image_description_creator_params_v1_set_tf_named :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, tf: Wp_Color_Manager_V1_Transfer_Function) {
 	_size: u16 = 8 + size_of(tf)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	tf := tf
-	bytes.buffer_write_ptr(&connection.buffer, &tf, size_of(tf))
+	_buffer_write_ptr(&connection.buffer, &tf, size_of(tf))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_tf_named:", " tf=", tf)
 	return
 }
 wp_image_description_creator_params_v1_set_tf_power :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, eexp: u32) {
 	_size: u16 = 8 + size_of(eexp)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	eexp := eexp
-	bytes.buffer_write_ptr(&connection.buffer, &eexp, size_of(eexp))
+	_buffer_write_ptr(&connection.buffer, &eexp, size_of(eexp))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_tf_power:", " eexp=", eexp)
 	return
 }
 wp_image_description_creator_params_v1_set_primaries_named :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, primaries: Wp_Color_Manager_V1_Primaries) {
 	_size: u16 = 8 + size_of(primaries)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	primaries := primaries
-	bytes.buffer_write_ptr(&connection.buffer, &primaries, size_of(primaries))
+	_buffer_write_ptr(&connection.buffer, &primaries, size_of(primaries))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_primaries_named:", " primaries=", primaries)
 	return
 }
 wp_image_description_creator_params_v1_set_primaries :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, r_x: i32, r_y: i32, g_x: i32, g_y: i32, b_x: i32, b_y: i32, w_x: i32, w_y: i32) {
 	_size: u16 = 8 + size_of(r_x) + size_of(r_y) + size_of(g_x) + size_of(g_y) + size_of(b_x) + size_of(b_y) + size_of(w_x) + size_of(w_y)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	r_x := r_x
-	bytes.buffer_write_ptr(&connection.buffer, &r_x, size_of(r_x))
+	_buffer_write_ptr(&connection.buffer, &r_x, size_of(r_x))
 	r_y := r_y
-	bytes.buffer_write_ptr(&connection.buffer, &r_y, size_of(r_y))
+	_buffer_write_ptr(&connection.buffer, &r_y, size_of(r_y))
 	g_x := g_x
-	bytes.buffer_write_ptr(&connection.buffer, &g_x, size_of(g_x))
+	_buffer_write_ptr(&connection.buffer, &g_x, size_of(g_x))
 	g_y := g_y
-	bytes.buffer_write_ptr(&connection.buffer, &g_y, size_of(g_y))
+	_buffer_write_ptr(&connection.buffer, &g_y, size_of(g_y))
 	b_x := b_x
-	bytes.buffer_write_ptr(&connection.buffer, &b_x, size_of(b_x))
+	_buffer_write_ptr(&connection.buffer, &b_x, size_of(b_x))
 	b_y := b_y
-	bytes.buffer_write_ptr(&connection.buffer, &b_y, size_of(b_y))
+	_buffer_write_ptr(&connection.buffer, &b_y, size_of(b_y))
 	w_x := w_x
-	bytes.buffer_write_ptr(&connection.buffer, &w_x, size_of(w_x))
+	_buffer_write_ptr(&connection.buffer, &w_x, size_of(w_x))
 	w_y := w_y
-	bytes.buffer_write_ptr(&connection.buffer, &w_y, size_of(w_y))
+	_buffer_write_ptr(&connection.buffer, &w_y, size_of(w_y))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_primaries:", " r_x=", r_x, " r_y=", r_y, " g_x=", g_x, " g_y=", g_y, " b_x=", b_x, " b_y=", b_y, " w_x=", w_x, " w_y=", w_y)
 	return
 }
 wp_image_description_creator_params_v1_set_luminances :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, min_lum: u32, max_lum: u32, reference_lum: u32) {
 	_size: u16 = 8 + size_of(min_lum) + size_of(max_lum) + size_of(reference_lum)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 5
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	min_lum := min_lum
-	bytes.buffer_write_ptr(&connection.buffer, &min_lum, size_of(min_lum))
+	_buffer_write_ptr(&connection.buffer, &min_lum, size_of(min_lum))
 	max_lum := max_lum
-	bytes.buffer_write_ptr(&connection.buffer, &max_lum, size_of(max_lum))
+	_buffer_write_ptr(&connection.buffer, &max_lum, size_of(max_lum))
 	reference_lum := reference_lum
-	bytes.buffer_write_ptr(&connection.buffer, &reference_lum, size_of(reference_lum))
+	_buffer_write_ptr(&connection.buffer, &reference_lum, size_of(reference_lum))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_luminances:", " min_lum=", min_lum, " max_lum=", max_lum, " reference_lum=", reference_lum)
 	return
 }
 wp_image_description_creator_params_v1_set_mastering_display_primaries :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, r_x: i32, r_y: i32, g_x: i32, g_y: i32, b_x: i32, b_y: i32, w_x: i32, w_y: i32) {
 	_size: u16 = 8 + size_of(r_x) + size_of(r_y) + size_of(g_x) + size_of(g_y) + size_of(b_x) + size_of(b_y) + size_of(w_x) + size_of(w_y)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 6
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	r_x := r_x
-	bytes.buffer_write_ptr(&connection.buffer, &r_x, size_of(r_x))
+	_buffer_write_ptr(&connection.buffer, &r_x, size_of(r_x))
 	r_y := r_y
-	bytes.buffer_write_ptr(&connection.buffer, &r_y, size_of(r_y))
+	_buffer_write_ptr(&connection.buffer, &r_y, size_of(r_y))
 	g_x := g_x
-	bytes.buffer_write_ptr(&connection.buffer, &g_x, size_of(g_x))
+	_buffer_write_ptr(&connection.buffer, &g_x, size_of(g_x))
 	g_y := g_y
-	bytes.buffer_write_ptr(&connection.buffer, &g_y, size_of(g_y))
+	_buffer_write_ptr(&connection.buffer, &g_y, size_of(g_y))
 	b_x := b_x
-	bytes.buffer_write_ptr(&connection.buffer, &b_x, size_of(b_x))
+	_buffer_write_ptr(&connection.buffer, &b_x, size_of(b_x))
 	b_y := b_y
-	bytes.buffer_write_ptr(&connection.buffer, &b_y, size_of(b_y))
+	_buffer_write_ptr(&connection.buffer, &b_y, size_of(b_y))
 	w_x := w_x
-	bytes.buffer_write_ptr(&connection.buffer, &w_x, size_of(w_x))
+	_buffer_write_ptr(&connection.buffer, &w_x, size_of(w_x))
 	w_y := w_y
-	bytes.buffer_write_ptr(&connection.buffer, &w_y, size_of(w_y))
+	_buffer_write_ptr(&connection.buffer, &w_y, size_of(w_y))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_mastering_display_primaries:", " r_x=", r_x, " r_y=", r_y, " g_x=", g_x, " g_y=", g_y, " b_x=", b_x, " b_y=", b_y, " w_x=", w_x, " w_y=", w_y)
 	return
 }
 wp_image_description_creator_params_v1_set_mastering_luminance :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, min_lum: u32, max_lum: u32) {
 	_size: u16 = 8 + size_of(min_lum) + size_of(max_lum)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 7
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	min_lum := min_lum
-	bytes.buffer_write_ptr(&connection.buffer, &min_lum, size_of(min_lum))
+	_buffer_write_ptr(&connection.buffer, &min_lum, size_of(min_lum))
 	max_lum := max_lum
-	bytes.buffer_write_ptr(&connection.buffer, &max_lum, size_of(max_lum))
+	_buffer_write_ptr(&connection.buffer, &max_lum, size_of(max_lum))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_mastering_luminance:", " min_lum=", min_lum, " max_lum=", max_lum)
 	return
 }
 wp_image_description_creator_params_v1_set_max_cll :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, max_cll: u32) {
 	_size: u16 = 8 + size_of(max_cll)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 8
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	max_cll := max_cll
-	bytes.buffer_write_ptr(&connection.buffer, &max_cll, size_of(max_cll))
+	_buffer_write_ptr(&connection.buffer, &max_cll, size_of(max_cll))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_max_cll:", " max_cll=", max_cll)
 	return
 }
 wp_image_description_creator_params_v1_set_max_fall :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, max_fall: u32) {
 	_size: u16 = 8 + size_of(max_fall)
 	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
 	opcode: u16 = 9
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	max_fall := max_fall
-	bytes.buffer_write_ptr(&connection.buffer, &max_fall, size_of(max_fall))
+	_buffer_write_ptr(&connection.buffer, &max_fall, size_of(max_fall))
 	_debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_max_fall:", " max_fall=", max_fall)
 	return
 }
 wp_image_description_v1_destroy :: proc(connection: ^Connection, wp_image_description_v1: Wp_Image_Description_V1) {
 	_size: u16 = 8
 	wp_image_description_v1 := wp_image_description_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_v1, size_of(wp_image_description_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_v1, size_of(wp_image_description_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_image_description_v1@", wp_image_description_v1, ".destroy:")
 	return
 }
 wp_image_description_v1_get_information :: proc(connection: ^Connection, wp_image_description_v1: Wp_Image_Description_V1) -> (information: Wp_Image_Description_Info_V1) {
 	_size: u16 = 8 + size_of(information)
 	wp_image_description_v1 := wp_image_description_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_v1, size_of(wp_image_description_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_v1, size_of(wp_image_description_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	information = auto_cast generate_id(connection, .Wp_Image_Description_Info_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &information, size_of(information))
+	_buffer_write_ptr(&connection.buffer, &information, size_of(information))
 	_debug_log(connection, "-> wp_image_description_v1@", wp_image_description_v1, ".get_information:", " information=", information)
 	return
 }
 wp_image_description_reference_v1_destroy :: proc(connection: ^Connection, wp_image_description_reference_v1: Wp_Image_Description_Reference_V1) {
 	_size: u16 = 8
 	wp_image_description_reference_v1 := wp_image_description_reference_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_image_description_reference_v1, size_of(wp_image_description_reference_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_image_description_reference_v1, size_of(wp_image_description_reference_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_image_description_reference_v1@", wp_image_description_reference_v1, ".destroy:")
 	return
 }
 wp_color_representation_manager_v1_destroy :: proc(connection: ^Connection, wp_color_representation_manager_v1: Wp_Color_Representation_Manager_V1) {
 	_size: u16 = 8
 	wp_color_representation_manager_v1 := wp_color_representation_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_representation_manager_v1, size_of(wp_color_representation_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_representation_manager_v1, size_of(wp_color_representation_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_color_representation_manager_v1@", wp_color_representation_manager_v1, ".destroy:")
 	return
 }
 wp_color_representation_manager_v1_get_surface :: proc(connection: ^Connection, wp_color_representation_manager_v1: Wp_Color_Representation_Manager_V1, surface: Surface) -> (id: Wp_Color_Representation_Surface_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_color_representation_manager_v1 := wp_color_representation_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_representation_manager_v1, size_of(wp_color_representation_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_representation_manager_v1, size_of(wp_color_representation_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Color_Representation_Surface_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_color_representation_manager_v1@", wp_color_representation_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
 	return
 }
 wp_color_representation_surface_v1_destroy :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1) {
 	_size: u16 = 8
 	wp_color_representation_surface_v1 := wp_color_representation_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".destroy:")
 	return
 }
 wp_color_representation_surface_v1_set_alpha_mode :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, alpha_mode: Wp_Color_Representation_Surface_V1_Alpha_Mode) {
 	_size: u16 = 8 + size_of(alpha_mode)
 	wp_color_representation_surface_v1 := wp_color_representation_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	alpha_mode := alpha_mode
-	bytes.buffer_write_ptr(&connection.buffer, &alpha_mode, size_of(alpha_mode))
+	_buffer_write_ptr(&connection.buffer, &alpha_mode, size_of(alpha_mode))
 	_debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_alpha_mode:", " alpha_mode=", alpha_mode)
 	return
 }
 wp_color_representation_surface_v1_set_coefficients_and_range :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, coefficients: Wp_Color_Representation_Surface_V1_Coefficients, range: Wp_Color_Representation_Surface_V1_Range) {
 	_size: u16 = 8 + size_of(coefficients) + size_of(range)
 	wp_color_representation_surface_v1 := wp_color_representation_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	coefficients := coefficients
-	bytes.buffer_write_ptr(&connection.buffer, &coefficients, size_of(coefficients))
+	_buffer_write_ptr(&connection.buffer, &coefficients, size_of(coefficients))
 	range := range
-	bytes.buffer_write_ptr(&connection.buffer, &range, size_of(range))
+	_buffer_write_ptr(&connection.buffer, &range, size_of(range))
 	_debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_coefficients_and_range:", " coefficients=", coefficients, " range=", range)
 	return
 }
 wp_color_representation_surface_v1_set_chroma_location :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, chroma_location: Wp_Color_Representation_Surface_V1_Chroma_Location) {
 	_size: u16 = 8 + size_of(chroma_location)
 	wp_color_representation_surface_v1 := wp_color_representation_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	chroma_location := chroma_location
-	bytes.buffer_write_ptr(&connection.buffer, &chroma_location, size_of(chroma_location))
+	_buffer_write_ptr(&connection.buffer, &chroma_location, size_of(chroma_location))
 	_debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_chroma_location:", " chroma_location=", chroma_location)
 	return
 }
 wp_commit_timing_manager_v1_destroy :: proc(connection: ^Connection, wp_commit_timing_manager_v1: Wp_Commit_Timing_Manager_V1) {
 	_size: u16 = 8
 	wp_commit_timing_manager_v1 := wp_commit_timing_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_commit_timing_manager_v1, size_of(wp_commit_timing_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_commit_timing_manager_v1, size_of(wp_commit_timing_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_commit_timing_manager_v1@", wp_commit_timing_manager_v1, ".destroy:")
 	return
 }
 wp_commit_timing_manager_v1_get_timer :: proc(connection: ^Connection, wp_commit_timing_manager_v1: Wp_Commit_Timing_Manager_V1, surface: Surface) -> (id: Wp_Commit_Timer_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_commit_timing_manager_v1 := wp_commit_timing_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_commit_timing_manager_v1, size_of(wp_commit_timing_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_commit_timing_manager_v1, size_of(wp_commit_timing_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Commit_Timer_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_commit_timing_manager_v1@", wp_commit_timing_manager_v1, ".get_timer:", " id=", id, " surface=", surface)
 	return
 }
 wp_commit_timer_v1_set_timestamp :: proc(connection: ^Connection, wp_commit_timer_v1: Wp_Commit_Timer_V1, tv_sec_hi: u32, tv_sec_lo: u32, tv_nsec: u32) {
 	_size: u16 = 8 + size_of(tv_sec_hi) + size_of(tv_sec_lo) + size_of(tv_nsec)
 	wp_commit_timer_v1 := wp_commit_timer_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_commit_timer_v1, size_of(wp_commit_timer_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_commit_timer_v1, size_of(wp_commit_timer_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	tv_sec_hi := tv_sec_hi
-	bytes.buffer_write_ptr(&connection.buffer, &tv_sec_hi, size_of(tv_sec_hi))
+	_buffer_write_ptr(&connection.buffer, &tv_sec_hi, size_of(tv_sec_hi))
 	tv_sec_lo := tv_sec_lo
-	bytes.buffer_write_ptr(&connection.buffer, &tv_sec_lo, size_of(tv_sec_lo))
+	_buffer_write_ptr(&connection.buffer, &tv_sec_lo, size_of(tv_sec_lo))
 	tv_nsec := tv_nsec
-	bytes.buffer_write_ptr(&connection.buffer, &tv_nsec, size_of(tv_nsec))
+	_buffer_write_ptr(&connection.buffer, &tv_nsec, size_of(tv_nsec))
 	_debug_log(connection, "-> wp_commit_timer_v1@", wp_commit_timer_v1, ".set_timestamp:", " tv_sec_hi=", tv_sec_hi, " tv_sec_lo=", tv_sec_lo, " tv_nsec=", tv_nsec)
 	return
 }
 wp_commit_timer_v1_destroy :: proc(connection: ^Connection, wp_commit_timer_v1: Wp_Commit_Timer_V1) {
 	_size: u16 = 8
 	wp_commit_timer_v1 := wp_commit_timer_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_commit_timer_v1, size_of(wp_commit_timer_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_commit_timer_v1, size_of(wp_commit_timer_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_commit_timer_v1@", wp_commit_timer_v1, ".destroy:")
 	return
 }
 wp_content_type_manager_v1_destroy :: proc(connection: ^Connection, wp_content_type_manager_v1: Wp_Content_Type_Manager_V1) {
 	_size: u16 = 8
 	wp_content_type_manager_v1 := wp_content_type_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_content_type_manager_v1, size_of(wp_content_type_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_content_type_manager_v1, size_of(wp_content_type_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_content_type_manager_v1@", wp_content_type_manager_v1, ".destroy:")
 	return
 }
 wp_content_type_manager_v1_get_surface_content_type :: proc(connection: ^Connection, wp_content_type_manager_v1: Wp_Content_Type_Manager_V1, surface: Surface) -> (id: Wp_Content_Type_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_content_type_manager_v1 := wp_content_type_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_content_type_manager_v1, size_of(wp_content_type_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_content_type_manager_v1, size_of(wp_content_type_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Content_Type_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_content_type_manager_v1@", wp_content_type_manager_v1, ".get_surface_content_type:", " id=", id, " surface=", surface)
 	return
 }
 wp_content_type_v1_destroy :: proc(connection: ^Connection, wp_content_type_v1: Wp_Content_Type_V1) {
 	_size: u16 = 8
 	wp_content_type_v1 := wp_content_type_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_content_type_v1, size_of(wp_content_type_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_content_type_v1, size_of(wp_content_type_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_content_type_v1@", wp_content_type_v1, ".destroy:")
 	return
 }
 wp_content_type_v1_set_content_type :: proc(connection: ^Connection, wp_content_type_v1: Wp_Content_Type_V1, content_type: Wp_Content_Type_V1_Type) {
 	_size: u16 = 8 + size_of(content_type)
 	wp_content_type_v1 := wp_content_type_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_content_type_v1, size_of(wp_content_type_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_content_type_v1, size_of(wp_content_type_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	content_type := content_type
-	bytes.buffer_write_ptr(&connection.buffer, &content_type, size_of(content_type))
+	_buffer_write_ptr(&connection.buffer, &content_type, size_of(content_type))
 	_debug_log(connection, "-> wp_content_type_v1@", wp_content_type_v1, ".set_content_type:", " content_type=", content_type)
 	return
 }
 wp_cursor_shape_manager_v1_destroy :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1) {
 	_size: u16 = 8
 	wp_cursor_shape_manager_v1 := wp_cursor_shape_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".destroy:")
 	return
 }
 wp_cursor_shape_manager_v1_get_pointer :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1, pointer: Pointer) -> (cursor_shape_device: Wp_Cursor_Shape_Device_V1) {
 	_size: u16 = 8 + size_of(cursor_shape_device) + size_of(pointer)
 	wp_cursor_shape_manager_v1 := wp_cursor_shape_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	cursor_shape_device = auto_cast generate_id(connection, .Wp_Cursor_Shape_Device_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &cursor_shape_device, size_of(cursor_shape_device))
+	_buffer_write_ptr(&connection.buffer, &cursor_shape_device, size_of(cursor_shape_device))
 	pointer := pointer
-	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
+	_buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
 	_debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".get_pointer:", " cursor_shape_device=", cursor_shape_device, " pointer=", pointer)
 	return
 }
 wp_cursor_shape_manager_v1_get_tablet_tool_v2 :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1, tablet_tool: Zwp_Tablet_Tool_V2) -> (cursor_shape_device: Wp_Cursor_Shape_Device_V1) {
 	_size: u16 = 8 + size_of(cursor_shape_device) + size_of(tablet_tool)
 	wp_cursor_shape_manager_v1 := wp_cursor_shape_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	cursor_shape_device = auto_cast generate_id(connection, .Wp_Cursor_Shape_Device_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &cursor_shape_device, size_of(cursor_shape_device))
+	_buffer_write_ptr(&connection.buffer, &cursor_shape_device, size_of(cursor_shape_device))
 	tablet_tool := tablet_tool
-	bytes.buffer_write_ptr(&connection.buffer, &tablet_tool, size_of(tablet_tool))
+	_buffer_write_ptr(&connection.buffer, &tablet_tool, size_of(tablet_tool))
 	_debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".get_tablet_tool_v2:", " cursor_shape_device=", cursor_shape_device, " tablet_tool=", tablet_tool)
 	return
 }
 wp_cursor_shape_device_v1_destroy :: proc(connection: ^Connection, wp_cursor_shape_device_v1: Wp_Cursor_Shape_Device_V1) {
 	_size: u16 = 8
 	wp_cursor_shape_device_v1 := wp_cursor_shape_device_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_cursor_shape_device_v1, size_of(wp_cursor_shape_device_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_cursor_shape_device_v1, size_of(wp_cursor_shape_device_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_cursor_shape_device_v1@", wp_cursor_shape_device_v1, ".destroy:")
 	return
 }
 wp_cursor_shape_device_v1_set_shape :: proc(connection: ^Connection, wp_cursor_shape_device_v1: Wp_Cursor_Shape_Device_V1, serial: u32, shape: Wp_Cursor_Shape_Device_V1_Shape) {
 	_size: u16 = 8 + size_of(serial) + size_of(shape)
 	wp_cursor_shape_device_v1 := wp_cursor_shape_device_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_cursor_shape_device_v1, size_of(wp_cursor_shape_device_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_cursor_shape_device_v1, size_of(wp_cursor_shape_device_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	shape := shape
-	bytes.buffer_write_ptr(&connection.buffer, &shape, size_of(shape))
+	_buffer_write_ptr(&connection.buffer, &shape, size_of(shape))
 	_debug_log(connection, "-> wp_cursor_shape_device_v1@", wp_cursor_shape_device_v1, ".set_shape:", " serial=", serial, " shape=", shape)
 	return
 }
 wp_drm_lease_device_v1_create_lease_request :: proc(connection: ^Connection, wp_drm_lease_device_v1: Wp_Drm_Lease_Device_V1) -> (id: Wp_Drm_Lease_Request_V1) {
 	_size: u16 = 8 + size_of(id)
 	wp_drm_lease_device_v1 := wp_drm_lease_device_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_drm_lease_device_v1, size_of(wp_drm_lease_device_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_drm_lease_device_v1, size_of(wp_drm_lease_device_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Drm_Lease_Request_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wp_drm_lease_device_v1@", wp_drm_lease_device_v1, ".create_lease_request:", " id=", id)
 	return
 }
 wp_drm_lease_device_v1_release :: proc(connection: ^Connection, wp_drm_lease_device_v1: Wp_Drm_Lease_Device_V1) {
 	_size: u16 = 8
 	wp_drm_lease_device_v1 := wp_drm_lease_device_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_drm_lease_device_v1, size_of(wp_drm_lease_device_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_drm_lease_device_v1, size_of(wp_drm_lease_device_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_drm_lease_device_v1@", wp_drm_lease_device_v1, ".release:")
 	return
 }
 wp_drm_lease_connector_v1_destroy :: proc(connection: ^Connection, wp_drm_lease_connector_v1: Wp_Drm_Lease_Connector_V1) {
 	_size: u16 = 8
 	wp_drm_lease_connector_v1 := wp_drm_lease_connector_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_drm_lease_connector_v1, size_of(wp_drm_lease_connector_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_drm_lease_connector_v1, size_of(wp_drm_lease_connector_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_drm_lease_connector_v1@", wp_drm_lease_connector_v1, ".destroy:")
 	return
 }
 wp_drm_lease_request_v1_request_connector :: proc(connection: ^Connection, wp_drm_lease_request_v1: Wp_Drm_Lease_Request_V1, connector: Wp_Drm_Lease_Connector_V1) {
 	_size: u16 = 8 + size_of(connector)
 	wp_drm_lease_request_v1 := wp_drm_lease_request_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_drm_lease_request_v1, size_of(wp_drm_lease_request_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_drm_lease_request_v1, size_of(wp_drm_lease_request_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	connector := connector
-	bytes.buffer_write_ptr(&connection.buffer, &connector, size_of(connector))
+	_buffer_write_ptr(&connection.buffer, &connector, size_of(connector))
 	_debug_log(connection, "-> wp_drm_lease_request_v1@", wp_drm_lease_request_v1, ".request_connector:", " connector=", connector)
 	return
 }
 wp_drm_lease_request_v1_submit :: proc(connection: ^Connection, wp_drm_lease_request_v1: Wp_Drm_Lease_Request_V1) -> (id: Wp_Drm_Lease_V1) {
 	_size: u16 = 8 + size_of(id)
 	wp_drm_lease_request_v1 := wp_drm_lease_request_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_drm_lease_request_v1, size_of(wp_drm_lease_request_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_drm_lease_request_v1, size_of(wp_drm_lease_request_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Drm_Lease_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> wp_drm_lease_request_v1@", wp_drm_lease_request_v1, ".submit:", " id=", id)
 	return
 }
 wp_drm_lease_v1_destroy :: proc(connection: ^Connection, wp_drm_lease_v1: Wp_Drm_Lease_V1) {
 	_size: u16 = 8
 	wp_drm_lease_v1 := wp_drm_lease_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_drm_lease_v1, size_of(wp_drm_lease_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_drm_lease_v1, size_of(wp_drm_lease_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_drm_lease_v1@", wp_drm_lease_v1, ".destroy:")
 	return
 }
 ext_background_effect_manager_v1_destroy :: proc(connection: ^Connection, ext_background_effect_manager_v1: Ext_Background_Effect_Manager_V1) {
 	_size: u16 = 8
 	ext_background_effect_manager_v1 := ext_background_effect_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_background_effect_manager_v1, size_of(ext_background_effect_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_background_effect_manager_v1, size_of(ext_background_effect_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_background_effect_manager_v1@", ext_background_effect_manager_v1, ".destroy:")
 	return
 }
 ext_background_effect_manager_v1_get_background_effect :: proc(connection: ^Connection, ext_background_effect_manager_v1: Ext_Background_Effect_Manager_V1, surface: Surface) -> (id: Ext_Background_Effect_Surface_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	ext_background_effect_manager_v1 := ext_background_effect_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_background_effect_manager_v1, size_of(ext_background_effect_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_background_effect_manager_v1, size_of(ext_background_effect_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Background_Effect_Surface_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> ext_background_effect_manager_v1@", ext_background_effect_manager_v1, ".get_background_effect:", " id=", id, " surface=", surface)
 	return
 }
 ext_background_effect_surface_v1_destroy :: proc(connection: ^Connection, ext_background_effect_surface_v1: Ext_Background_Effect_Surface_V1) {
 	_size: u16 = 8
 	ext_background_effect_surface_v1 := ext_background_effect_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_background_effect_surface_v1, size_of(ext_background_effect_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_background_effect_surface_v1, size_of(ext_background_effect_surface_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_background_effect_surface_v1@", ext_background_effect_surface_v1, ".destroy:")
 	return
 }
 ext_background_effect_surface_v1_set_blur_region :: proc(connection: ^Connection, ext_background_effect_surface_v1: Ext_Background_Effect_Surface_V1, region: Region) {
 	_size: u16 = 8 + size_of(region)
 	ext_background_effect_surface_v1 := ext_background_effect_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_background_effect_surface_v1, size_of(ext_background_effect_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_background_effect_surface_v1, size_of(ext_background_effect_surface_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	region := region
-	bytes.buffer_write_ptr(&connection.buffer, &region, size_of(region))
+	_buffer_write_ptr(&connection.buffer, &region, size_of(region))
 	_debug_log(connection, "-> ext_background_effect_surface_v1@", ext_background_effect_surface_v1, ".set_blur_region:", " region=", region)
 	return
 }
 ext_data_control_manager_v1_create_data_source :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1) -> (id: Ext_Data_Control_Source_V1) {
 	_size: u16 = 8 + size_of(id)
 	ext_data_control_manager_v1 := ext_data_control_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Data_Control_Source_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".create_data_source:", " id=", id)
 	return
 }
 ext_data_control_manager_v1_get_data_device :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1, seat: Seat) -> (id: Ext_Data_Control_Device_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(seat)
 	ext_data_control_manager_v1 := ext_data_control_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Data_Control_Device_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	_debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".get_data_device:", " id=", id, " seat=", seat)
 	return
 }
 ext_data_control_manager_v1_destroy :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1) {
 	_size: u16 = 8
 	ext_data_control_manager_v1 := ext_data_control_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".destroy:")
 	return
 }
 ext_data_control_device_v1_set_selection :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1, source: Ext_Data_Control_Source_V1) {
 	_size: u16 = 8 + size_of(source)
 	ext_data_control_device_v1 := ext_data_control_device_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	source := source
-	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	_debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".set_selection:", " source=", source)
 	return
 }
 ext_data_control_device_v1_destroy :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1) {
 	_size: u16 = 8
 	ext_data_control_device_v1 := ext_data_control_device_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".destroy:")
 	return
 }
 ext_data_control_device_v1_set_primary_selection :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1, source: Ext_Data_Control_Source_V1) {
 	_size: u16 = 8 + size_of(source)
 	ext_data_control_device_v1 := ext_data_control_device_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	source := source
-	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	_debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".set_primary_selection:", " source=", source)
 	return
 }
 ext_data_control_source_v1_offer :: proc(connection: ^Connection, ext_data_control_source_v1: Ext_Data_Control_Source_V1, mime_type: string) {
 	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
 	ext_data_control_source_v1 := ext_data_control_source_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_source_v1, size_of(ext_data_control_source_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_source_v1, size_of(ext_data_control_source_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_mime_type_len := u32(len(mime_type)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_mime_type_len, 4)
-	bytes.buffer_write_string(&connection.buffer, mime_type)
-	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, mime_type)
 	_debug_log(connection, "-> ext_data_control_source_v1@", ext_data_control_source_v1, ".offer:", " mime_type=", mime_type)
 	return
 }
 ext_data_control_source_v1_destroy :: proc(connection: ^Connection, ext_data_control_source_v1: Ext_Data_Control_Source_V1) {
 	_size: u16 = 8
 	ext_data_control_source_v1 := ext_data_control_source_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_source_v1, size_of(ext_data_control_source_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_source_v1, size_of(ext_data_control_source_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_data_control_source_v1@", ext_data_control_source_v1, ".destroy:")
 	return
 }
 ext_data_control_offer_v1_receive :: proc(connection: ^Connection, ext_data_control_offer_v1: Ext_Data_Control_Offer_V1, mime_type: string, fd: Fd) {
 	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
 	ext_data_control_offer_v1 := ext_data_control_offer_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_offer_v1, size_of(ext_data_control_offer_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_offer_v1, size_of(ext_data_control_offer_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_mime_type_len := u32(len(mime_type)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_mime_type_len, 4)
-	bytes.buffer_write_string(&connection.buffer, mime_type)
-	for _ in len(mime_type) ..< (len(mime_type) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, mime_type)
 	append(&connection.fds_out, fd)
 	_debug_log(connection, "-> ext_data_control_offer_v1@", ext_data_control_offer_v1, ".receive:", " mime_type=", mime_type, " fd=", fd)
 	return
@@ -3865,619 +3808,615 @@ ext_data_control_offer_v1_receive :: proc(connection: ^Connection, ext_data_cont
 ext_data_control_offer_v1_destroy :: proc(connection: ^Connection, ext_data_control_offer_v1: Ext_Data_Control_Offer_V1) {
 	_size: u16 = 8
 	ext_data_control_offer_v1 := ext_data_control_offer_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_data_control_offer_v1, size_of(ext_data_control_offer_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_data_control_offer_v1, size_of(ext_data_control_offer_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_data_control_offer_v1@", ext_data_control_offer_v1, ".destroy:")
 	return
 }
 ext_foreign_toplevel_list_v1_stop :: proc(connection: ^Connection, ext_foreign_toplevel_list_v1: Ext_Foreign_Toplevel_List_V1) {
 	_size: u16 = 8
 	ext_foreign_toplevel_list_v1 := ext_foreign_toplevel_list_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_list_v1, size_of(ext_foreign_toplevel_list_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_list_v1, size_of(ext_foreign_toplevel_list_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_foreign_toplevel_list_v1@", ext_foreign_toplevel_list_v1, ".stop:")
 	return
 }
 ext_foreign_toplevel_list_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_list_v1: Ext_Foreign_Toplevel_List_V1) {
 	_size: u16 = 8
 	ext_foreign_toplevel_list_v1 := ext_foreign_toplevel_list_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_list_v1, size_of(ext_foreign_toplevel_list_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_list_v1, size_of(ext_foreign_toplevel_list_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_foreign_toplevel_list_v1@", ext_foreign_toplevel_list_v1, ".destroy:")
 	return
 }
 ext_foreign_toplevel_handle_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_handle_v1: Ext_Foreign_Toplevel_Handle_V1) {
 	_size: u16 = 8
 	ext_foreign_toplevel_handle_v1 := ext_foreign_toplevel_handle_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_handle_v1, size_of(ext_foreign_toplevel_handle_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_handle_v1, size_of(ext_foreign_toplevel_handle_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_foreign_toplevel_handle_v1@", ext_foreign_toplevel_handle_v1, ".destroy:")
 	return
 }
 ext_idle_notifier_v1_destroy :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1) {
 	_size: u16 = 8
 	ext_idle_notifier_v1 := ext_idle_notifier_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".destroy:")
 	return
 }
 ext_idle_notifier_v1_get_idle_notification :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1, timeout: u32, seat: Seat) -> (id: Ext_Idle_Notification_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(timeout) + size_of(seat)
 	ext_idle_notifier_v1 := ext_idle_notifier_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Idle_Notification_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	timeout := timeout
-	bytes.buffer_write_ptr(&connection.buffer, &timeout, size_of(timeout))
+	_buffer_write_ptr(&connection.buffer, &timeout, size_of(timeout))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	_debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".get_idle_notification:", " id=", id, " timeout=", timeout, " seat=", seat)
 	return
 }
 ext_idle_notifier_v1_get_input_idle_notification :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1, timeout: u32, seat: Seat) -> (id: Ext_Idle_Notification_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(timeout) + size_of(seat)
 	ext_idle_notifier_v1 := ext_idle_notifier_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Idle_Notification_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	timeout := timeout
-	bytes.buffer_write_ptr(&connection.buffer, &timeout, size_of(timeout))
+	_buffer_write_ptr(&connection.buffer, &timeout, size_of(timeout))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	_debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".get_input_idle_notification:", " id=", id, " timeout=", timeout, " seat=", seat)
 	return
 }
 ext_idle_notification_v1_destroy :: proc(connection: ^Connection, ext_idle_notification_v1: Ext_Idle_Notification_V1) {
 	_size: u16 = 8
 	ext_idle_notification_v1 := ext_idle_notification_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_idle_notification_v1, size_of(ext_idle_notification_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_idle_notification_v1, size_of(ext_idle_notification_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_idle_notification_v1@", ext_idle_notification_v1, ".destroy:")
 	return
 }
 ext_image_capture_source_v1_destroy :: proc(connection: ^Connection, ext_image_capture_source_v1: Ext_Image_Capture_Source_V1) {
 	_size: u16 = 8
 	ext_image_capture_source_v1 := ext_image_capture_source_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_capture_source_v1, size_of(ext_image_capture_source_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_capture_source_v1, size_of(ext_image_capture_source_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_image_capture_source_v1@", ext_image_capture_source_v1, ".destroy:")
 	return
 }
 ext_output_image_capture_source_manager_v1_create_source :: proc(connection: ^Connection, ext_output_image_capture_source_manager_v1: Ext_Output_Image_Capture_Source_Manager_V1, output: Output) -> (source: Ext_Image_Capture_Source_V1) {
 	_size: u16 = 8 + size_of(source) + size_of(output)
 	ext_output_image_capture_source_manager_v1 := ext_output_image_capture_source_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_output_image_capture_source_manager_v1, size_of(ext_output_image_capture_source_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_output_image_capture_source_manager_v1, size_of(ext_output_image_capture_source_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	source = auto_cast generate_id(connection, .Ext_Image_Capture_Source_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	output := output
-	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_buffer_write_ptr(&connection.buffer, &output, size_of(output))
 	_debug_log(connection, "-> ext_output_image_capture_source_manager_v1@", ext_output_image_capture_source_manager_v1, ".create_source:", " source=", source, " output=", output)
 	return
 }
 ext_output_image_capture_source_manager_v1_destroy :: proc(connection: ^Connection, ext_output_image_capture_source_manager_v1: Ext_Output_Image_Capture_Source_Manager_V1) {
 	_size: u16 = 8
 	ext_output_image_capture_source_manager_v1 := ext_output_image_capture_source_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_output_image_capture_source_manager_v1, size_of(ext_output_image_capture_source_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_output_image_capture_source_manager_v1, size_of(ext_output_image_capture_source_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_output_image_capture_source_manager_v1@", ext_output_image_capture_source_manager_v1, ".destroy:")
 	return
 }
 ext_foreign_toplevel_image_capture_source_manager_v1_create_source :: proc(connection: ^Connection, ext_foreign_toplevel_image_capture_source_manager_v1: Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1, toplevel_handle: Ext_Foreign_Toplevel_Handle_V1) -> (source: Ext_Image_Capture_Source_V1) {
 	_size: u16 = 8 + size_of(source) + size_of(toplevel_handle)
 	ext_foreign_toplevel_image_capture_source_manager_v1 := ext_foreign_toplevel_image_capture_source_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_image_capture_source_manager_v1, size_of(ext_foreign_toplevel_image_capture_source_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_image_capture_source_manager_v1, size_of(ext_foreign_toplevel_image_capture_source_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	source = auto_cast generate_id(connection, .Ext_Image_Capture_Source_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	toplevel_handle := toplevel_handle
-	bytes.buffer_write_ptr(&connection.buffer, &toplevel_handle, size_of(toplevel_handle))
+	_buffer_write_ptr(&connection.buffer, &toplevel_handle, size_of(toplevel_handle))
 	_debug_log(connection, "-> ext_foreign_toplevel_image_capture_source_manager_v1@", ext_foreign_toplevel_image_capture_source_manager_v1, ".create_source:", " source=", source, " toplevel_handle=", toplevel_handle)
 	return
 }
 ext_foreign_toplevel_image_capture_source_manager_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_image_capture_source_manager_v1: Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1) {
 	_size: u16 = 8
 	ext_foreign_toplevel_image_capture_source_manager_v1 := ext_foreign_toplevel_image_capture_source_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_image_capture_source_manager_v1, size_of(ext_foreign_toplevel_image_capture_source_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_foreign_toplevel_image_capture_source_manager_v1, size_of(ext_foreign_toplevel_image_capture_source_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_foreign_toplevel_image_capture_source_manager_v1@", ext_foreign_toplevel_image_capture_source_manager_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_manager_v1_create_session :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1, source: Ext_Image_Capture_Source_V1, options: Ext_Image_Copy_Capture_Manager_V1_Options) -> (session: Ext_Image_Copy_Capture_Session_V1) {
 	_size: u16 = 8 + size_of(session) + size_of(source) + size_of(options)
 	ext_image_copy_capture_manager_v1 := ext_image_copy_capture_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	session = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Session_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &session, size_of(session))
+	_buffer_write_ptr(&connection.buffer, &session, size_of(session))
 	source := source
-	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	options := options
-	bytes.buffer_write_ptr(&connection.buffer, &options, size_of(options))
+	_buffer_write_ptr(&connection.buffer, &options, size_of(options))
 	_debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".create_session:", " session=", session, " source=", source, " options=", options)
 	return
 }
 ext_image_copy_capture_manager_v1_create_pointer_cursor_session :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1, source: Ext_Image_Capture_Source_V1, pointer: Pointer) -> (session: Ext_Image_Copy_Capture_Cursor_Session_V1) {
 	_size: u16 = 8 + size_of(session) + size_of(source) + size_of(pointer)
 	ext_image_copy_capture_manager_v1 := ext_image_copy_capture_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	session = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Cursor_Session_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &session, size_of(session))
+	_buffer_write_ptr(&connection.buffer, &session, size_of(session))
 	source := source
-	bytes.buffer_write_ptr(&connection.buffer, &source, size_of(source))
+	_buffer_write_ptr(&connection.buffer, &source, size_of(source))
 	pointer := pointer
-	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
+	_buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
 	_debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".create_pointer_cursor_session:", " session=", session, " source=", source, " pointer=", pointer)
 	return
 }
 ext_image_copy_capture_manager_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1) {
 	_size: u16 = 8
 	ext_image_copy_capture_manager_v1 := ext_image_copy_capture_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_session_v1_create_frame :: proc(connection: ^Connection, ext_image_copy_capture_session_v1: Ext_Image_Copy_Capture_Session_V1) -> (frame: Ext_Image_Copy_Capture_Frame_V1) {
 	_size: u16 = 8 + size_of(frame)
 	ext_image_copy_capture_session_v1 := ext_image_copy_capture_session_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_session_v1, size_of(ext_image_copy_capture_session_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_session_v1, size_of(ext_image_copy_capture_session_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	frame = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Frame_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &frame, size_of(frame))
+	_buffer_write_ptr(&connection.buffer, &frame, size_of(frame))
 	_debug_log(connection, "-> ext_image_copy_capture_session_v1@", ext_image_copy_capture_session_v1, ".create_frame:", " frame=", frame)
 	return
 }
 ext_image_copy_capture_session_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_session_v1: Ext_Image_Copy_Capture_Session_V1) {
 	_size: u16 = 8
 	ext_image_copy_capture_session_v1 := ext_image_copy_capture_session_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_session_v1, size_of(ext_image_copy_capture_session_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_session_v1, size_of(ext_image_copy_capture_session_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_image_copy_capture_session_v1@", ext_image_copy_capture_session_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_frame_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1) {
 	_size: u16 = 8
 	ext_image_copy_capture_frame_v1 := ext_image_copy_capture_frame_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_frame_v1_attach_buffer :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1, buffer: Buffer) {
 	_size: u16 = 8 + size_of(buffer)
 	ext_image_copy_capture_frame_v1 := ext_image_copy_capture_frame_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	buffer := buffer
-	bytes.buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
+	_buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
 	_debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".attach_buffer:", " buffer=", buffer)
 	return
 }
 ext_image_copy_capture_frame_v1_damage_buffer :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1, x: i32, y: i32, width: i32, height: i32) {
 	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
 	ext_image_copy_capture_frame_v1 := ext_image_copy_capture_frame_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	width := width
-	bytes.buffer_write_ptr(&connection.buffer, &width, size_of(width))
+	_buffer_write_ptr(&connection.buffer, &width, size_of(width))
 	height := height
-	bytes.buffer_write_ptr(&connection.buffer, &height, size_of(height))
+	_buffer_write_ptr(&connection.buffer, &height, size_of(height))
 	_debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".damage_buffer:", " x=", x, " y=", y, " width=", width, " height=", height)
 	return
 }
 ext_image_copy_capture_frame_v1_capture :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1) {
 	_size: u16 = 8
 	ext_image_copy_capture_frame_v1 := ext_image_copy_capture_frame_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".capture:")
 	return
 }
 ext_image_copy_capture_cursor_session_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_cursor_session_v1: Ext_Image_Copy_Capture_Cursor_Session_V1) {
 	_size: u16 = 8
 	ext_image_copy_capture_cursor_session_v1 := ext_image_copy_capture_cursor_session_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_cursor_session_v1, size_of(ext_image_copy_capture_cursor_session_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_cursor_session_v1, size_of(ext_image_copy_capture_cursor_session_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_image_copy_capture_cursor_session_v1@", ext_image_copy_capture_cursor_session_v1, ".destroy:")
 	return
 }
 ext_image_copy_capture_cursor_session_v1_get_capture_session :: proc(connection: ^Connection, ext_image_copy_capture_cursor_session_v1: Ext_Image_Copy_Capture_Cursor_Session_V1) -> (session: Ext_Image_Copy_Capture_Session_V1) {
 	_size: u16 = 8 + size_of(session)
 	ext_image_copy_capture_cursor_session_v1 := ext_image_copy_capture_cursor_session_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_cursor_session_v1, size_of(ext_image_copy_capture_cursor_session_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_image_copy_capture_cursor_session_v1, size_of(ext_image_copy_capture_cursor_session_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	session = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Session_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &session, size_of(session))
+	_buffer_write_ptr(&connection.buffer, &session, size_of(session))
 	_debug_log(connection, "-> ext_image_copy_capture_cursor_session_v1@", ext_image_copy_capture_cursor_session_v1, ".get_capture_session:", " session=", session)
 	return
 }
 ext_session_lock_manager_v1_destroy :: proc(connection: ^Connection, ext_session_lock_manager_v1: Ext_Session_Lock_Manager_V1) {
 	_size: u16 = 8
 	ext_session_lock_manager_v1 := ext_session_lock_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_session_lock_manager_v1, size_of(ext_session_lock_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_session_lock_manager_v1, size_of(ext_session_lock_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_session_lock_manager_v1@", ext_session_lock_manager_v1, ".destroy:")
 	return
 }
 ext_session_lock_manager_v1_lock :: proc(connection: ^Connection, ext_session_lock_manager_v1: Ext_Session_Lock_Manager_V1) -> (id: Ext_Session_Lock_V1) {
 	_size: u16 = 8 + size_of(id)
 	ext_session_lock_manager_v1 := ext_session_lock_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_session_lock_manager_v1, size_of(ext_session_lock_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_session_lock_manager_v1, size_of(ext_session_lock_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Session_Lock_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> ext_session_lock_manager_v1@", ext_session_lock_manager_v1, ".lock:", " id=", id)
 	return
 }
 ext_session_lock_v1_destroy :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1) {
 	_size: u16 = 8
 	ext_session_lock_v1 := ext_session_lock_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_session_lock_v1, size_of(ext_session_lock_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_session_lock_v1, size_of(ext_session_lock_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".destroy:")
 	return
 }
 ext_session_lock_v1_get_lock_surface :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1, surface: Surface, output: Output) -> (id: Ext_Session_Lock_Surface_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface) + size_of(output)
 	ext_session_lock_v1 := ext_session_lock_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_session_lock_v1, size_of(ext_session_lock_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_session_lock_v1, size_of(ext_session_lock_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Ext_Session_Lock_Surface_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	output := output
-	bytes.buffer_write_ptr(&connection.buffer, &output, size_of(output))
+	_buffer_write_ptr(&connection.buffer, &output, size_of(output))
 	_debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".get_lock_surface:", " id=", id, " surface=", surface, " output=", output)
 	return
 }
 ext_session_lock_v1_unlock_and_destroy :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1) {
 	_size: u16 = 8
 	ext_session_lock_v1 := ext_session_lock_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_session_lock_v1, size_of(ext_session_lock_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_session_lock_v1, size_of(ext_session_lock_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".unlock_and_destroy:")
 	return
 }
 ext_session_lock_surface_v1_destroy :: proc(connection: ^Connection, ext_session_lock_surface_v1: Ext_Session_Lock_Surface_V1) {
 	_size: u16 = 8
 	ext_session_lock_surface_v1 := ext_session_lock_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_session_lock_surface_v1, size_of(ext_session_lock_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_session_lock_surface_v1, size_of(ext_session_lock_surface_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_session_lock_surface_v1@", ext_session_lock_surface_v1, ".destroy:")
 	return
 }
 ext_session_lock_surface_v1_ack_configure :: proc(connection: ^Connection, ext_session_lock_surface_v1: Ext_Session_Lock_Surface_V1, serial: u32) {
 	_size: u16 = 8 + size_of(serial)
 	ext_session_lock_surface_v1 := ext_session_lock_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_session_lock_surface_v1, size_of(ext_session_lock_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_session_lock_surface_v1, size_of(ext_session_lock_surface_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> ext_session_lock_surface_v1@", ext_session_lock_surface_v1, ".ack_configure:", " serial=", serial)
 	return
 }
 ext_transient_seat_manager_v1_create :: proc(connection: ^Connection, ext_transient_seat_manager_v1: Ext_Transient_Seat_Manager_V1) -> (seat: Ext_Transient_Seat_V1) {
 	_size: u16 = 8 + size_of(seat)
 	ext_transient_seat_manager_v1 := ext_transient_seat_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_transient_seat_manager_v1, size_of(ext_transient_seat_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_transient_seat_manager_v1, size_of(ext_transient_seat_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	seat = auto_cast generate_id(connection, .Ext_Transient_Seat_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	_debug_log(connection, "-> ext_transient_seat_manager_v1@", ext_transient_seat_manager_v1, ".create:", " seat=", seat)
 	return
 }
 ext_transient_seat_manager_v1_destroy :: proc(connection: ^Connection, ext_transient_seat_manager_v1: Ext_Transient_Seat_Manager_V1) {
 	_size: u16 = 8
 	ext_transient_seat_manager_v1 := ext_transient_seat_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_transient_seat_manager_v1, size_of(ext_transient_seat_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_transient_seat_manager_v1, size_of(ext_transient_seat_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_transient_seat_manager_v1@", ext_transient_seat_manager_v1, ".destroy:")
 	return
 }
 ext_transient_seat_v1_destroy :: proc(connection: ^Connection, ext_transient_seat_v1: Ext_Transient_Seat_V1) {
 	_size: u16 = 8
 	ext_transient_seat_v1 := ext_transient_seat_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_transient_seat_v1, size_of(ext_transient_seat_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_transient_seat_v1, size_of(ext_transient_seat_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_transient_seat_v1@", ext_transient_seat_v1, ".destroy:")
 	return
 }
 ext_workspace_manager_v1_commit :: proc(connection: ^Connection, ext_workspace_manager_v1: Ext_Workspace_Manager_V1) {
 	_size: u16 = 8
 	ext_workspace_manager_v1 := ext_workspace_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_manager_v1, size_of(ext_workspace_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_manager_v1, size_of(ext_workspace_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_workspace_manager_v1@", ext_workspace_manager_v1, ".commit:")
 	return
 }
 ext_workspace_manager_v1_stop :: proc(connection: ^Connection, ext_workspace_manager_v1: Ext_Workspace_Manager_V1) {
 	_size: u16 = 8
 	ext_workspace_manager_v1 := ext_workspace_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_manager_v1, size_of(ext_workspace_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_manager_v1, size_of(ext_workspace_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_workspace_manager_v1@", ext_workspace_manager_v1, ".stop:")
 	return
 }
 ext_workspace_group_handle_v1_create_workspace :: proc(connection: ^Connection, ext_workspace_group_handle_v1: Ext_Workspace_Group_Handle_V1, workspace: string) {
 	_size: u16 = 8 + 4 + u16((len(workspace) + 1 + 3) & -4)
 	ext_workspace_group_handle_v1 := ext_workspace_group_handle_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_group_handle_v1, size_of(ext_workspace_group_handle_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_group_handle_v1, size_of(ext_workspace_group_handle_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_workspace_len := u32(len(workspace)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_workspace_len, 4)
-	bytes.buffer_write_string(&connection.buffer, workspace)
-	for _ in len(workspace) ..< (len(workspace) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, workspace)
 	_debug_log(connection, "-> ext_workspace_group_handle_v1@", ext_workspace_group_handle_v1, ".create_workspace:", " workspace=", workspace)
 	return
 }
 ext_workspace_group_handle_v1_destroy :: proc(connection: ^Connection, ext_workspace_group_handle_v1: Ext_Workspace_Group_Handle_V1) {
 	_size: u16 = 8
 	ext_workspace_group_handle_v1 := ext_workspace_group_handle_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_group_handle_v1, size_of(ext_workspace_group_handle_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_group_handle_v1, size_of(ext_workspace_group_handle_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_workspace_group_handle_v1@", ext_workspace_group_handle_v1, ".destroy:")
 	return
 }
 ext_workspace_handle_v1_destroy :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
 	_size: u16 = 8
 	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".destroy:")
 	return
 }
 ext_workspace_handle_v1_activate :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
 	_size: u16 = 8
 	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".activate:")
 	return
 }
 ext_workspace_handle_v1_deactivate :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
 	_size: u16 = 8
 	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".deactivate:")
 	return
 }
 ext_workspace_handle_v1_assign :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1, workspace_group: Ext_Workspace_Group_Handle_V1) {
 	_size: u16 = 8 + size_of(workspace_group)
 	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	workspace_group := workspace_group
-	bytes.buffer_write_ptr(&connection.buffer, &workspace_group, size_of(workspace_group))
+	_buffer_write_ptr(&connection.buffer, &workspace_group, size_of(workspace_group))
 	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".assign:", " workspace_group=", workspace_group)
 	return
 }
 ext_workspace_handle_v1_remove :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
 	_size: u16 = 8
 	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	bytes.buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
+	_buffer_write_ptr(&connection.buffer, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".remove:")
 	return
 }
 wp_fifo_manager_v1_destroy :: proc(connection: ^Connection, wp_fifo_manager_v1: Wp_Fifo_Manager_V1) {
 	_size: u16 = 8
 	wp_fifo_manager_v1 := wp_fifo_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_fifo_manager_v1, size_of(wp_fifo_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_fifo_manager_v1, size_of(wp_fifo_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_fifo_manager_v1@", wp_fifo_manager_v1, ".destroy:")
 	return
 }
 wp_fifo_manager_v1_get_fifo :: proc(connection: ^Connection, wp_fifo_manager_v1: Wp_Fifo_Manager_V1, surface: Surface) -> (id: Wp_Fifo_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_fifo_manager_v1 := wp_fifo_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_fifo_manager_v1, size_of(wp_fifo_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_fifo_manager_v1, size_of(wp_fifo_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Fifo_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_fifo_manager_v1@", wp_fifo_manager_v1, ".get_fifo:", " id=", id, " surface=", surface)
 	return
 }
 wp_fifo_v1_set_barrier :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
 	_size: u16 = 8
 	wp_fifo_v1 := wp_fifo_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_fifo_v1, size_of(wp_fifo_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_fifo_v1, size_of(wp_fifo_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".set_barrier:")
 	return
 }
 wp_fifo_v1_wait_barrier :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
 	_size: u16 = 8
 	wp_fifo_v1 := wp_fifo_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_fifo_v1, size_of(wp_fifo_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_fifo_v1, size_of(wp_fifo_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".wait_barrier:")
 	return
 }
 wp_fifo_v1_destroy :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
 	_size: u16 = 8
 	wp_fifo_v1 := wp_fifo_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_fifo_v1, size_of(wp_fifo_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_fifo_v1, size_of(wp_fifo_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".destroy:")
 	return
 }
 wp_fractional_scale_manager_v1_destroy :: proc(connection: ^Connection, wp_fractional_scale_manager_v1: Wp_Fractional_Scale_Manager_V1) {
 	_size: u16 = 8
 	wp_fractional_scale_manager_v1 := wp_fractional_scale_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_fractional_scale_manager_v1, size_of(wp_fractional_scale_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_fractional_scale_manager_v1, size_of(wp_fractional_scale_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_fractional_scale_manager_v1@", wp_fractional_scale_manager_v1, ".destroy:")
 	return
 }
 wp_fractional_scale_manager_v1_get_fractional_scale :: proc(connection: ^Connection, wp_fractional_scale_manager_v1: Wp_Fractional_Scale_Manager_V1, surface: Surface) -> (id: Wp_Fractional_Scale_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_fractional_scale_manager_v1 := wp_fractional_scale_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_fractional_scale_manager_v1, size_of(wp_fractional_scale_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_fractional_scale_manager_v1, size_of(wp_fractional_scale_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Fractional_Scale_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_fractional_scale_manager_v1@", wp_fractional_scale_manager_v1, ".get_fractional_scale:", " id=", id, " surface=", surface)
 	return
 }
 wp_fractional_scale_v1_destroy :: proc(connection: ^Connection, wp_fractional_scale_v1: Wp_Fractional_Scale_V1) {
 	_size: u16 = 8
 	wp_fractional_scale_v1 := wp_fractional_scale_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_fractional_scale_v1, size_of(wp_fractional_scale_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_fractional_scale_v1, size_of(wp_fractional_scale_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_fractional_scale_v1@", wp_fractional_scale_v1, ".destroy:")
 	return
 }
 wp_linux_drm_syncobj_manager_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1) {
 	_size: u16 = 8
 	wp_linux_drm_syncobj_manager_v1 := wp_linux_drm_syncobj_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".destroy:")
 	return
 }
 wp_linux_drm_syncobj_manager_v1_get_surface :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1, surface: Surface) -> (id: Wp_Linux_Drm_Syncobj_Surface_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_linux_drm_syncobj_manager_v1 := wp_linux_drm_syncobj_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Linux_Drm_Syncobj_Surface_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
 	return
 }
 wp_linux_drm_syncobj_manager_v1_import_timeline :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1, fd: Fd) -> (id: Wp_Linux_Drm_Syncobj_Timeline_V1) {
 	_size: u16 = 8 + size_of(id)
 	wp_linux_drm_syncobj_manager_v1 := wp_linux_drm_syncobj_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Linux_Drm_Syncobj_Timeline_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	append(&connection.fds_out, fd)
 	_debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".import_timeline:", " id=", id, " fd=", fd)
 	return
@@ -4485,104 +4424,104 @@ wp_linux_drm_syncobj_manager_v1_import_timeline :: proc(connection: ^Connection,
 wp_linux_drm_syncobj_timeline_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_timeline_v1: Wp_Linux_Drm_Syncobj_Timeline_V1) {
 	_size: u16 = 8
 	wp_linux_drm_syncobj_timeline_v1 := wp_linux_drm_syncobj_timeline_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_timeline_v1, size_of(wp_linux_drm_syncobj_timeline_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_timeline_v1, size_of(wp_linux_drm_syncobj_timeline_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_linux_drm_syncobj_timeline_v1@", wp_linux_drm_syncobj_timeline_v1, ".destroy:")
 	return
 }
 wp_linux_drm_syncobj_surface_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1) {
 	_size: u16 = 8
 	wp_linux_drm_syncobj_surface_v1 := wp_linux_drm_syncobj_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".destroy:")
 	return
 }
 wp_linux_drm_syncobj_surface_v1_set_acquire_point :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1, timeline: Wp_Linux_Drm_Syncobj_Timeline_V1, point_hi: u32, point_lo: u32) {
 	_size: u16 = 8 + size_of(timeline) + size_of(point_hi) + size_of(point_lo)
 	wp_linux_drm_syncobj_surface_v1 := wp_linux_drm_syncobj_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	timeline := timeline
-	bytes.buffer_write_ptr(&connection.buffer, &timeline, size_of(timeline))
+	_buffer_write_ptr(&connection.buffer, &timeline, size_of(timeline))
 	point_hi := point_hi
-	bytes.buffer_write_ptr(&connection.buffer, &point_hi, size_of(point_hi))
+	_buffer_write_ptr(&connection.buffer, &point_hi, size_of(point_hi))
 	point_lo := point_lo
-	bytes.buffer_write_ptr(&connection.buffer, &point_lo, size_of(point_lo))
+	_buffer_write_ptr(&connection.buffer, &point_lo, size_of(point_lo))
 	_debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".set_acquire_point:", " timeline=", timeline, " point_hi=", point_hi, " point_lo=", point_lo)
 	return
 }
 wp_linux_drm_syncobj_surface_v1_set_release_point :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1, timeline: Wp_Linux_Drm_Syncobj_Timeline_V1, point_hi: u32, point_lo: u32) {
 	_size: u16 = 8 + size_of(timeline) + size_of(point_hi) + size_of(point_lo)
 	wp_linux_drm_syncobj_surface_v1 := wp_linux_drm_syncobj_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	timeline := timeline
-	bytes.buffer_write_ptr(&connection.buffer, &timeline, size_of(timeline))
+	_buffer_write_ptr(&connection.buffer, &timeline, size_of(timeline))
 	point_hi := point_hi
-	bytes.buffer_write_ptr(&connection.buffer, &point_hi, size_of(point_hi))
+	_buffer_write_ptr(&connection.buffer, &point_hi, size_of(point_hi))
 	point_lo := point_lo
-	bytes.buffer_write_ptr(&connection.buffer, &point_lo, size_of(point_lo))
+	_buffer_write_ptr(&connection.buffer, &point_lo, size_of(point_lo))
 	_debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".set_release_point:", " timeline=", timeline, " point_hi=", point_hi, " point_lo=", point_lo)
 	return
 }
 wp_pointer_warp_v1_destroy :: proc(connection: ^Connection, wp_pointer_warp_v1: Wp_Pointer_Warp_V1) {
 	_size: u16 = 8
 	wp_pointer_warp_v1 := wp_pointer_warp_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_pointer_warp_v1, size_of(wp_pointer_warp_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_pointer_warp_v1, size_of(wp_pointer_warp_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_pointer_warp_v1@", wp_pointer_warp_v1, ".destroy:")
 	return
 }
 wp_pointer_warp_v1_warp_pointer :: proc(connection: ^Connection, wp_pointer_warp_v1: Wp_Pointer_Warp_V1, surface: Surface, pointer: Pointer, x: f64, y: f64, serial: u32) {
 	_size: u16 = 8 + size_of(surface) + size_of(pointer) + size_of(x) + size_of(y) + size_of(serial)
 	wp_pointer_warp_v1 := wp_pointer_warp_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_pointer_warp_v1, size_of(wp_pointer_warp_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_pointer_warp_v1, size_of(wp_pointer_warp_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	pointer := pointer
-	bytes.buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
+	_buffer_write_ptr(&connection.buffer, &pointer, size_of(pointer))
 	x := x
-	bytes.buffer_write_ptr(&connection.buffer, &x, size_of(x))
+	_buffer_write_ptr(&connection.buffer, &x, size_of(x))
 	y := y
-	bytes.buffer_write_ptr(&connection.buffer, &y, size_of(y))
+	_buffer_write_ptr(&connection.buffer, &y, size_of(y))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	_debug_log(connection, "-> wp_pointer_warp_v1@", wp_pointer_warp_v1, ".warp_pointer:", " surface=", surface, " pointer=", pointer, " x=", x, " y=", y, " serial=", serial)
 	return
 }
 wp_security_context_manager_v1_destroy :: proc(connection: ^Connection, wp_security_context_manager_v1: Wp_Security_Context_Manager_V1) {
 	_size: u16 = 8
 	wp_security_context_manager_v1 := wp_security_context_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_security_context_manager_v1, size_of(wp_security_context_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_security_context_manager_v1, size_of(wp_security_context_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_security_context_manager_v1@", wp_security_context_manager_v1, ".destroy:")
 	return
 }
 wp_security_context_manager_v1_create_listener :: proc(connection: ^Connection, wp_security_context_manager_v1: Wp_Security_Context_Manager_V1, listen_fd: Fd, close_fd: Fd) -> (id: Wp_Security_Context_V1) {
 	_size: u16 = 8 + size_of(id)
 	wp_security_context_manager_v1 := wp_security_context_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_security_context_manager_v1, size_of(wp_security_context_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_security_context_manager_v1, size_of(wp_security_context_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Security_Context_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	append(&connection.fds_out, listen_fd)
 	append(&connection.fds_out, close_fd)
 	_debug_log(connection, "-> wp_security_context_manager_v1@", wp_security_context_manager_v1, ".create_listener:", " id=", id, " listen_fd=", listen_fd, " close_fd=", close_fd)
@@ -4591,534 +4530,502 @@ wp_security_context_manager_v1_create_listener :: proc(connection: ^Connection, 
 wp_security_context_v1_destroy :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1) {
 	_size: u16 = 8
 	wp_security_context_v1 := wp_security_context_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".destroy:")
 	return
 }
 wp_security_context_v1_set_sandbox_engine :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, name: string) {
 	_size: u16 = 8 + 4 + u16((len(name) + 1 + 3) & -4)
 	wp_security_context_v1 := wp_security_context_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_name_len := u32(len(name)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_name_len, 4)
-	bytes.buffer_write_string(&connection.buffer, name)
-	for _ in len(name) ..< (len(name) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, name)
 	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_sandbox_engine:", " name=", name)
 	return
 }
 wp_security_context_v1_set_app_id :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, app_id: string) {
 	_size: u16 = 8 + 4 + u16((len(app_id) + 1 + 3) & -4)
 	wp_security_context_v1 := wp_security_context_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_app_id_len := u32(len(app_id)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_app_id_len, 4)
-	bytes.buffer_write_string(&connection.buffer, app_id)
-	for _ in len(app_id) ..< (len(app_id) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, app_id)
 	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_app_id:", " app_id=", app_id)
 	return
 }
 wp_security_context_v1_set_instance_id :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, instance_id: string) {
 	_size: u16 = 8 + 4 + u16((len(instance_id) + 1 + 3) & -4)
 	wp_security_context_v1 := wp_security_context_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_instance_id_len := u32(len(instance_id)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_instance_id_len, 4)
-	bytes.buffer_write_string(&connection.buffer, instance_id)
-	for _ in len(instance_id) ..< (len(instance_id) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, instance_id)
 	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_instance_id:", " instance_id=", instance_id)
 	return
 }
 wp_security_context_v1_commit :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1) {
 	_size: u16 = 8
 	wp_security_context_v1 := wp_security_context_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_security_context_v1, size_of(wp_security_context_v1))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".commit:")
 	return
 }
 wp_single_pixel_buffer_manager_v1_destroy :: proc(connection: ^Connection, wp_single_pixel_buffer_manager_v1: Wp_Single_Pixel_Buffer_Manager_V1) {
 	_size: u16 = 8
 	wp_single_pixel_buffer_manager_v1 := wp_single_pixel_buffer_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_single_pixel_buffer_manager_v1, size_of(wp_single_pixel_buffer_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_single_pixel_buffer_manager_v1, size_of(wp_single_pixel_buffer_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_single_pixel_buffer_manager_v1@", wp_single_pixel_buffer_manager_v1, ".destroy:")
 	return
 }
 wp_single_pixel_buffer_manager_v1_create_u32_rgba_buffer :: proc(connection: ^Connection, wp_single_pixel_buffer_manager_v1: Wp_Single_Pixel_Buffer_Manager_V1, r: u32, g: u32, b: u32, a: u32) -> (id: Buffer) {
 	_size: u16 = 8 + size_of(id) + size_of(r) + size_of(g) + size_of(b) + size_of(a)
 	wp_single_pixel_buffer_manager_v1 := wp_single_pixel_buffer_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_single_pixel_buffer_manager_v1, size_of(wp_single_pixel_buffer_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_single_pixel_buffer_manager_v1, size_of(wp_single_pixel_buffer_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Buffer)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	r := r
-	bytes.buffer_write_ptr(&connection.buffer, &r, size_of(r))
+	_buffer_write_ptr(&connection.buffer, &r, size_of(r))
 	g := g
-	bytes.buffer_write_ptr(&connection.buffer, &g, size_of(g))
+	_buffer_write_ptr(&connection.buffer, &g, size_of(g))
 	b := b
-	bytes.buffer_write_ptr(&connection.buffer, &b, size_of(b))
+	_buffer_write_ptr(&connection.buffer, &b, size_of(b))
 	a := a
-	bytes.buffer_write_ptr(&connection.buffer, &a, size_of(a))
+	_buffer_write_ptr(&connection.buffer, &a, size_of(a))
 	_debug_log(connection, "-> wp_single_pixel_buffer_manager_v1@", wp_single_pixel_buffer_manager_v1, ".create_u32_rgba_buffer:", " id=", id, " r=", r, " g=", g, " b=", b, " a=", a)
 	return
 }
 wp_tearing_control_manager_v1_destroy :: proc(connection: ^Connection, wp_tearing_control_manager_v1: Wp_Tearing_Control_Manager_V1) {
 	_size: u16 = 8
 	wp_tearing_control_manager_v1 := wp_tearing_control_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_tearing_control_manager_v1, size_of(wp_tearing_control_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_tearing_control_manager_v1, size_of(wp_tearing_control_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_tearing_control_manager_v1@", wp_tearing_control_manager_v1, ".destroy:")
 	return
 }
 wp_tearing_control_manager_v1_get_tearing_control :: proc(connection: ^Connection, wp_tearing_control_manager_v1: Wp_Tearing_Control_Manager_V1, surface: Surface) -> (id: Wp_Tearing_Control_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	wp_tearing_control_manager_v1 := wp_tearing_control_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_tearing_control_manager_v1, size_of(wp_tearing_control_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_tearing_control_manager_v1, size_of(wp_tearing_control_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Wp_Tearing_Control_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> wp_tearing_control_manager_v1@", wp_tearing_control_manager_v1, ".get_tearing_control:", " id=", id, " surface=", surface)
 	return
 }
 wp_tearing_control_v1_set_presentation_hint :: proc(connection: ^Connection, wp_tearing_control_v1: Wp_Tearing_Control_V1, hint: Wp_Tearing_Control_V1_Presentation_Hint) {
 	_size: u16 = 8 + size_of(hint)
 	wp_tearing_control_v1 := wp_tearing_control_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_tearing_control_v1, size_of(wp_tearing_control_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_tearing_control_v1, size_of(wp_tearing_control_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	hint := hint
-	bytes.buffer_write_ptr(&connection.buffer, &hint, size_of(hint))
+	_buffer_write_ptr(&connection.buffer, &hint, size_of(hint))
 	_debug_log(connection, "-> wp_tearing_control_v1@", wp_tearing_control_v1, ".set_presentation_hint:", " hint=", hint)
 	return
 }
 wp_tearing_control_v1_destroy :: proc(connection: ^Connection, wp_tearing_control_v1: Wp_Tearing_Control_V1) {
 	_size: u16 = 8
 	wp_tearing_control_v1 := wp_tearing_control_v1
-	bytes.buffer_write_ptr(&connection.buffer, &wp_tearing_control_v1, size_of(wp_tearing_control_v1))
+	_buffer_write_ptr(&connection.buffer, &wp_tearing_control_v1, size_of(wp_tearing_control_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> wp_tearing_control_v1@", wp_tearing_control_v1, ".destroy:")
 	return
 }
 xdg_activation_v1_destroy :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1) {
 	_size: u16 = 8
 	xdg_activation_v1 := xdg_activation_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_activation_v1, size_of(xdg_activation_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_activation_v1, size_of(xdg_activation_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".destroy:")
 	return
 }
 xdg_activation_v1_get_activation_token :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1) -> (id: Xdg_Activation_Token_V1) {
 	_size: u16 = 8 + size_of(id)
 	xdg_activation_v1 := xdg_activation_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_activation_v1, size_of(xdg_activation_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_activation_v1, size_of(xdg_activation_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Activation_Token_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".get_activation_token:", " id=", id)
 	return
 }
 xdg_activation_v1_activate :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1, token: string, surface: Surface) {
 	_size: u16 = 8 + 4 + u16((len(token) + 1 + 3) & -4) + size_of(surface)
 	xdg_activation_v1 := xdg_activation_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_activation_v1, size_of(xdg_activation_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_activation_v1, size_of(xdg_activation_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_token_len := u32(len(token)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_token_len, 4)
-	bytes.buffer_write_string(&connection.buffer, token)
-	for _ in len(token) ..< (len(token) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, token)
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".activate:", " token=", token, " surface=", surface)
 	return
 }
 xdg_activation_token_v1_set_serial :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, serial: u32, seat: Seat) {
 	_size: u16 = 8 + size_of(serial) + size_of(seat)
 	xdg_activation_token_v1 := xdg_activation_token_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial := serial
-	bytes.buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
+	_buffer_write_ptr(&connection.buffer, &serial, size_of(serial))
 	seat := seat
-	bytes.buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
+	_buffer_write_ptr(&connection.buffer, &seat, size_of(seat))
 	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_serial:", " serial=", serial, " seat=", seat)
 	return
 }
 xdg_activation_token_v1_set_app_id :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, app_id: string) {
 	_size: u16 = 8 + 4 + u16((len(app_id) + 1 + 3) & -4)
 	xdg_activation_token_v1 := xdg_activation_token_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_app_id_len := u32(len(app_id)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_app_id_len, 4)
-	bytes.buffer_write_string(&connection.buffer, app_id)
-	for _ in len(app_id) ..< (len(app_id) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, app_id)
 	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_app_id:", " app_id=", app_id)
 	return
 }
 xdg_activation_token_v1_set_surface :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, surface: Surface) {
 	_size: u16 = 8 + size_of(surface)
 	xdg_activation_token_v1 := xdg_activation_token_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_surface:", " surface=", surface)
 	return
 }
 xdg_activation_token_v1_commit :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1) {
 	_size: u16 = 8
 	xdg_activation_token_v1 := xdg_activation_token_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
 	opcode: u16 = 3
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".commit:")
 	return
 }
 xdg_activation_token_v1_destroy :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1) {
 	_size: u16 = 8
 	xdg_activation_token_v1 := xdg_activation_token_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
 	opcode: u16 = 4
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".destroy:")
 	return
 }
 xdg_wm_dialog_v1_destroy :: proc(connection: ^Connection, xdg_wm_dialog_v1: Xdg_Wm_Dialog_V1) {
 	_size: u16 = 8
 	xdg_wm_dialog_v1 := xdg_wm_dialog_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_wm_dialog_v1, size_of(xdg_wm_dialog_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_wm_dialog_v1, size_of(xdg_wm_dialog_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_wm_dialog_v1@", xdg_wm_dialog_v1, ".destroy:")
 	return
 }
 xdg_wm_dialog_v1_get_xdg_dialog :: proc(connection: ^Connection, xdg_wm_dialog_v1: Xdg_Wm_Dialog_V1, toplevel: Xdg_Toplevel) -> (id: Xdg_Dialog_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(toplevel)
 	xdg_wm_dialog_v1 := xdg_wm_dialog_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_wm_dialog_v1, size_of(xdg_wm_dialog_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_wm_dialog_v1, size_of(xdg_wm_dialog_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Dialog_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	toplevel := toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
+	_buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
 	_debug_log(connection, "-> xdg_wm_dialog_v1@", xdg_wm_dialog_v1, ".get_xdg_dialog:", " id=", id, " toplevel=", toplevel)
 	return
 }
 xdg_dialog_v1_destroy :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
 	_size: u16 = 8
 	xdg_dialog_v1 := xdg_dialog_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_dialog_v1, size_of(xdg_dialog_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_dialog_v1, size_of(xdg_dialog_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".destroy:")
 	return
 }
 xdg_dialog_v1_set_modal :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
 	_size: u16 = 8
 	xdg_dialog_v1 := xdg_dialog_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_dialog_v1, size_of(xdg_dialog_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_dialog_v1, size_of(xdg_dialog_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".set_modal:")
 	return
 }
 xdg_dialog_v1_unset_modal :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
 	_size: u16 = 8
 	xdg_dialog_v1 := xdg_dialog_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_dialog_v1, size_of(xdg_dialog_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_dialog_v1, size_of(xdg_dialog_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".unset_modal:")
 	return
 }
 xdg_system_bell_v1_destroy :: proc(connection: ^Connection, xdg_system_bell_v1: Xdg_System_Bell_V1) {
 	_size: u16 = 8
 	xdg_system_bell_v1 := xdg_system_bell_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_system_bell_v1, size_of(xdg_system_bell_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_system_bell_v1, size_of(xdg_system_bell_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_system_bell_v1@", xdg_system_bell_v1, ".destroy:")
 	return
 }
 xdg_system_bell_v1_ring :: proc(connection: ^Connection, xdg_system_bell_v1: Xdg_System_Bell_V1, surface: Surface) {
 	_size: u16 = 8 + size_of(surface)
 	xdg_system_bell_v1 := xdg_system_bell_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_system_bell_v1, size_of(xdg_system_bell_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_system_bell_v1, size_of(xdg_system_bell_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> xdg_system_bell_v1@", xdg_system_bell_v1, ".ring:", " surface=", surface)
 	return
 }
 xdg_toplevel_drag_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_drag_manager_v1: Xdg_Toplevel_Drag_Manager_V1) {
 	_size: u16 = 8
 	xdg_toplevel_drag_manager_v1 := xdg_toplevel_drag_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_drag_manager_v1, size_of(xdg_toplevel_drag_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_drag_manager_v1, size_of(xdg_toplevel_drag_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel_drag_manager_v1@", xdg_toplevel_drag_manager_v1, ".destroy:")
 	return
 }
 xdg_toplevel_drag_manager_v1_get_xdg_toplevel_drag :: proc(connection: ^Connection, xdg_toplevel_drag_manager_v1: Xdg_Toplevel_Drag_Manager_V1, data_source: Data_Source) -> (id: Xdg_Toplevel_Drag_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(data_source)
 	xdg_toplevel_drag_manager_v1 := xdg_toplevel_drag_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_drag_manager_v1, size_of(xdg_toplevel_drag_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_drag_manager_v1, size_of(xdg_toplevel_drag_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Toplevel_Drag_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	data_source := data_source
-	bytes.buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
+	_buffer_write_ptr(&connection.buffer, &data_source, size_of(data_source))
 	_debug_log(connection, "-> xdg_toplevel_drag_manager_v1@", xdg_toplevel_drag_manager_v1, ".get_xdg_toplevel_drag:", " id=", id, " data_source=", data_source)
 	return
 }
 xdg_toplevel_drag_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_drag_v1: Xdg_Toplevel_Drag_V1) {
 	_size: u16 = 8
 	xdg_toplevel_drag_v1 := xdg_toplevel_drag_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_drag_v1, size_of(xdg_toplevel_drag_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_drag_v1, size_of(xdg_toplevel_drag_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel_drag_v1@", xdg_toplevel_drag_v1, ".destroy:")
 	return
 }
 xdg_toplevel_drag_v1_attach :: proc(connection: ^Connection, xdg_toplevel_drag_v1: Xdg_Toplevel_Drag_V1, toplevel: Xdg_Toplevel, x_offset: i32, y_offset: i32) {
 	_size: u16 = 8 + size_of(toplevel) + size_of(x_offset) + size_of(y_offset)
 	xdg_toplevel_drag_v1 := xdg_toplevel_drag_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_drag_v1, size_of(xdg_toplevel_drag_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_drag_v1, size_of(xdg_toplevel_drag_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	toplevel := toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
+	_buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
 	x_offset := x_offset
-	bytes.buffer_write_ptr(&connection.buffer, &x_offset, size_of(x_offset))
+	_buffer_write_ptr(&connection.buffer, &x_offset, size_of(x_offset))
 	y_offset := y_offset
-	bytes.buffer_write_ptr(&connection.buffer, &y_offset, size_of(y_offset))
+	_buffer_write_ptr(&connection.buffer, &y_offset, size_of(y_offset))
 	_debug_log(connection, "-> xdg_toplevel_drag_v1@", xdg_toplevel_drag_v1, ".attach:", " toplevel=", toplevel, " x_offset=", x_offset, " y_offset=", y_offset)
 	return
 }
 xdg_toplevel_icon_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1) {
 	_size: u16 = 8
 	xdg_toplevel_icon_manager_v1 := xdg_toplevel_icon_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".destroy:")
 	return
 }
 xdg_toplevel_icon_manager_v1_create_icon :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1) -> (id: Xdg_Toplevel_Icon_V1) {
 	_size: u16 = 8 + size_of(id)
 	xdg_toplevel_icon_manager_v1 := xdg_toplevel_icon_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xdg_Toplevel_Icon_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	_debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".create_icon:", " id=", id)
 	return
 }
 xdg_toplevel_icon_manager_v1_set_icon :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1, toplevel: Xdg_Toplevel, icon: Xdg_Toplevel_Icon_V1) {
 	_size: u16 = 8 + size_of(toplevel) + size_of(icon)
 	xdg_toplevel_icon_manager_v1 := xdg_toplevel_icon_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	toplevel := toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
+	_buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
 	icon := icon
-	bytes.buffer_write_ptr(&connection.buffer, &icon, size_of(icon))
+	_buffer_write_ptr(&connection.buffer, &icon, size_of(icon))
 	_debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".set_icon:", " toplevel=", toplevel, " icon=", icon)
 	return
 }
 xdg_toplevel_icon_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1) {
 	_size: u16 = 8
 	xdg_toplevel_icon_v1 := xdg_toplevel_icon_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".destroy:")
 	return
 }
 xdg_toplevel_icon_v1_set_name :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1, icon_name: string) {
 	_size: u16 = 8 + 4 + u16((len(icon_name) + 1 + 3) & -4)
 	xdg_toplevel_icon_v1 := xdg_toplevel_icon_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
-	_icon_name_len := u32(len(icon_name)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_icon_name_len, 4)
-	bytes.buffer_write_string(&connection.buffer, icon_name)
-	for _ in len(icon_name) ..< (len(icon_name) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_string(&connection.buffer, icon_name)
 	_debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".set_name:", " icon_name=", icon_name)
 	return
 }
 xdg_toplevel_icon_v1_add_buffer :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1, buffer: Buffer, scale: i32) {
 	_size: u16 = 8 + size_of(buffer) + size_of(scale)
 	xdg_toplevel_icon_v1 := xdg_toplevel_icon_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	buffer := buffer
-	bytes.buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
+	_buffer_write_ptr(&connection.buffer, &buffer, size_of(buffer))
 	scale := scale
-	bytes.buffer_write_ptr(&connection.buffer, &scale, size_of(scale))
+	_buffer_write_ptr(&connection.buffer, &scale, size_of(scale))
 	_debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".add_buffer:", " buffer=", buffer, " scale=", scale)
 	return
 }
 xdg_toplevel_tag_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1) {
 	_size: u16 = 8
 	xdg_toplevel_tag_manager_v1 := xdg_toplevel_tag_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".destroy:")
 	return
 }
 xdg_toplevel_tag_manager_v1_set_toplevel_tag :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1, toplevel: Xdg_Toplevel, tag: string) {
 	_size: u16 = 8 + size_of(toplevel) + 4 + u16((len(tag) + 1 + 3) & -4)
 	xdg_toplevel_tag_manager_v1 := xdg_toplevel_tag_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	toplevel := toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
-	_tag_len := u32(len(tag)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_tag_len, 4)
-	bytes.buffer_write_string(&connection.buffer, tag)
-	for _ in len(tag) ..< (len(tag) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
+	_buffer_write_string(&connection.buffer, tag)
 	_debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".set_toplevel_tag:", " toplevel=", toplevel, " tag=", tag)
 	return
 }
 xdg_toplevel_tag_manager_v1_set_toplevel_description :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1, toplevel: Xdg_Toplevel, description: string) {
 	_size: u16 = 8 + size_of(toplevel) + 4 + u16((len(description) + 1 + 3) & -4)
 	xdg_toplevel_tag_manager_v1 := xdg_toplevel_tag_manager_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
+	_buffer_write_ptr(&connection.buffer, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
 	opcode: u16 = 2
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	toplevel := toplevel
-	bytes.buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
-	_description_len := u32(len(description)) + 1
-	bytes.buffer_write_ptr(&connection.buffer, &_description_len, 4)
-	bytes.buffer_write_string(&connection.buffer, description)
-	for _ in len(description) ..< (len(description) + 1 + 3) & -4 do bytes.buffer_write_byte(&connection.buffer, 0)
-	assert(bytes.buffer_length(&connection.buffer) % 4 == 0)
+	_buffer_write_ptr(&connection.buffer, &toplevel, size_of(toplevel))
+	_buffer_write_string(&connection.buffer, description)
 	_debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".set_toplevel_description:", " toplevel=", toplevel, " description=", description)
 	return
 }
 xwayland_shell_v1_destroy :: proc(connection: ^Connection, xwayland_shell_v1: Xwayland_Shell_V1) {
 	_size: u16 = 8
 	xwayland_shell_v1 := xwayland_shell_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xwayland_shell_v1, size_of(xwayland_shell_v1))
+	_buffer_write_ptr(&connection.buffer, &xwayland_shell_v1, size_of(xwayland_shell_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xwayland_shell_v1@", xwayland_shell_v1, ".destroy:")
 	return
 }
 xwayland_shell_v1_get_xwayland_surface :: proc(connection: ^Connection, xwayland_shell_v1: Xwayland_Shell_V1, surface: Surface) -> (id: Xwayland_Surface_V1) {
 	_size: u16 = 8 + size_of(id) + size_of(surface)
 	xwayland_shell_v1 := xwayland_shell_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xwayland_shell_v1, size_of(xwayland_shell_v1))
+	_buffer_write_ptr(&connection.buffer, &xwayland_shell_v1, size_of(xwayland_shell_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	id = auto_cast generate_id(connection, .Xwayland_Surface_V1)
-	bytes.buffer_write_ptr(&connection.buffer, &id, size_of(id))
+	_buffer_write_ptr(&connection.buffer, &id, size_of(id))
 	surface := surface
-	bytes.buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
+	_buffer_write_ptr(&connection.buffer, &surface, size_of(surface))
 	_debug_log(connection, "-> xwayland_shell_v1@", xwayland_shell_v1, ".get_xwayland_surface:", " id=", id, " surface=", surface)
 	return
 }
 xwayland_surface_v1_set_serial :: proc(connection: ^Connection, xwayland_surface_v1: Xwayland_Surface_V1, serial_lo: u32, serial_hi: u32) {
 	_size: u16 = 8 + size_of(serial_lo) + size_of(serial_hi)
 	xwayland_surface_v1 := xwayland_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xwayland_surface_v1, size_of(xwayland_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &xwayland_surface_v1, size_of(xwayland_surface_v1))
 	opcode: u16 = 0
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	serial_lo := serial_lo
-	bytes.buffer_write_ptr(&connection.buffer, &serial_lo, size_of(serial_lo))
+	_buffer_write_ptr(&connection.buffer, &serial_lo, size_of(serial_lo))
 	serial_hi := serial_hi
-	bytes.buffer_write_ptr(&connection.buffer, &serial_hi, size_of(serial_hi))
+	_buffer_write_ptr(&connection.buffer, &serial_hi, size_of(serial_hi))
 	_debug_log(connection, "-> xwayland_surface_v1@", xwayland_surface_v1, ".set_serial:", " serial_lo=", serial_lo, " serial_hi=", serial_hi)
 	return
 }
 xwayland_surface_v1_destroy :: proc(connection: ^Connection, xwayland_surface_v1: Xwayland_Surface_V1) {
 	_size: u16 = 8
 	xwayland_surface_v1 := xwayland_surface_v1
-	bytes.buffer_write_ptr(&connection.buffer, &xwayland_surface_v1, size_of(xwayland_surface_v1))
+	_buffer_write_ptr(&connection.buffer, &xwayland_surface_v1, size_of(xwayland_surface_v1))
 	opcode: u16 = 1
-	bytes.buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
-	bytes.buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
+	_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))
+	_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))
 	_debug_log(connection, "-> xwayland_surface_v1@", xwayland_surface_v1, ".destroy:")
 	return
 }

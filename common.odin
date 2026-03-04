@@ -4,7 +4,6 @@ import "base:intrinsics"
 
 import "core:sys/linux"
 
-import "core:bytes"
 import "core:slice"
 import "core:fmt"
 
@@ -14,7 +13,7 @@ Object :: distinct u32
 SERVER_ID_START :: 0xFF000000
 
 Connection :: struct {
-	buffer:              bytes.Buffer,
+	buffer:              [dynamic]byte,
 	data:                []byte,
 	data_cursor:         int,
 	client_object_types: [dynamic]Object_Type,
@@ -44,8 +43,8 @@ connection_flush :: proc(connection: ^Connection) {
 	msg := linux.Msg_Hdr {
 		iov = {
 			{
-				base = raw_data(connection.buffer.buf),
-				len  = len(connection.buffer.buf),
+				base = raw_data(connection.buffer),
+				len  = len(connection.buffer),
 			},
 		},
 		control = make([]byte, 16 + ((len(connection.fds_out) + 7) & -8) * 4, context.temp_allocator),
@@ -61,7 +60,7 @@ connection_flush :: proc(connection: ^Connection) {
 	_, errno := linux.sendmsg(connection.socket, &msg, { .CMSG_CLOEXEC, .NOSIGNAL, })
 	assert(errno == .NONE)
 
-	bytes.buffer_reset(&connection.buffer)
+	clear(&connection.buffer)
 	connection.data_cursor = 0
 }
 
@@ -197,4 +196,16 @@ _debug_log :: proc(connection: ^Connection, args: ..any) {
 	if connection.log_fn != nil {
 		connection.log_fn(fmt.tprint(..args, sep = ""), connection.user_data)
 	}
+}
+
+_buffer_write_ptr :: proc(buffer: ^[dynamic]byte, pointer: rawptr, size: int) {
+	append(buffer, ..([^]byte)(pointer)[:size])
+}
+
+_buffer_write_string :: proc(buffer: ^[dynamic]byte, str: string) {
+	l := u32(len(str)) + 1
+	_buffer_write_ptr(buffer, &l, size_of(l))
+	append(buffer, ..transmute([]byte)(str))
+	for _ in len(str) ..< (len(str) + 1 + 3) & -4 do append(buffer, 0)
+	assert(len(buffer) % 4 == 0)
 }
