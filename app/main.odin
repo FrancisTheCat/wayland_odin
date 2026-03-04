@@ -93,8 +93,6 @@ main :: proc() {
 				case "wl_compositor":
 					compositor = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Compositor)
 					fmt.println("compositor:", compositor)
-				case:
-					fmt.println(event)
 				}
 			case wl.Event_Xdg_Wm_Base_Ping:
 				wl.xdg_wm_base_pong(&connection, e.object, e.serial)
@@ -105,8 +103,6 @@ main :: proc() {
 				configured = true
 			case wl.Event_Pointer_Enter:
 				enter_serial = e.serial
-			case:
-				fmt.println(event)
 			}
 
 			if cursor_shape_device == 0 && pointer != 0 && cursor_shape_manager != 0 {

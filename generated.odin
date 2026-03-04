@@ -6355,7 +6355,7 @@ Event_Xdg_Toplevel_Icon_Manager_V1_Done :: struct {
 	object: Xdg_Toplevel_Icon_Manager_V1,
 }
 
-parse_wl_display_error :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Error, ok: bool) {
+parse_display_error :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Error, ok: bool) {
 	event.object = Display(object)
 	read(connection, &event.object_id) or_return
 	read(connection, &event.code) or_return
@@ -6364,14 +6364,14 @@ parse_wl_display_error :: proc(connection: ^Connection, object: u32) -> (event: 
 	ok = true
 	return
 }
-parse_wl_display_delete_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Delete_Id, ok: bool) {
+parse_display_delete_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Delete_Id, ok: bool) {
 	event.object = Display(object)
 	read(connection, &event.id) or_return
 	_debug_log(connection, "<- wl_display@", object, ".delete_id:", " id=", event.id)
 	ok = true
 	return
 }
-parse_wl_registry_global :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global, ok: bool) {
+parse_registry_global :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global, ok: bool) {
 	event.object = Registry(object)
 	read(connection, &event.name) or_return
 	read(connection, &event.interface) or_return
@@ -6380,62 +6380,62 @@ parse_wl_registry_global :: proc(connection: ^Connection, object: u32) -> (event
 	ok = true
 	return
 }
-parse_wl_registry_global_remove :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global_Remove, ok: bool) {
+parse_registry_global_remove :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global_Remove, ok: bool) {
 	event.object = Registry(object)
 	read(connection, &event.name) or_return
 	_debug_log(connection, "<- wl_registry@", object, ".global_remove:", " name=", event.name)
 	ok = true
 	return
 }
-parse_wl_callback_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Callback_Done, ok: bool) {
+parse_callback_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Callback_Done, ok: bool) {
 	event.object = Callback(object)
 	read(connection, &event.callback_data) or_return
 	_debug_log(connection, "<- wl_callback@", object, ".done:", " callback_data=", event.callback_data)
 	ok = true
 	return
 }
-parse_wl_shm_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Shm_Format, ok: bool) {
+parse_shm_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Shm_Format, ok: bool) {
 	event.object = Shm(object)
 	read(connection, &event.format) or_return
 	_debug_log(connection, "<- wl_shm@", object, ".format:", " format=", event.format)
 	ok = true
 	return
 }
-parse_wl_buffer_release :: proc(connection: ^Connection, object: u32) -> (event: Event_Buffer_Release, ok: bool) {
+parse_buffer_release :: proc(connection: ^Connection, object: u32) -> (event: Event_Buffer_Release, ok: bool) {
 	event.object = Buffer(object)
 	_debug_log(connection, "<- wl_buffer@", object, ".release:")
 	ok = true
 	return
 }
-parse_wl_data_offer_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Offer, ok: bool) {
+parse_data_offer_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Offer, ok: bool) {
 	event.object = Data_Offer(object)
 	read(connection, &event.mime_type) or_return
 	_debug_log(connection, "<- wl_data_offer@", object, ".offer:", " mime_type=", event.mime_type)
 	ok = true
 	return
 }
-parse_wl_data_offer_source_actions :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Source_Actions, ok: bool) {
+parse_data_offer_source_actions :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Source_Actions, ok: bool) {
 	event.object = Data_Offer(object)
 	read(connection, &event.source_actions) or_return
 	_debug_log(connection, "<- wl_data_offer@", object, ".source_actions:", " source_actions=", event.source_actions)
 	ok = true
 	return
 }
-parse_wl_data_offer_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Action, ok: bool) {
+parse_data_offer_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Action, ok: bool) {
 	event.object = Data_Offer(object)
 	read(connection, &event.dnd_action) or_return
 	_debug_log(connection, "<- wl_data_offer@", object, ".action:", " dnd_action=", event.dnd_action)
 	ok = true
 	return
 }
-parse_wl_data_source_target :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Target, ok: bool) {
+parse_data_source_target :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Target, ok: bool) {
 	event.object = Data_Source(object)
 	read(connection, &event.mime_type) or_return
 	_debug_log(connection, "<- wl_data_source@", object, ".target:", " mime_type=", event.mime_type)
 	ok = true
 	return
 }
-parse_wl_data_source_send :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Send, ok: bool) {
+parse_data_source_send :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Send, ok: bool) {
 	event.object = Data_Source(object)
 	read(connection, &event.mime_type) or_return
 	read(connection, &event.fd) or_return
@@ -6443,32 +6443,32 @@ parse_wl_data_source_send :: proc(connection: ^Connection, object: u32) -> (even
 	ok = true
 	return
 }
-parse_wl_data_source_cancelled :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Cancelled, ok: bool) {
+parse_data_source_cancelled :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Cancelled, ok: bool) {
 	event.object = Data_Source(object)
 	_debug_log(connection, "<- wl_data_source@", object, ".cancelled:")
 	ok = true
 	return
 }
-parse_wl_data_source_dnd_drop_performed :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Drop_Performed, ok: bool) {
+parse_data_source_dnd_drop_performed :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Drop_Performed, ok: bool) {
 	event.object = Data_Source(object)
 	_debug_log(connection, "<- wl_data_source@", object, ".dnd_drop_performed:")
 	ok = true
 	return
 }
-parse_wl_data_source_dnd_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Finished, ok: bool) {
+parse_data_source_dnd_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Finished, ok: bool) {
 	event.object = Data_Source(object)
 	_debug_log(connection, "<- wl_data_source@", object, ".dnd_finished:")
 	ok = true
 	return
 }
-parse_wl_data_source_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Action, ok: bool) {
+parse_data_source_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Action, ok: bool) {
 	event.object = Data_Source(object)
 	read(connection, &event.dnd_action) or_return
 	_debug_log(connection, "<- wl_data_source@", object, ".action:", " dnd_action=", event.dnd_action)
 	ok = true
 	return
 }
-parse_wl_data_device_data_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Data_Offer, ok: bool) {
+parse_data_device_data_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Data_Offer, ok: bool) {
 	event.object = Data_Device(object)
 	read(connection, &event.id) or_return
 	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
@@ -6477,7 +6477,7 @@ parse_wl_data_device_data_offer :: proc(connection: ^Connection, object: u32) ->
 	ok = true
 	return
 }
-parse_wl_data_device_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Enter, ok: bool) {
+parse_data_device_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Enter, ok: bool) {
 	event.object = Data_Device(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
@@ -6488,13 +6488,13 @@ parse_wl_data_device_enter :: proc(connection: ^Connection, object: u32) -> (eve
 	ok = true
 	return
 }
-parse_wl_data_device_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Leave, ok: bool) {
+parse_data_device_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Leave, ok: bool) {
 	event.object = Data_Device(object)
 	_debug_log(connection, "<- wl_data_device@", object, ".leave:")
 	ok = true
 	return
 }
-parse_wl_data_device_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Motion, ok: bool) {
+parse_data_device_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Motion, ok: bool) {
 	event.object = Data_Device(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.x) or_return
@@ -6503,27 +6503,27 @@ parse_wl_data_device_motion :: proc(connection: ^Connection, object: u32) -> (ev
 	ok = true
 	return
 }
-parse_wl_data_device_drop :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Drop, ok: bool) {
+parse_data_device_drop :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Drop, ok: bool) {
 	event.object = Data_Device(object)
 	_debug_log(connection, "<- wl_data_device@", object, ".drop:")
 	ok = true
 	return
 }
-parse_wl_data_device_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Selection, ok: bool) {
+parse_data_device_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Selection, ok: bool) {
 	event.object = Data_Device(object)
 	read(connection, &event.id) or_return
 	_debug_log(connection, "<- wl_data_device@", object, ".selection:", " id=", event.id)
 	ok = true
 	return
 }
-parse_wl_shell_surface_ping :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Ping, ok: bool) {
+parse_shell_surface_ping :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Ping, ok: bool) {
 	event.object = Shell_Surface(object)
 	read(connection, &event.serial) or_return
 	_debug_log(connection, "<- wl_shell_surface@", object, ".ping:", " serial=", event.serial)
 	ok = true
 	return
 }
-parse_wl_shell_surface_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Configure, ok: bool) {
+parse_shell_surface_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Configure, ok: bool) {
 	event.object = Shell_Surface(object)
 	read(connection, &event.edges) or_return
 	read(connection, &event.width) or_return
@@ -6532,55 +6532,55 @@ parse_wl_shell_surface_configure :: proc(connection: ^Connection, object: u32) -
 	ok = true
 	return
 }
-parse_wl_shell_surface_popup_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Popup_Done, ok: bool) {
+parse_shell_surface_popup_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Popup_Done, ok: bool) {
 	event.object = Shell_Surface(object)
 	_debug_log(connection, "<- wl_shell_surface@", object, ".popup_done:")
 	ok = true
 	return
 }
-parse_wl_surface_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Enter, ok: bool) {
+parse_surface_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Enter, ok: bool) {
 	event.object = Surface(object)
 	read(connection, &event.output) or_return
 	_debug_log(connection, "<- wl_surface@", object, ".enter:", " output=", event.output)
 	ok = true
 	return
 }
-parse_wl_surface_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Leave, ok: bool) {
+parse_surface_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Leave, ok: bool) {
 	event.object = Surface(object)
 	read(connection, &event.output) or_return
 	_debug_log(connection, "<- wl_surface@", object, ".leave:", " output=", event.output)
 	ok = true
 	return
 }
-parse_wl_surface_preferred_buffer_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Scale, ok: bool) {
+parse_surface_preferred_buffer_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Scale, ok: bool) {
 	event.object = Surface(object)
 	read(connection, &event.factor) or_return
 	_debug_log(connection, "<- wl_surface@", object, ".preferred_buffer_scale:", " factor=", event.factor)
 	ok = true
 	return
 }
-parse_wl_surface_preferred_buffer_transform :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Transform, ok: bool) {
+parse_surface_preferred_buffer_transform :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Transform, ok: bool) {
 	event.object = Surface(object)
 	read(connection, &event.transform) or_return
 	_debug_log(connection, "<- wl_surface@", object, ".preferred_buffer_transform:", " transform=", event.transform)
 	ok = true
 	return
 }
-parse_wl_seat_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Capabilities, ok: bool) {
+parse_seat_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Capabilities, ok: bool) {
 	event.object = Seat(object)
 	read(connection, &event.capabilities) or_return
 	_debug_log(connection, "<- wl_seat@", object, ".capabilities:", " capabilities=", event.capabilities)
 	ok = true
 	return
 }
-parse_wl_seat_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Name, ok: bool) {
+parse_seat_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Name, ok: bool) {
 	event.object = Seat(object)
 	read(connection, &event.name) or_return
 	_debug_log(connection, "<- wl_seat@", object, ".name:", " name=", event.name)
 	ok = true
 	return
 }
-parse_wl_pointer_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Enter, ok: bool) {
+parse_pointer_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Enter, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
@@ -6590,7 +6590,7 @@ parse_wl_pointer_enter :: proc(connection: ^Connection, object: u32) -> (event: 
 	ok = true
 	return
 }
-parse_wl_pointer_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Leave, ok: bool) {
+parse_pointer_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Leave, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
@@ -6598,7 +6598,7 @@ parse_wl_pointer_leave :: proc(connection: ^Connection, object: u32) -> (event: 
 	ok = true
 	return
 }
-parse_wl_pointer_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Motion, ok: bool) {
+parse_pointer_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Motion, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.surface_x) or_return
@@ -6607,7 +6607,7 @@ parse_wl_pointer_motion :: proc(connection: ^Connection, object: u32) -> (event:
 	ok = true
 	return
 }
-parse_wl_pointer_button :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Button, ok: bool) {
+parse_pointer_button :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Button, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
@@ -6617,7 +6617,7 @@ parse_wl_pointer_button :: proc(connection: ^Connection, object: u32) -> (event:
 	ok = true
 	return
 }
-parse_wl_pointer_axis :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis, ok: bool) {
+parse_pointer_axis :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.axis) or_return
@@ -6626,20 +6626,20 @@ parse_wl_pointer_axis :: proc(connection: ^Connection, object: u32) -> (event: E
 	ok = true
 	return
 }
-parse_wl_pointer_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Frame, ok: bool) {
+parse_pointer_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Frame, ok: bool) {
 	event.object = Pointer(object)
 	_debug_log(connection, "<- wl_pointer@", object, ".frame:")
 	ok = true
 	return
 }
-parse_wl_pointer_axis_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Source, ok: bool) {
+parse_pointer_axis_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Source, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.axis_source) or_return
 	_debug_log(connection, "<- wl_pointer@", object, ".axis_source:", " axis_source=", event.axis_source)
 	ok = true
 	return
 }
-parse_wl_pointer_axis_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Stop, ok: bool) {
+parse_pointer_axis_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Stop, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.axis) or_return
@@ -6647,7 +6647,7 @@ parse_wl_pointer_axis_stop :: proc(connection: ^Connection, object: u32) -> (eve
 	ok = true
 	return
 }
-parse_wl_pointer_axis_discrete :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Discrete, ok: bool) {
+parse_pointer_axis_discrete :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Discrete, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.discrete) or_return
@@ -6655,7 +6655,7 @@ parse_wl_pointer_axis_discrete :: proc(connection: ^Connection, object: u32) -> 
 	ok = true
 	return
 }
-parse_wl_pointer_axis_value120 :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Value120, ok: bool) {
+parse_pointer_axis_value120 :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Value120, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.value120) or_return
@@ -6663,7 +6663,7 @@ parse_wl_pointer_axis_value120 :: proc(connection: ^Connection, object: u32) -> 
 	ok = true
 	return
 }
-parse_wl_pointer_axis_relative_direction :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Relative_Direction, ok: bool) {
+parse_pointer_axis_relative_direction :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Relative_Direction, ok: bool) {
 	event.object = Pointer(object)
 	read(connection, &event.axis) or_return
 	read(connection, &event.direction) or_return
@@ -6671,7 +6671,7 @@ parse_wl_pointer_axis_relative_direction :: proc(connection: ^Connection, object
 	ok = true
 	return
 }
-parse_wl_keyboard_keymap :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Keymap, ok: bool) {
+parse_keyboard_keymap :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Keymap, ok: bool) {
 	event.object = Keyboard(object)
 	read(connection, &event.format) or_return
 	read(connection, &event.fd) or_return
@@ -6680,7 +6680,7 @@ parse_wl_keyboard_keymap :: proc(connection: ^Connection, object: u32) -> (event
 	ok = true
 	return
 }
-parse_wl_keyboard_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Enter, ok: bool) {
+parse_keyboard_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Enter, ok: bool) {
 	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
@@ -6689,7 +6689,7 @@ parse_wl_keyboard_enter :: proc(connection: ^Connection, object: u32) -> (event:
 	ok = true
 	return
 }
-parse_wl_keyboard_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Leave, ok: bool) {
+parse_keyboard_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Leave, ok: bool) {
 	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.surface) or_return
@@ -6697,7 +6697,7 @@ parse_wl_keyboard_leave :: proc(connection: ^Connection, object: u32) -> (event:
 	ok = true
 	return
 }
-parse_wl_keyboard_key :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Key, ok: bool) {
+parse_keyboard_key :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Key, ok: bool) {
 	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
@@ -6707,7 +6707,7 @@ parse_wl_keyboard_key :: proc(connection: ^Connection, object: u32) -> (event: E
 	ok = true
 	return
 }
-parse_wl_keyboard_modifiers :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Modifiers, ok: bool) {
+parse_keyboard_modifiers :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Modifiers, ok: bool) {
 	event.object = Keyboard(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.mods_depressed) or_return
@@ -6718,7 +6718,7 @@ parse_wl_keyboard_modifiers :: proc(connection: ^Connection, object: u32) -> (ev
 	ok = true
 	return
 }
-parse_wl_keyboard_repeat_info :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Repeat_Info, ok: bool) {
+parse_keyboard_repeat_info :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Repeat_Info, ok: bool) {
 	event.object = Keyboard(object)
 	read(connection, &event.rate) or_return
 	read(connection, &event.delay) or_return
@@ -6726,7 +6726,7 @@ parse_wl_keyboard_repeat_info :: proc(connection: ^Connection, object: u32) -> (
 	ok = true
 	return
 }
-parse_wl_touch_down :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Down, ok: bool) {
+parse_touch_down :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Down, ok: bool) {
 	event.object = Touch(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
@@ -6738,7 +6738,7 @@ parse_wl_touch_down :: proc(connection: ^Connection, object: u32) -> (event: Eve
 	ok = true
 	return
 }
-parse_wl_touch_up :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Up, ok: bool) {
+parse_touch_up :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Up, ok: bool) {
 	event.object = Touch(object)
 	read(connection, &event.serial) or_return
 	read(connection, &event.time) or_return
@@ -6747,7 +6747,7 @@ parse_wl_touch_up :: proc(connection: ^Connection, object: u32) -> (event: Event
 	ok = true
 	return
 }
-parse_wl_touch_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Motion, ok: bool) {
+parse_touch_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Motion, ok: bool) {
 	event.object = Touch(object)
 	read(connection, &event.time) or_return
 	read(connection, &event.id) or_return
@@ -6757,19 +6757,19 @@ parse_wl_touch_motion :: proc(connection: ^Connection, object: u32) -> (event: E
 	ok = true
 	return
 }
-parse_wl_touch_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Frame, ok: bool) {
+parse_touch_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Frame, ok: bool) {
 	event.object = Touch(object)
 	_debug_log(connection, "<- wl_touch@", object, ".frame:")
 	ok = true
 	return
 }
-parse_wl_touch_cancel :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Cancel, ok: bool) {
+parse_touch_cancel :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Cancel, ok: bool) {
 	event.object = Touch(object)
 	_debug_log(connection, "<- wl_touch@", object, ".cancel:")
 	ok = true
 	return
 }
-parse_wl_touch_shape :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Shape, ok: bool) {
+parse_touch_shape :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Shape, ok: bool) {
 	event.object = Touch(object)
 	read(connection, &event.id) or_return
 	read(connection, &event.major) or_return
@@ -6778,7 +6778,7 @@ parse_wl_touch_shape :: proc(connection: ^Connection, object: u32) -> (event: Ev
 	ok = true
 	return
 }
-parse_wl_touch_orientation :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Orientation, ok: bool) {
+parse_touch_orientation :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Orientation, ok: bool) {
 	event.object = Touch(object)
 	read(connection, &event.id) or_return
 	read(connection, &event.orientation) or_return
@@ -6786,7 +6786,7 @@ parse_wl_touch_orientation :: proc(connection: ^Connection, object: u32) -> (eve
 	ok = true
 	return
 }
-parse_wl_output_geometry :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Geometry, ok: bool) {
+parse_output_geometry :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Geometry, ok: bool) {
 	event.object = Output(object)
 	read(connection, &event.x) or_return
 	read(connection, &event.y) or_return
@@ -6800,7 +6800,7 @@ parse_wl_output_geometry :: proc(connection: ^Connection, object: u32) -> (event
 	ok = true
 	return
 }
-parse_wl_output_mode :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Mode, ok: bool) {
+parse_output_mode :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Mode, ok: bool) {
 	event.object = Output(object)
 	read(connection, &event.flags) or_return
 	read(connection, &event.width) or_return
@@ -6810,27 +6810,27 @@ parse_wl_output_mode :: proc(connection: ^Connection, object: u32) -> (event: Ev
 	ok = true
 	return
 }
-parse_wl_output_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Done, ok: bool) {
+parse_output_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Done, ok: bool) {
 	event.object = Output(object)
 	_debug_log(connection, "<- wl_output@", object, ".done:")
 	ok = true
 	return
 }
-parse_wl_output_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Scale, ok: bool) {
+parse_output_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Scale, ok: bool) {
 	event.object = Output(object)
 	read(connection, &event.factor) or_return
 	_debug_log(connection, "<- wl_output@", object, ".scale:", " factor=", event.factor)
 	ok = true
 	return
 }
-parse_wl_output_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Name, ok: bool) {
+parse_output_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Name, ok: bool) {
 	event.object = Output(object)
 	read(connection, &event.name) or_return
 	_debug_log(connection, "<- wl_output@", object, ".name:", " name=", event.name)
 	ok = true
 	return
 }
-parse_wl_output_description :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Description, ok: bool) {
+parse_output_description :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Description, ok: bool) {
 	event.object = Output(object)
 	read(connection, &event.description) or_return
 	_debug_log(connection, "<- wl_output@", object, ".description:", " description=", event.description)
@@ -8079,25 +8079,25 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Display:
 		switch opcode {
 		case 0:
-			return parse_wl_display_error(connection, object)
+			return parse_display_error(connection, object)
 		case 1:
-			return parse_wl_display_delete_id(connection, object)
+			return parse_display_delete_id(connection, object)
 		case:
 			return
 		}
 	case .Registry:
 		switch opcode {
 		case 0:
-			return parse_wl_registry_global(connection, object)
+			return parse_registry_global(connection, object)
 		case 1:
-			return parse_wl_registry_global_remove(connection, object)
+			return parse_registry_global_remove(connection, object)
 		case:
 			return
 		}
 	case .Callback:
 		switch opcode {
 		case 0:
-			return parse_wl_callback_done(connection, object)
+			return parse_callback_done(connection, object)
 		case:
 			return
 		}
@@ -8114,59 +8114,59 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Shm:
 		switch opcode {
 		case 0:
-			return parse_wl_shm_format(connection, object)
+			return parse_shm_format(connection, object)
 		case:
 			return
 		}
 	case .Buffer:
 		switch opcode {
 		case 0:
-			return parse_wl_buffer_release(connection, object)
+			return parse_buffer_release(connection, object)
 		case:
 			return
 		}
 	case .Data_Offer:
 		switch opcode {
 		case 0:
-			return parse_wl_data_offer_offer(connection, object)
+			return parse_data_offer_offer(connection, object)
 		case 1:
-			return parse_wl_data_offer_source_actions(connection, object)
+			return parse_data_offer_source_actions(connection, object)
 		case 2:
-			return parse_wl_data_offer_action(connection, object)
+			return parse_data_offer_action(connection, object)
 		case:
 			return
 		}
 	case .Data_Source:
 		switch opcode {
 		case 0:
-			return parse_wl_data_source_target(connection, object)
+			return parse_data_source_target(connection, object)
 		case 1:
-			return parse_wl_data_source_send(connection, object)
+			return parse_data_source_send(connection, object)
 		case 2:
-			return parse_wl_data_source_cancelled(connection, object)
+			return parse_data_source_cancelled(connection, object)
 		case 3:
-			return parse_wl_data_source_dnd_drop_performed(connection, object)
+			return parse_data_source_dnd_drop_performed(connection, object)
 		case 4:
-			return parse_wl_data_source_dnd_finished(connection, object)
+			return parse_data_source_dnd_finished(connection, object)
 		case 5:
-			return parse_wl_data_source_action(connection, object)
+			return parse_data_source_action(connection, object)
 		case:
 			return
 		}
 	case .Data_Device:
 		switch opcode {
 		case 0:
-			return parse_wl_data_device_data_offer(connection, object)
+			return parse_data_device_data_offer(connection, object)
 		case 1:
-			return parse_wl_data_device_enter(connection, object)
+			return parse_data_device_enter(connection, object)
 		case 2:
-			return parse_wl_data_device_leave(connection, object)
+			return parse_data_device_leave(connection, object)
 		case 3:
-			return parse_wl_data_device_motion(connection, object)
+			return parse_data_device_motion(connection, object)
 		case 4:
-			return parse_wl_data_device_drop(connection, object)
+			return parse_data_device_drop(connection, object)
 		case 5:
-			return parse_wl_data_device_selection(connection, object)
+			return parse_data_device_selection(connection, object)
 		case:
 			return
 		}
@@ -8183,113 +8183,113 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Shell_Surface:
 		switch opcode {
 		case 0:
-			return parse_wl_shell_surface_ping(connection, object)
+			return parse_shell_surface_ping(connection, object)
 		case 1:
-			return parse_wl_shell_surface_configure(connection, object)
+			return parse_shell_surface_configure(connection, object)
 		case 2:
-			return parse_wl_shell_surface_popup_done(connection, object)
+			return parse_shell_surface_popup_done(connection, object)
 		case:
 			return
 		}
 	case .Surface:
 		switch opcode {
 		case 0:
-			return parse_wl_surface_enter(connection, object)
+			return parse_surface_enter(connection, object)
 		case 1:
-			return parse_wl_surface_leave(connection, object)
+			return parse_surface_leave(connection, object)
 		case 2:
-			return parse_wl_surface_preferred_buffer_scale(connection, object)
+			return parse_surface_preferred_buffer_scale(connection, object)
 		case 3:
-			return parse_wl_surface_preferred_buffer_transform(connection, object)
+			return parse_surface_preferred_buffer_transform(connection, object)
 		case:
 			return
 		}
 	case .Seat:
 		switch opcode {
 		case 0:
-			return parse_wl_seat_capabilities(connection, object)
+			return parse_seat_capabilities(connection, object)
 		case 1:
-			return parse_wl_seat_name(connection, object)
+			return parse_seat_name(connection, object)
 		case:
 			return
 		}
 	case .Pointer:
 		switch opcode {
 		case 0:
-			return parse_wl_pointer_enter(connection, object)
+			return parse_pointer_enter(connection, object)
 		case 1:
-			return parse_wl_pointer_leave(connection, object)
+			return parse_pointer_leave(connection, object)
 		case 2:
-			return parse_wl_pointer_motion(connection, object)
+			return parse_pointer_motion(connection, object)
 		case 3:
-			return parse_wl_pointer_button(connection, object)
+			return parse_pointer_button(connection, object)
 		case 4:
-			return parse_wl_pointer_axis(connection, object)
+			return parse_pointer_axis(connection, object)
 		case 5:
-			return parse_wl_pointer_frame(connection, object)
+			return parse_pointer_frame(connection, object)
 		case 6:
-			return parse_wl_pointer_axis_source(connection, object)
+			return parse_pointer_axis_source(connection, object)
 		case 7:
-			return parse_wl_pointer_axis_stop(connection, object)
+			return parse_pointer_axis_stop(connection, object)
 		case 8:
-			return parse_wl_pointer_axis_discrete(connection, object)
+			return parse_pointer_axis_discrete(connection, object)
 		case 9:
-			return parse_wl_pointer_axis_value120(connection, object)
+			return parse_pointer_axis_value120(connection, object)
 		case 10:
-			return parse_wl_pointer_axis_relative_direction(connection, object)
+			return parse_pointer_axis_relative_direction(connection, object)
 		case:
 			return
 		}
 	case .Keyboard:
 		switch opcode {
 		case 0:
-			return parse_wl_keyboard_keymap(connection, object)
+			return parse_keyboard_keymap(connection, object)
 		case 1:
-			return parse_wl_keyboard_enter(connection, object)
+			return parse_keyboard_enter(connection, object)
 		case 2:
-			return parse_wl_keyboard_leave(connection, object)
+			return parse_keyboard_leave(connection, object)
 		case 3:
-			return parse_wl_keyboard_key(connection, object)
+			return parse_keyboard_key(connection, object)
 		case 4:
-			return parse_wl_keyboard_modifiers(connection, object)
+			return parse_keyboard_modifiers(connection, object)
 		case 5:
-			return parse_wl_keyboard_repeat_info(connection, object)
+			return parse_keyboard_repeat_info(connection, object)
 		case:
 			return
 		}
 	case .Touch:
 		switch opcode {
 		case 0:
-			return parse_wl_touch_down(connection, object)
+			return parse_touch_down(connection, object)
 		case 1:
-			return parse_wl_touch_up(connection, object)
+			return parse_touch_up(connection, object)
 		case 2:
-			return parse_wl_touch_motion(connection, object)
+			return parse_touch_motion(connection, object)
 		case 3:
-			return parse_wl_touch_frame(connection, object)
+			return parse_touch_frame(connection, object)
 		case 4:
-			return parse_wl_touch_cancel(connection, object)
+			return parse_touch_cancel(connection, object)
 		case 5:
-			return parse_wl_touch_shape(connection, object)
+			return parse_touch_shape(connection, object)
 		case 6:
-			return parse_wl_touch_orientation(connection, object)
+			return parse_touch_orientation(connection, object)
 		case:
 			return
 		}
 	case .Output:
 		switch opcode {
 		case 0:
-			return parse_wl_output_geometry(connection, object)
+			return parse_output_geometry(connection, object)
 		case 1:
-			return parse_wl_output_mode(connection, object)
+			return parse_output_mode(connection, object)
 		case 2:
-			return parse_wl_output_done(connection, object)
+			return parse_output_done(connection, object)
 		case 3:
-			return parse_wl_output_scale(connection, object)
+			return parse_output_scale(connection, object)
 		case 4:
-			return parse_wl_output_name(connection, object)
+			return parse_output_name(connection, object)
 		case 5:
-			return parse_wl_output_description(connection, object)
+			return parse_output_description(connection, object)
 		case:
 			return
 		}
