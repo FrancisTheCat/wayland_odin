@@ -7,6 +7,8 @@ import "core:sys/linux"
 import "core:slice"
 import "core:fmt"
 
+WAYLAND_DEBUG_LOG :: #config(WAYLAND_DEBUG_LOG, ODIN_DEBUG)
+
 Fd     :: linux.Fd
 Object :: distinct u32
 
@@ -192,6 +194,7 @@ read_string :: proc(connection: ^Connection, data: ^string) -> bool {
 	return true
 }
 
+@(disabled = !WAYLAND_DEBUG_LOG)
 _debug_log :: proc(connection: ^Connection, args: ..any) {
 	if connection.log_fn != nil {
 		connection.log_fn(fmt.tprint(..args, sep = ""), connection.user_data)
