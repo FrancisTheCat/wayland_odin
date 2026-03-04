@@ -144,7 +144,7 @@ main :: proc() {
 			fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer, &opcode, size_of(opcode))")
 			fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer, &_size, size_of(_size))")
 
-			fmt.sbprintf(&debug_log, `	_debug_log(connection, "-> %s@", %s, ".%s:"`, ctx.raw_object_name, ctx.object_name, request_name)
+			fmt.sbprintf(&debug_log, `	if connection.log_fn != nil do _debug_log(connection, "-> %s@", %s, ".%s:"`, ctx.raw_object_name, ctx.object_name, request_name)
 
 			for child_id in element.value {
 				child := ctx.document.elements[child_id.(u32) or_continue]
@@ -248,7 +248,7 @@ main :: proc() {
 			fmt.sbprintfln(&body, "\tevent.object = %v(object)", ctx.object_type_name)
 
 			debug_log: strings.Builder
-			fmt.sbprintf(&debug_log, `	_debug_log(connection, "<- %s@", object, ".%s:"`, ctx.raw_object_name, event_name)
+			fmt.sbprintf(&debug_log, `	if connection.log_fn != nil do _debug_log(connection, "<- %s@", object, ".%s:"`, ctx.raw_object_name, event_name)
 
 			for child_id in element.value {
 				child := ctx.document.elements[child_id.(u32) or_continue]

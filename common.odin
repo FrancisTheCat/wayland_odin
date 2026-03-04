@@ -196,9 +196,7 @@ read_string :: proc(connection: ^Connection, data: ^string) -> bool {
 
 @(disabled = !WAYLAND_DEBUG_LOG)
 _debug_log :: proc(connection: ^Connection, args: ..any) {
-	if connection.log_fn != nil {
-		connection.log_fn(fmt.tprint(..args, sep = ""), connection.user_data)
-	}
+	connection.log_fn(fmt.tprint(..args, sep = ""), connection.user_data)
 }
 
 _buffer_write_ptr :: proc(buffer: ^[dynamic]byte, pointer: rawptr, size: int) {
