@@ -23,8 +23,6 @@ main :: proc() {
 	registry := wl.display_get_registry(&connection, display)
 	wl.display_sync(&connection, display)
 
-	buffer := make([]byte, 1 << 16)
-
 	shm:                  wl.Shm
 	seat:                 wl.Seat
 	pool:                 wl.Shm_Pool
@@ -66,7 +64,7 @@ main :: proc() {
 
 	for {
 		wl.connection_flush(&connection)
-		wl.connection_poll(&connection, buffer)
+		wl.connection_poll(&connection)
 		
 		for event in wl.peek_event(&connection) {
 			#partial switch e in event {
@@ -133,7 +131,5 @@ main :: proc() {
 				attached = true
 			}
 		}
-
-		assert(connection.data_cursor == len(connection.data))
 	}
 }

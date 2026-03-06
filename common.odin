@@ -7,7 +7,8 @@ import "core:sys/linux"
 import "core:slice"
 import "core:fmt"
 
-WAYLAND_DEBUG_LOG :: #config(WAYLAND_DEBUG_LOG, ODIN_DEBUG)
+WAYLAND_DEBUG_LOG   :: #config(WAYLAND_DEBUG_LOG, ODIN_DEBUG)
+WAYLAND_BUFFER_SIZE :: #config(WAYLAND_BUFFER_SIZE, 1 << 12)
 
 Fd     :: linux.Fd
 Object :: distinct u32
@@ -15,9 +16,9 @@ Object :: distinct u32
 SERVER_ID_START :: 0xFF000000
 
 Connection :: struct {
-	buffer:              [dynamic]byte,
-	data:                []byte,
-	data_cursor:         int,
+	buffer_out:          [dynamic]byte,
+	buffer_in:           []byte,
+	start_in, end_in:    int,
 	client_object_types: [dynamic]Object_Type,
 	server_object_types: [dynamic]Object_Type,
 	fds_in:              [dynamic]Fd,
@@ -45,8 +46,8 @@ connection_flush :: proc(connection: ^Connection) {
 	msg := linux.Msg_Hdr {
 		iov = {
 			{
-				base = raw_data(connection.buffer),
-				len  = len(connection.buffer),
+				base = raw_data(connection.buffer_out),
+				len  = len(connection.buffer_out),
 			},
 		},
 		control = make([]byte, 16 + ((len(connection.fds_out) + 7) & -8) * 4, context.temp_allocator),
@@ -65,9 +66,8 @@ connection_flush :: proc(connection: ^Connection) {
 	}
 	assert(errno == .NONE)
 
-	clear(&connection.buffer)
+	clear(&connection.buffer_out)
 	clear(&connection.fds_out)
-	connection.data_cursor = 0
 }
 
 @(require_results)
@@ -78,11 +78,12 @@ display_connect :: proc(
 	user_data: rawptr = nil,
 ) -> (connection: Connection, display: Display) {
 	connection.socket                 = socket
-	connection.fds_in                 = make([dynamic]linux.Fd,       allocator)
-	connection.fds_out                = make([dynamic]linux.Fd,       allocator)
-	connection.free_ids               = make([dynamic]u32,            allocator)
-	connection.server_object_types    = make([dynamic]Object_Type,    allocator)
-	connection.client_object_types    = make([dynamic]Object_Type, 2, allocator)
+	connection.buffer_in              = make([]byte, WAYLAND_BUFFER_SIZE, allocator)
+	connection.fds_in                 = make([dynamic]linux.Fd,           allocator)
+	connection.fds_out                = make([dynamic]linux.Fd,           allocator)
+	connection.free_ids               = make([dynamic]u32,                allocator)
+	connection.server_object_types    = make([dynamic]Object_Type,        allocator)
+	connection.client_object_types    = make([dynamic]Object_Type, 2,     allocator)
 	connection.client_object_types[1] = .Display
 	connection.log_fn                 = log_fn
 	connection.user_data              = user_data
@@ -91,7 +92,8 @@ display_connect :: proc(
 }
 
 connection_destroy :: proc(connection: Connection) {
-	delete(connection.buffer)
+	delete(connection.buffer_in, connection.buffer_out.allocator)
+	delete(connection.buffer_out)
 	delete(connection.client_object_types)
 	delete(connection.server_object_types)
 	delete(connection.fds_in)
@@ -99,9 +101,13 @@ connection_destroy :: proc(connection: Connection) {
 	delete(connection.free_ids)
 }
 
-connection_poll :: proc(connection: ^Connection, buffer: []byte) {
+connection_poll :: proc(connection: ^Connection) {
+	copy(connection.buffer_in, connection.buffer_in[connection.start_in:connection.end_in])
+	connection.end_in   = connection.end_in - connection.start_in
+	connection.start_in = 0
+
 	msg: linux.Msg_Hdr = {
-		iov     = { transmute(linux.IO_Vec)buffer, },
+		iov     = { transmute(linux.IO_Vec)connection.buffer_in[connection.end_in:], },
 		control = make([]byte, 16 + 8 * 4, context.temp_allocator),
 	}
 	hdr      := cast(^struct { len: u64, level, type: i32 })raw_data(msg.control)
@@ -109,10 +115,10 @@ connection_poll :: proc(connection: ^Connection, buffer: []byte) {
 	hdr.level = i32(linux.SOL_SOCKET)
 	hdr.type  = 1
 	n, errno := linux.recvmsg(connection.socket, &msg, { .CMSG_CLOEXEC, .NOSIGNAL, })
-	connection.data = buffer[:n]
 	if errno != nil {
 		return
 	}
+	connection.end_in += n
 	if len(msg.control) != 0 {
 		append(&connection.fds_in, ..slice.reinterpret([]Fd, msg.control[size_of(hdr^):]))
 	}
@@ -136,17 +142,21 @@ peek_event :: proc(connection: ^Connection) -> (event: Event, ok: bool) {
 
 @(require_results)
 _peek_event :: proc(connection: ^Connection) -> (event: Event, ok: bool) {
-	if len(connection.data) - connection.data_cursor < 8 {
+	if connection.end_in - connection.start_in < 8 {
 		return
 	}
 
 	object: u32
-	intrinsics.mem_copy(&object, &connection.data[connection.data_cursor], 4)
+	intrinsics.mem_copy(&object, &connection.buffer_in[connection.start_in], 4)
 	opcode, size: u16
-	intrinsics.mem_copy(&opcode, &connection.data[connection.data_cursor + 4], 2)
-	intrinsics.mem_copy(&size,   &connection.data[connection.data_cursor + 6], 2)
+	intrinsics.mem_copy(&opcode, &connection.buffer_in[connection.start_in + 4], 2)
+	intrinsics.mem_copy(&size,   &connection.buffer_in[connection.start_in + 6], 2)
 
-	if len(connection.data) - connection.data_cursor < int(size) {
+	assert(int(size) <= len(connection.buffer_in))
+	assert(size % 4 == 0)
+	assert(size >= 8)
+
+	if connection.end_in - connection.start_in < int(size) {
 		return
 	}
 
@@ -164,12 +174,12 @@ _peek_event :: proc(connection: ^Connection) -> (event: Event, ok: bool) {
 		object_type = connection.client_object_types[object]
 	}
 
-	prev_cursor := connection.data_cursor
+	prev_start := connection.start_in
 	defer if !ok {
-		connection.data_cursor = prev_cursor
+		connection.start_in = prev_start
 	}
 
-	connection.data_cursor += 8
+	connection.start_in += 8
 	return parse_event(connection, object, object_type, u32(opcode))
 }
 
@@ -188,8 +198,8 @@ read_fd :: proc(connection: ^Connection, data: ^Fd) -> bool {
 
 read_int :: proc(connection: ^Connection, data: ^$T) -> bool where intrinsics.type_is_integer(T) || intrinsics.type_is_enum(T) || intrinsics.type_is_bit_set(T) {
 	value: u32
-	intrinsics.mem_copy(&value, &connection.data[connection.data_cursor], size_of(value))
-	connection.data_cursor += 4
+	intrinsics.mem_copy(&value, &connection.buffer_in[connection.start_in], size_of(value))
+	connection.start_in += 4
 	data^ = transmute(T)value
 	return true
 }
@@ -199,27 +209,27 @@ read_f64 :: proc(connection: ^Connection, data: ^f64) -> bool {
 		integer: i32 | 24,
 		decimal: i32 | 8,
 	}
-	intrinsics.mem_copy(&value, &connection.data[connection.data_cursor], size_of(value))
-	connection.data_cursor += 4
+	intrinsics.mem_copy(&value, &connection.buffer_in[connection.start_in], size_of(value))
+	connection.start_in += 4
 	data^ = f64(value.integer) + f64(value.decimal) / 256.0
 	return true
 }
 
 read_array :: proc(connection: ^Connection, data: ^[]byte) -> bool {
 	length: i32
-	intrinsics.mem_copy(&length, &connection.data[connection.data_cursor], size_of(length))
-	connection.data_cursor += 4
-	data^ = connection.data[connection.data_cursor:][:length]
-	connection.data_cursor = (connection.data_cursor + int(length) + 3) & -4
+	intrinsics.mem_copy(&length, &connection.buffer_in[connection.start_in], size_of(length))
+	connection.start_in += 4
+	data^ = connection.buffer_in[connection.start_in:][:length]
+	connection.start_in = (connection.start_in + int(length) + 3) & -4
 	return true
 }
 
 read_string :: proc(connection: ^Connection, data: ^string) -> bool {
 	length: i32
-	intrinsics.mem_copy(&length, &connection.data[connection.data_cursor], size_of(length))
-	connection.data_cursor += 4
-	data^ = string(connection.data[connection.data_cursor:][:length - 1])
-	connection.data_cursor = (connection.data_cursor + int(length) + 3) & -4
+	intrinsics.mem_copy(&length, &connection.buffer_in[connection.start_in], size_of(length))
+	connection.start_in += 4
+	data^ = string(connection.buffer_in[connection.start_in:][:length - 1])
+	connection.start_in = (connection.start_in + int(length) + 3) & -4
 	return true
 }
 
