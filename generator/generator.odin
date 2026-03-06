@@ -227,10 +227,10 @@ main :: proc() {
 		}
 
 		generate_event :: proc(
-			ctx:             ^Context,
-			element:         xml.Element,
-			event_name:      string,
-			opcode:          int,
+			ctx:        ^Context,
+			element:    xml.Element,
+			event_name: string,
+			opcode:     int,
 		) -> (ok: bool) {
 			type_name := fmt.tprintf("%v_%v", ctx.object_type_name, strings.to_ada_case(event_name))
 			fmt.wprintfln(ctx.event_union_writer, "\tEvent_%v,", type_name)
@@ -262,7 +262,11 @@ main :: proc() {
 
 				fmt.sbprintf(&debug_log, `, " %s=", event.%s`, name, name)
 
-				fmt.sbprintfln(&body, "\tread(connection, &event.%v) or_return", name)
+				if type == "Fd" {
+					fmt.sbprintfln(&body, "\tread_fd(connection, &event.%v) or_return", name)
+				} else {
+					fmt.sbprintfln(&body, "\tread(connection, &event.%v) or_return", name)
+				}
 
 				if new_id {
 					fmt.sbprintfln(&body, "\tresize(&connection.server_object_types, max(len(connection.server_object_types), int(event.%v) - SERVER_ID_START + 1))", name)

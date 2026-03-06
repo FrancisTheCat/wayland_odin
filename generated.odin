@@ -6345,7 +6345,7 @@ parse_data_source_target :: proc(connection: ^Connection, object: u32) -> (event
 parse_data_source_send :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Send, ok: bool) {
 	event.object = Data_Source(object)
 	read(connection, &event.mime_type) or_return
-	read(connection, &event.fd) or_return
+	read_fd(connection, &event.fd) or_return
 	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_source@", object, ".send:", " mime_type=", event.mime_type, " fd=", event.fd)
 	ok = true
 	return
@@ -6581,7 +6581,7 @@ parse_pointer_axis_relative_direction :: proc(connection: ^Connection, object: u
 parse_keyboard_keymap :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Keymap, ok: bool) {
 	event.object = Keyboard(object)
 	read(connection, &event.format) or_return
-	read(connection, &event.fd) or_return
+	read_fd(connection, &event.fd) or_return
 	read(connection, &event.size) or_return
 	if connection.log_fn != nil do _debug_log(connection, "<- wl_keyboard@", object, ".keymap:", " format=", event.format, " fd=", event.fd, " size=", event.size)
 	ok = true
@@ -6783,7 +6783,7 @@ parse_zwp_linux_dmabuf_feedback_v1_done :: proc(connection: ^Connection, object:
 }
 parse_zwp_linux_dmabuf_feedback_v1_format_table :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Format_Table, ok: bool) {
 	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
-	read(connection, &event.fd) or_return
+	read_fd(connection, &event.fd) or_return
 	read(connection, &event.size) or_return
 	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".format_table:", " fd=", event.fd, " size=", event.size)
 	ok = true
@@ -7400,7 +7400,7 @@ parse_wp_image_description_info_v1_done :: proc(connection: ^Connection, object:
 }
 parse_wp_image_description_info_v1_icc_file :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Icc_File, ok: bool) {
 	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.icc) or_return
+	read_fd(connection, &event.icc) or_return
 	read(connection, &event.icc_size) or_return
 	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".icc_file:", " icc=", event.icc, " icc_size=", event.icc_size)
 	ok = true
@@ -7509,7 +7509,7 @@ parse_wp_color_representation_manager_v1_done :: proc(connection: ^Connection, o
 }
 parse_wp_drm_lease_device_v1_drm_fd :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Drm_Fd, ok: bool) {
 	event.object = Wp_Drm_Lease_Device_V1(object)
-	read(connection, &event.fd) or_return
+	read_fd(connection, &event.fd) or_return
 	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".drm_fd:", " fd=", event.fd)
 	ok = true
 	return
@@ -7570,7 +7570,7 @@ parse_wp_drm_lease_connector_v1_withdrawn :: proc(connection: ^Connection, objec
 }
 parse_wp_drm_lease_v1_lease_fd :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_V1_Lease_Fd, ok: bool) {
 	event.object = Wp_Drm_Lease_V1(object)
-	read(connection, &event.leased_fd) or_return
+	read_fd(connection, &event.leased_fd) or_return
 	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_v1@", object, ".lease_fd:", " leased_fd=", event.leased_fd)
 	ok = true
 	return
@@ -7620,7 +7620,7 @@ parse_ext_data_control_device_v1_primary_selection :: proc(connection: ^Connecti
 parse_ext_data_control_source_v1_send :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Source_V1_Send, ok: bool) {
 	event.object = Ext_Data_Control_Source_V1(object)
 	read(connection, &event.mime_type) or_return
-	read(connection, &event.fd) or_return
+	read_fd(connection, &event.fd) or_return
 	if connection.log_fn != nil do _debug_log(connection, "<- ext_data_control_source_v1@", object, ".send:", " mime_type=", event.mime_type, " fd=", event.fd)
 	ok = true
 	return

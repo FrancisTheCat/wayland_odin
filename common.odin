@@ -60,9 +60,13 @@ connection_flush :: proc(connection: ^Connection) {
 	copy(msg.control[16:], slice.to_bytes(connection.fds_out[:]))
 
 	_, errno := linux.sendmsg(connection.socket, &msg, { .CMSG_CLOEXEC, .NOSIGNAL, })
+	if errno == .EAGAIN {
+		return
+	}
 	assert(errno == .NONE)
 
 	clear(&connection.buffer)
+	clear(&connection.fds_out)
 	connection.data_cursor = 0
 }
 
@@ -86,12 +90,32 @@ display_connect :: proc(
 	return
 }
 
+connection_destroy :: proc(connection: Connection) {
+	delete(connection.buffer)
+	delete(connection.client_object_types)
+	delete(connection.server_object_types)
+	delete(connection.fds_in)
+	delete(connection.fds_out)
+	delete(connection.free_ids)
+}
+
 connection_poll :: proc(connection: ^Connection, buffer: []byte) {
 	msg: linux.Msg_Hdr = {
-		iov = { transmute(linux.IO_Vec)buffer, },
+		iov     = { transmute(linux.IO_Vec)buffer, },
+		control = make([]byte, 16 + 8 * 4, context.temp_allocator),
 	}
+	hdr      := cast(^struct { len: u64, level, type: i32 })raw_data(msg.control)
+	hdr.len   = u64(len(msg.control))
+	hdr.level = i32(linux.SOL_SOCKET)
+	hdr.type  = 1
 	n, errno := linux.recvmsg(connection.socket, &msg, { .CMSG_CLOEXEC, .NOSIGNAL, })
 	connection.data = buffer[:n]
+	if errno != nil {
+		return
+	}
+	if len(msg.control) != 0 {
+		append(&connection.fds_in, ..slice.reinterpret([]Fd, msg.control[size_of(hdr^):]))
+	}
 	assert(errno == .NONE || errno == .EAGAIN)
 }
 
@@ -138,6 +162,11 @@ _peek_event :: proc(connection: ^Connection) -> (event: Event, ok: bool) {
 			return
 		}
 		object_type = connection.client_object_types[object]
+	}
+
+	prev_cursor := connection.data_cursor
+	defer if !ok {
+		connection.data_cursor = prev_cursor
 	}
 
 	connection.data_cursor += 8

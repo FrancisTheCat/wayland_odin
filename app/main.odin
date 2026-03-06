@@ -129,6 +129,8 @@ main :: proc() {
 				wl.surface_damage_buffer(&connection, wl_surface, 0, 0, WIDTH, HEIGHT)
 
 				wl.surface_commit(&connection, wl_surface)
+
+				attached = true
 			}
 		}
 
