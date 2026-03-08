@@ -11,31 +11,33 @@ import "base:intrinsics"
 
 main :: proc() {
 	Context :: struct {
-		document:            ^xml.Document,
-		requests_writer:     io.Writer,
-		event_union_writer:  io.Writer,
-		event_types_writer:  io.Writer,
-		event_parser_writer: io.Writer,
-		parser_writer:       io.Writer,
-		enums_writer:        io.Writer,
-		objects_writer:      io.Writer,
-		object_enum_writer:  io.Writer,
-		resolution_writer:   io.Writer,
-		object_name:         string,
-		raw_object_name:     string,
-		object_type_name:    string,
+		document:             ^xml.Document,
+		requests_builder:     strings.Builder,
+		event_union_builder: ^strings.Builder,
+		event_types_builder:  strings.Builder,
+		event_parser_builder: strings.Builder,
+		parser_builder:      ^strings.Builder,
+		enums_builder:        strings.Builder,
+		objects_builder:      strings.Builder,
+		object_enum_builder: ^strings.Builder,
+		resolution_builder:  ^strings.Builder,
+		object_name:          string,
+		raw_object_name:      string,
+		object_type_name:     string,
+		namespace:            string,
+		imports:              map[string]struct{},
 	}
 
 	generate_interface :: proc(ctx: ^Context, element: xml.Element) -> (ok: bool) {
-		fmt.wprintfln(ctx.objects_writer, "%v :: distinct u32", ctx.object_type_name)
+		fmt.sbprintfln(&ctx.objects_builder, "%v :: distinct u32", ctx.object_type_name)
 
-		fmt.wprintfln(ctx.object_enum_writer,  "\t%v,", ctx.object_type_name)
+		fmt.sbprintfln(ctx.object_enum_builder,  "\t%v,", strings.to_ada_case(ctx.raw_object_name))
 
-		fmt.wprintfln(ctx.resolution_writer, "\tcase %v:", ctx.object_type_name)
-		fmt.wprintfln(ctx.resolution_writer, "\t\tassert(interface == \"%v\")", ctx.raw_object_name)
-		fmt.wprintfln(ctx.resolution_writer, "\t\treturn .%v", ctx.object_type_name)
+		fmt.sbprintfln(ctx.resolution_builder, "\tcase %v.%v:", ctx.namespace, ctx.object_type_name)
+		fmt.sbprintfln(ctx.resolution_builder, "\t\tassert(interface == \"%v\")", ctx.raw_object_name)
+		fmt.sbprintfln(ctx.resolution_builder, "\t\treturn .%v", strings.to_ada_case(ctx.raw_object_name))
 
-		parse_field :: proc(ctx: ^Context, element: u32) -> (name, type: string, new_id, ok: bool) {
+		parse_field :: proc(ctx: ^Context, element: u32) -> (name, type, type_name: string, new_id, ok: bool) {
 			name = xml.find_attribute_val_by_key(ctx.document, element, "name") or_return
 			type = xml.find_attribute_val_by_key(ctx.document, element, "type") or_return
 
@@ -81,10 +83,33 @@ main :: proc() {
 			case "matrix":      name = "matrix_"
 			}
 
+			@(require_results)
+			apply_namespace :: proc(ctx: ^Context, type: string) -> string {
+				type := type
+
+				namespace := strings.to_lower(strings.split_iterator(&type, "_") or_else panic("No namespace in type"))
+				type       = strings.to_ada_case(type)
+				if namespace != ctx.namespace {
+					type                   = fmt.aprintf("%v.%v", namespace, type)
+					ctx.imports[namespace] = {}
+				}
+
+				return type
+			}
+
 			if type == "new_id" {
-				type   = object_type_name(xml.find_attribute_val_by_key(ctx.document, element, "interface") or_else "new_id")
 				ok     = true
 				new_id = true
+
+				found: bool
+				type, found = xml.find_attribute_val_by_key(ctx.document, element, "interface")
+				if !found {
+					type = "new_id"
+					return
+				}
+
+				type_name = strings.to_ada_case(type)
+				type      = apply_namespace(ctx, type)
 				return
 			}
 
@@ -113,22 +138,26 @@ main :: proc() {
 			if e, ok := xml.find_attribute_val_by_key(ctx.document, element, "enum"); ok {
 				dot_index := strings.index_byte(e, '.')
 				if dot_index != -1 {
-					type = fmt.tprintf("%v_%v", object_type_name(e[:dot_index]), strings.to_ada_case(e[dot_index + 1:]))
+					type = fmt.tprintf("%v_%v", strings.to_ada_case(e[:dot_index]), strings.to_ada_case(e[dot_index + 1:]))
 				} else {
 					type = fmt.tprintf("%v_%v", ctx.object_type_name, strings.to_ada_case(e))
 				}
+
+				if dot_index != -1 {
+					type = apply_namespace(ctx, type)
+				}
 			}
 
-			if i, ok := xml.find_attribute_val_by_key(ctx.document, element, "interface"); ok {
-				type = object_type_name(i)
+			if interface, ok := xml.find_attribute_val_by_key(ctx.document, element, "interface"); ok {
+				type = apply_namespace(ctx, interface)
 			}
 
 			ok = true
 			return
 		}
-		
+
 		generate_request :: proc(ctx: ^Context, element: xml.Element, request_name: string, opcode: int) -> (ok: bool) {
-			fmt.wprintf(ctx.requests_writer, "%v_%v :: proc(connection: ^Connection, %v: %v", ctx.object_name, request_name, ctx.object_name, ctx.object_type_name)
+			fmt.sbprintf(&ctx.requests_builder, "%v_%v :: proc(connection: ^Connection, %v: %v", ctx.object_name, request_name, ctx.object_name, ctx.object_type_name)
 			body:          strings.Builder
 			sizes:         strings.Builder
 			return_values: strings.Builder
@@ -152,8 +181,7 @@ main :: proc() {
 					continue
 				}
 
-				name, type, new_id := parse_field(ctx, child_id.(u32)) or_return
-				type = strings.trim_prefix(type, "Wl_")
+				name, type, type_name, new_id := parse_field(ctx, child_id.(u32)) or_return
 
 				fmt.sbprintf(&debug_log, `, " %s=", %s`, name, name)
 
@@ -165,7 +193,7 @@ main :: proc() {
 				switch type {
 				case "Fd":
 					fmt.sbprintfln(&body, "\tappend(&connection.fds_out, %v)", name)
-				case "New_Id":
+				case "new_id":
 					has_new_id = true
 					generate_write_string(&body, &sizes, "interface")
 
@@ -174,7 +202,7 @@ main :: proc() {
 					fmt.sbprintf(&sizes, " + size_of(version)")
 
 					fmt.sbprintfln(&body, "\t_type := resolve_type(T, interface, _location)")
-					fmt.sbprintfln(&body, "\t%v = auto_cast generate_id(connection, _type)", name)
+					fmt.sbprintfln(&body, "\t%v = auto_cast _generate_id(connection, _type)", name)
 					fmt.sbprintfln(&body, "\t_buffer_write_ptr(&connection.buffer_out, &%v, size_of(%v))", name, name)
 					fmt.sbprintf(&sizes, " + size_of(%v)", name)
 				case "string":
@@ -185,7 +213,7 @@ main :: proc() {
 					fmt.sbprintfln(&body, "\tunimplemented()")
 				case:
 					if new_id {
-						fmt.sbprintfln(&body, "\t%v = auto_cast generate_id(connection, .%v)", name, type)
+						fmt.sbprintfln(&body, "\t%v = auto_cast _generate_id(connection, .%v)", name, type_name)
 					} else {
 						fmt.sbprintfln(&body, "\t%v := %v", name, name)
 					}
@@ -197,32 +225,32 @@ main :: proc() {
 					if len(return_values.buf) != 0 {
 						fmt.sbprint(&return_values, ", ")
 					}
-					if type == "New_Id" {
-						fmt.wprint(ctx.requests_writer, ", interface: string, version: u32, $T: typeid")
+					if type == "new_id" {
+						fmt.sbprint(&ctx.requests_builder, ", interface: string, version: u32, $T: typeid")
 						fmt.sbprintf(&return_values, "%v: T", name)
 						continue
 					}
 					fmt.sbprintf(&return_values, "%v: %v", name, type)
 				} else {
-					fmt.wprintf(ctx.requests_writer, ", %v: %v", name, type)
+					fmt.sbprintf(&ctx.requests_builder, ", %v: %v", name, type)
 				}
 			}
 			if has_new_id {
-				fmt.wprint(ctx.requests_writer, ", _location := #caller_location")
+				fmt.sbprint(&ctx.requests_builder, ", _location := #caller_location")
 			}
-			fmt.wprint(ctx.requests_writer, ")")
+			fmt.sbprint(&ctx.requests_builder, ")")
 			if len(return_values.buf) != 0 {
-				fmt.wprintf(ctx.requests_writer, " -> (%v)", strings.to_string(return_values))
+				fmt.sbprintf(&ctx.requests_builder, " -> (%v)", strings.to_string(return_values))
 			}
 			if has_new_id {
-				fmt.wprint(ctx.requests_writer, " where intrinsics.type_is_named(T), intrinsics.type_base_type(T) == u32")
+				fmt.sbprint(&ctx.requests_builder, " where intrinsics.type_is_named(T), intrinsics.type_base_type(T) == u32")
 			}
-			fmt.wprint(ctx.requests_writer, " {\n")
-			fmt.wprintln(ctx.requests_writer, strings.to_string(sizes))
-			fmt.wprint(ctx.requests_writer, strings.to_string(body))
+			fmt.sbprint(&ctx.requests_builder, " {\n")
+			fmt.sbprintln(&ctx.requests_builder, strings.to_string(sizes))
+			fmt.sbprint(&ctx.requests_builder, strings.to_string(body))
 			fmt.sbprintfln(&debug_log, ")")
-			fmt.wprint(ctx.requests_writer, strings.to_string(debug_log))
-			fmt.wprint(ctx.requests_writer, "\treturn\n}\n")
+			fmt.sbprint(&ctx.requests_builder, strings.to_string(debug_log))
+			fmt.sbprint(&ctx.requests_builder, "\treturn\n}\n")
 			return true
 		}
 
@@ -233,16 +261,16 @@ main :: proc() {
 			opcode:     int,
 		) -> (ok: bool) {
 			type_name := fmt.tprintf("%v_%v", ctx.object_type_name, strings.to_ada_case(event_name))
-			fmt.wprintfln(ctx.event_union_writer, "\tEvent_%v,", type_name)
+			fmt.sbprintfln(ctx.event_union_builder, "\t%v.%v_Event,", ctx.namespace, type_name)
 
-			fmt.wprintf(ctx.event_parser_writer, "parse_%v_%v :: proc(connection: ^Connection, object: u32)", ctx.object_name, event_name)
-			fmt.wprintfln(ctx.event_parser_writer, " -> (event: Event_%v, ok: bool) {{", type_name)
+			fmt.sbprintf(&ctx.event_parser_builder, "parse_%v_%v :: proc(connection: ^Connection, object: u32)", ctx.object_name, event_name)
+			fmt.sbprintfln(&ctx.event_parser_builder, " -> (event: %v_Event, ok: bool) {{", type_name)
 
-			fmt.wprintf(ctx.event_types_writer, "Event_%v :: struct {{\n", type_name)
-			fmt.wprintf(ctx.event_types_writer, "\tobject: %s,\n", ctx.object_type_name)
+			fmt.sbprintf(&ctx.event_types_builder, "%v_Event :: struct {{\n", type_name)
+			fmt.sbprintf(&ctx.event_types_builder, "\tobject: %s,\n", ctx.object_type_name)
 
-			fmt.wprintfln(ctx.parser_writer, "\t\tcase %d:", opcode)
-			fmt.wprintfln(ctx.parser_writer, "\t\t\treturn parse_%v_%v(connection, object)", ctx.object_name, event_name)
+			fmt.sbprintfln(ctx.parser_builder, "\t\tcase %d:", opcode)
+			fmt.sbprintfln(ctx.parser_builder, "\t\t\treturn %v.parse_%v_%v(connection, object)", ctx.namespace, ctx.object_name, event_name)
 
 			body: strings.Builder
 			fmt.sbprintfln(&body, "\tevent.object = %v(object)", ctx.object_type_name)
@@ -256,9 +284,8 @@ main :: proc() {
 					continue
 				}
 
-				name, type, new_id := parse_field(ctx, child_id.(u32)) or_return
-				type = strings.trim_prefix(type, "Wl_")
-				fmt.wprintf(ctx.event_types_writer, "\t%v: %v,\n", name, type)
+				name, type, type_name, new_id := parse_field(ctx, child_id.(u32)) or_return
+				fmt.sbprintf(&ctx.event_types_builder, "\t%v: %v,\n", name, type)
 
 				fmt.sbprintf(&debug_log, `, " %s=", event.%s`, name, name)
 
@@ -270,15 +297,15 @@ main :: proc() {
 
 				if new_id {
 					fmt.sbprintfln(&body, "\tresize(&connection.server_object_types, max(len(connection.server_object_types), int(event.%v) - SERVER_ID_START + 1))", name)
-					fmt.sbprintfln(&body, "\tconnection.server_object_types[u32(event.%v) - SERVER_ID_START] = .%v", name, type)
+					fmt.sbprintfln(&body, "\tconnection.server_object_types[u32(event.%v) - SERVER_ID_START] = .%v", name, type_name)
 				}
 			}
-			fmt.wprint(ctx.event_types_writer, "}\n")
+			fmt.sbprint(&ctx.event_types_builder, "}\n")
 
-			fmt.wprint(ctx.event_parser_writer, strings.to_string(body))
+			fmt.sbprint(&ctx.event_parser_builder, strings.to_string(body))
 			fmt.sbprintfln(&debug_log, ")")
-			fmt.wprint(ctx.event_parser_writer, strings.to_string(debug_log))
-			fmt.wprintln(ctx.event_parser_writer, "\tok = true\n\treturn\n}")
+			fmt.sbprint(&ctx.event_parser_builder, strings.to_string(debug_log))
+			fmt.sbprintln(&ctx.event_parser_builder, "\tok = true\n\treturn\n}")
 
 			return true
 		}
@@ -287,9 +314,9 @@ main :: proc() {
 			type_name := fmt.tprintf("%v_%v", ctx.object_type_name, strings.to_ada_case(type_name))
 
 			if bitfield {
-				fmt.wprintfln(ctx.enums_writer, "%v_Bits :: enum {{", type_name)
+				fmt.sbprintfln(&ctx.enums_builder, "%v_Bits :: enum {{", type_name)
 			} else {
-				fmt.wprintfln(ctx.enums_writer, "%v :: enum u32 {{", type_name)
+				fmt.sbprintfln(&ctx.enums_builder, "%v :: enum u32 {{", type_name)
 			}
 			for child_id in element.value {
 				child := ctx.document.elements[child_id.(u32) or_continue]
@@ -312,28 +339,28 @@ main :: proc() {
 					value_int = intrinsics.count_trailing_zeros(value_int)
 
 					if summary, ok := xml.find_attribute_val_by_key(ctx.document, child_id.(u32), "summary"); ok {
-						fmt.wprintf(ctx.enums_writer, "\t// %v\n", summary)
+						fmt.sbprintf(&ctx.enums_builder, "\t// %v\n", summary)
 					}
 
-					fmt.wprintf(ctx.enums_writer, "\t%v%v = %v,\n", prefix, strings.to_ada_case(name), value_int)
+					fmt.sbprintf(&ctx.enums_builder, "\t%v%v = %v,\n", prefix, strings.to_ada_case(name), value_int)
 				} else {
 					if summary, ok := xml.find_attribute_val_by_key(ctx.document, child_id.(u32), "summary"); ok {
-						fmt.wprintf(ctx.enums_writer, "\t// %v\n", summary)
+						fmt.sbprintf(&ctx.enums_builder, "\t// %v\n", summary)
 					}
 
-					fmt.wprintf(ctx.enums_writer, "\t%v%v = %v,\n", prefix, strings.to_ada_case(name), value)
+					fmt.sbprintf(&ctx.enums_builder, "\t%v%v = %v,\n", prefix, strings.to_ada_case(name), value)
 				}
 			}
-			fmt.wprintln(ctx.enums_writer, "}")
+			fmt.sbprintln(&ctx.enums_builder, "}")
 			if bitfield {
-				fmt.wprintfln(ctx.enums_writer, "%v :: distinct bit_set[%v_Bits; u32]", type_name, type_name)
+				fmt.sbprintfln(&ctx.enums_builder, "%v :: distinct bit_set[%v_Bits; u32]", type_name, type_name)
 			}
 
 			return true
 		}
 
-		fmt.wprintfln(ctx.parser_writer, "\tcase .%v:", ctx.object_type_name)
-		fmt.wprintfln(ctx.parser_writer, "\t\tswitch opcode {{")
+		fmt.sbprintfln(ctx.parser_builder, "\tcase .%v:", strings.to_ada_case(ctx.raw_object_name))
+		fmt.sbprintfln(ctx.parser_builder, "\t\tswitch opcode {{")
 
 		event_opcode   := 0
 		request_opcode := 0
@@ -353,44 +380,32 @@ main :: proc() {
 			}
 		}
 
-		fmt.wprintfln(ctx.parser_writer, "\t\tcase:")
-		fmt.wprintfln(ctx.parser_writer, "\t\t\treturn")
-		fmt.wprintfln(ctx.parser_writer, "\t\t}")
+		fmt.sbprintfln(ctx.parser_builder, "\t\tcase:")
+		fmt.sbprintfln(ctx.parser_builder, "\t\t\treturn")
+		fmt.sbprintfln(ctx.parser_builder, "\t\t}")
 
 		return true
 	}
 
-	requests_builder:     strings.Builder
-	event_union_builder:  strings.Builder
-	event_types_builder:  strings.Builder
-	event_parser_builder: strings.Builder
-	parser_builder:       strings.Builder
-	enums_builder:        strings.Builder
-	objects_builder:      strings.Builder
-	object_enum_builder:  strings.Builder
-	resolution_builder:   strings.Builder
+	@(static)
+	ctx_map: map[string]Context
+	@(static)
+	object_enum_builder, event_union_builder, parser_builder, resolution_builder: strings.Builder
 
-	ctx: Context = {
-		requests_writer     = strings.to_writer(&requests_builder),
-		event_union_writer  = strings.to_writer(&event_union_builder),
-		event_types_writer  = strings.to_writer(&event_types_builder),
-		event_parser_writer = strings.to_writer(&event_parser_builder),
-		parser_writer       = strings.to_writer(&parser_builder),
-		enums_writer        = strings.to_writer(&enums_builder),
-		objects_writer      = strings.to_writer(&objects_builder),
-		object_enum_writer  = strings.to_writer(&object_enum_builder),
-		resolution_writer   = strings.to_writer(&resolution_builder),
-	}
+	get_ctx :: proc(namespace: string) -> ^Context {
+		if namespace in ctx_map {
+			return &ctx_map[namespace]
+		}
 
-	fmt.wprintln(ctx.event_union_writer,  "Event :: union {")
-	fmt.wprintln(ctx.object_enum_writer,  "Object_Type :: enum {")
-	fmt.wprintln(ctx.parser_writer,       "parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Type, opcode: u32) -> (event: Event, ok: bool) {")
-	fmt.wprintln(ctx.parser_writer,       "\tswitch (object_type) {")
-	fmt.wprintln(ctx.resolution_writer,   "resolve_type :: proc($T: typeid, interface: string, location := #caller_location) -> (type: Object_Type) {")
-	fmt.wprintln(ctx.resolution_writer,   "\tswitch typeid_of(T) {")
+		ctx: Context
+		ctx.namespace           = namespace
+		ctx.object_enum_builder = &object_enum_builder
+		ctx.event_union_builder = &event_union_builder
+		ctx.parser_builder      = &parser_builder
+		ctx.resolution_builder  = &resolution_builder
 
-	object_type_name :: proc(object: string) -> string {
-		return strings.trim_prefix(strings.to_ada_case(object), "Wl_")
+		ctx_map[namespace] = ctx
+		return &ctx_map[namespace]
 	}
 
 	for arg in os.args[1:] {
@@ -399,19 +414,35 @@ main :: proc() {
 			fmt.eprintln(err)
 			return
 		}
-		defer xml.destroy(document)
-
-		ctx.document = document
 
 		root := document.elements[0]
 		for child_id in root.value {
 			child := document.elements[child_id.(u32) or_continue]
 			if child.ident == "interface" {
-				name := xml.find_attribute_val_by_key(document, child_id.(u32), "name") or_continue
-				ctx.raw_object_name  = name
-				ctx.object_name      = strings.trim_prefix(name, "wl_")
-				ctx.object_type_name = object_type_name(name)
-				ok := generate_interface(&ctx, child)
+				name      := xml.find_attribute_val_by_key(document, child_id.(u32), "name") or_continue
+				raw_name  := name
+				namespace := strings.split_iterator(&name, "_") or_else panic("interface without namespace")
+
+				ctx: ^Context
+				if namespace in ctx_map {
+					ctx = &ctx_map[namespace]
+				} else {
+					ctx_map[namespace] = {
+						namespace           = namespace,
+						object_enum_builder = &object_enum_builder,
+						event_union_builder = &event_union_builder,
+						parser_builder      = &parser_builder,
+						resolution_builder  = &resolution_builder,
+					}
+					ctx = &ctx_map[namespace]
+				}
+
+				ctx.raw_object_name  = raw_name
+				ctx.object_name      = strings.trim_prefix(name, ctx.namespace)
+				ctx.object_type_name = strings.to_ada_case(name)
+				ctx.document         = document
+
+				ok := generate_interface(ctx, child)
 				if !ok {
 					fmt.eprintfln("Failed to generate interface: %v", name)
 					return
@@ -420,34 +451,97 @@ main :: proc() {
 		}
 	}
 
-	fmt.wprintln(ctx.event_union_writer,  "}")
-	fmt.wprintln(ctx.object_enum_writer,  "}")
+	for namespace, &ctx in ctx_map {
+		os.make_directory(namespace)
+		output_writer := os.to_stream(
+			os.open(
+				fmt.aprintf("%v/generated.odin", namespace),
+				{ .Read, .Write, .Create, .Trunc, },
+				{ .Read_User, .Write_User, .Read_Group, .Read_Other, },
+			) or_else panic(""),
+		)
 
-	fmt.wprintln(ctx.parser_writer,      "\tcase:")
-	fmt.wprintln(ctx.parser_writer,      "\t\treturn")
-	fmt.wprintln(ctx.parser_writer,      "\t}")
-	fmt.wprintln(ctx.parser_writer,      "}")
-
-	fmt.wprintln(ctx.resolution_writer,  "\tcase:")
-	fmt.wprintln(ctx.resolution_writer,  "\t\tpanic(\"Invalid type\", location)")
-	fmt.wprintln(ctx.resolution_writer,  "\t}")
-	fmt.wprintln(ctx.resolution_writer,  "}")
-
-	output_writer := os.to_stream(os.open("generated.odin", os.O_RDWR | os.O_CREATE | os.O_TRUNC, {.Read_User, .Write_User, .Read_Group, .Read_Other}) or_else panic(""))
-
-	fmt.wprintln(output_writer,
-`package wayland
+		fmt.wprintfln(output_writer,
+`package wayland_%v
 
 import "base:intrinsics"
-`)
-	fmt.wprintln(output_writer, strings.to_string(enums_builder))
-	fmt.wprintln(output_writer, strings.to_string(requests_builder))
-	fmt.wprintln(output_writer, strings.to_string(event_union_builder))
-	fmt.wprintln(output_writer, strings.to_string(event_types_builder))
-	fmt.wprintln(output_writer, strings.to_string(event_parser_builder))
-	fmt.wprintln(output_writer, strings.to_string(parser_builder))
-	fmt.wprintln(output_writer, strings.to_string(object_enum_builder))
-	fmt.wprintln(output_writer, strings.to_string(objects_builder))
-	fmt.wprintln(output_writer, strings.to_string(resolution_builder))
-}
 
+import "../common"
+`, namespace)
+
+		for import_ in ctx.imports {
+			fmt.wprintfln(output_writer, "import \"../%v\"", import_)
+		}
+
+		fmt.wprintln(output_writer, `
+Connection           :: common.Connection
+Fd                   :: common.Fd
+Object               :: common.Object
+Object_Type          :: common.Object_Type
+
+SERVER_ID_START      :: common.SERVER_ID_START
+
+_buffer_write_ptr    :: common._buffer_write_ptr
+_buffer_write_string :: common._buffer_write_string
+_generate_id         :: common._generate_id
+_debug_log           :: common._debug_log
+read                 :: common.read
+read_fd              :: common.read_fd
+
+resolve_type: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type)
+
+`)
+
+		fmt.wprintln(output_writer, strings.to_string(ctx.enums_builder))
+		fmt.wprintln(output_writer, strings.to_string(ctx.requests_builder))
+		fmt.wprintln(output_writer, strings.to_string(ctx.event_types_builder))
+		fmt.wprintln(output_writer, strings.to_string(ctx.event_parser_builder))
+		fmt.wprintln(output_writer, strings.to_string(ctx.objects_builder))
+	}
+
+	output_writer := os.to_stream(
+		os.open(
+			"common/generated.odin",
+			{ .Read, .Write, .Create, .Trunc, },
+			{ .Read_User, .Write_User, .Read_Group, .Read_Other, },
+		) or_else panic(""),
+	)
+
+	fmt.wprintln(output_writer, "package wayland_common\n")
+	fmt.wprintln(output_writer, "Object_Type :: enum {")
+	fmt.wprint(output_writer, strings.to_string(object_enum_builder))
+	fmt.wprintln(output_writer,  "}")
+
+	output_writer = os.to_stream(
+		os.open(
+			"generated.odin",
+			{ .Read, .Write, .Create, .Trunc, },
+			{ .Read_User, .Write_User, .Read_Group, .Read_Other, },
+		) or_else panic(""),
+	)
+
+	fmt.wprintln(output_writer, "package wayland\n")
+	for namespace, _ in ctx_map {
+		fmt.wprintfln(output_writer, "import \"%v\"", namespace)
+	}
+	fmt.wprintln(output_writer, "\nEvent :: union {")
+
+	fmt.wprint(output_writer, strings.to_string(event_union_builder))
+	fmt.wprintln(output_writer,  "}")
+
+	fmt.wprintln(output_writer, "parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Type, opcode: u32) -> (event: Event, ok: bool) {")
+	fmt.wprintln(output_writer, "\tswitch object_type {")
+	fmt.wprintln(output_writer, strings.to_string(parser_builder))
+	fmt.wprintln(output_writer, "\tcase:")
+	fmt.wprintln(output_writer, "\t\treturn")
+	fmt.wprintln(output_writer, "\t}")
+	fmt.wprintln(output_writer, "}\n")
+
+	fmt.wprintln(output_writer, "resolve_type :: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type) {")
+	fmt.wprintln(output_writer, "\tswitch t {")
+	fmt.wprintln(output_writer, strings.to_string(resolution_builder))
+	fmt.wprintln(output_writer, "\tcase:")
+	fmt.wprintln(output_writer, "\t\tpanic(\"Invalid type\", location)")
+	fmt.wprintln(output_writer, "\t}")
+	fmt.wprintln(output_writer, "}")
+}

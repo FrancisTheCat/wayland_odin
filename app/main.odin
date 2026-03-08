@@ -4,7 +4,10 @@ import "core:sys/linux"
 import "core:fmt"
 import "core:os"
 
-import wl ".."
+import wayland  ".."
+import wl       "../wl"
+import wp       "../wp"
+import xdg      "../xdg"
 
 main :: proc() {
 	socket := linux.socket(.UNIX, .STREAM, { .CLOEXEC, }, {}) or_else panic("")
@@ -16,7 +19,7 @@ main :: proc() {
 	errno := linux.connect(socket, &addr)
 	assert(errno == {})
 
-	connection, display := wl.display_connect(socket, log_fn = proc(message: string, user_pointer: rawptr) {
+	connection, display := wayland.display_connect(socket, log_fn = proc(message: string, user_pointer: rawptr) {
 		fmt.println(message)
 	})
 
@@ -31,12 +34,12 @@ main :: proc() {
 	compositor:           wl.Compositor
 	pointer:              wl.Pointer
 
-	xdg_wm_base:          wl.Xdg_Wm_Base
-	xdg_surface:          wl.Xdg_Surface
-	xdg_toplevel:         wl.Xdg_Toplevel
+	xdg_wm_base:          xdg.Wm_Base
+	xdg_surface:          xdg.Surface
+	xdg_toplevel:         xdg.Toplevel
 
-	cursor_shape_manager: wl.Wp_Cursor_Shape_Manager_V1
-	cursor_shape_device:  wl.Wp_Cursor_Shape_Device_V1
+	cursor_shape_manager: wp.Cursor_Shape_Manager_V1
+	cursor_shape_device:  wp.Cursor_Shape_Device_V1
 
 	enter_serial: u32
 	cursor_set:   bool
@@ -63,12 +66,12 @@ main :: proc() {
 	}
 
 	for {
-		wl.connection_flush(&connection)
-		wl.connection_poll(&connection)
+		wayland.connection_flush(&connection)
+		wayland.connection_poll(&connection)
 		
-		for event in wl.peek_event(&connection) {
+		for event in wayland.peek_event(&connection) {
 			#partial switch e in event {
-			case wl.Event_Registry_Global:
+			case wl.Registry_Global_Event:
 				switch e.interface {
 				case "wl_shm":
 					shm       = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Shm)
@@ -78,10 +81,10 @@ main :: proc() {
 					fmt.println("pool:", pool)
 					fmt.println("wl_buffer:", wl_buffer)
 				case "xdg_wm_base":
-					xdg_wm_base = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Xdg_Wm_Base)
+					xdg_wm_base = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, xdg.Wm_Base)
 					fmt.println("xdg_wm_base:", xdg_wm_base)
 				case "wp_cursor_shape_manager_v1":
-					cursor_shape_manager = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Wp_Cursor_Shape_Manager_V1)
+					cursor_shape_manager = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wp.Cursor_Shape_Manager_V1)
 					fmt.println("cursor_shape_manager:", cursor_shape_manager)
 				case "wl_seat":
 					seat = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Seat)
@@ -92,31 +95,31 @@ main :: proc() {
 					compositor = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Compositor)
 					fmt.println("compositor:", compositor)
 				}
-			case wl.Event_Xdg_Wm_Base_Ping:
-				wl.xdg_wm_base_pong(&connection, e.object, e.serial)
-			case wl.Event_Xdg_Toplevel_Close:
+			case xdg.Wm_Base_Ping_Event:
+				xdg.wm_base_pong(&connection, e.object, e.serial)
+			case xdg.Toplevel_Close_Event:
 				return
-			case wl.Event_Xdg_Surface_Configure:
-				wl.xdg_surface_ack_configure(&connection, e.object, e.serial)
+			case xdg.Surface_Configure_Event:
+				xdg.surface_ack_configure(&connection, e.object, e.serial)
 				configured = true
-			case wl.Event_Pointer_Enter:
+			case wl.Pointer_Enter_Event:
 				enter_serial = e.serial
 			}
 
 			if cursor_shape_device == 0 && pointer != 0 && cursor_shape_manager != 0 {
-				cursor_shape_device = wl.wp_cursor_shape_manager_v1_get_pointer(&connection, cursor_shape_manager, pointer)
+				cursor_shape_device = wp.cursor_shape_manager_v1_get_pointer(&connection, cursor_shape_manager, pointer)
 				fmt.println("cursor_shape_device:", cursor_shape_device)
 			}
 
 			if cursor_shape_device != 0 && !cursor_set && enter_serial != 0 {
-				wl.wp_cursor_shape_device_v1_set_shape(&connection, cursor_shape_device, enter_serial, .Crosshair)
+				wp.cursor_shape_device_v1_set_shape(&connection, cursor_shape_device, enter_serial, .Crosshair)
 				cursor_set = true
 			}
 
 			if compositor != 0 && shm != 0 && xdg_wm_base != 0 && wl_surface == 0 {
 				wl_surface   = wl.compositor_create_surface(&connection, compositor)
-				xdg_surface  = wl.xdg_wm_base_get_xdg_surface(&connection, xdg_wm_base, wl_surface)
-				xdg_toplevel = wl.xdg_surface_get_toplevel(&connection, xdg_surface)
+				xdg_surface  = xdg.wm_base_get_xdg_surface(&connection, xdg_wm_base, wl_surface)
+				xdg_toplevel = xdg.surface_get_toplevel(&connection, xdg_surface)
 
 				wl.surface_commit(&connection, wl_surface)
 			}

@@ -1,8221 +1,480 @@
 package wayland
 
-import "base:intrinsics"
-
-Display_Error :: enum u32 {
-	// server couldn't find object
-	Invalid_Object = 0,
-	// method doesn't exist on the specified interface or malformed request
-	Invalid_Method = 1,
-	// server is out of memory
-	No_Memory = 2,
-	// implementation error in compositor
-	Implementation = 3,
-}
-Shm_Error :: enum u32 {
-	// buffer format is not known
-	Invalid_Format = 0,
-	// invalid size or stride during pool or buffer creation
-	Invalid_Stride = 1,
-	// mmapping the file descriptor failed
-	Invalid_Fd = 2,
-}
-Shm_Format :: enum u32 {
-	// 32-bit ARGB format, [31:0] A:R:G:B 8:8:8:8 little endian
-	Argb8888 = 0,
-	// 32-bit RGB format, [31:0] x:R:G:B 8:8:8:8 little endian
-	Xrgb8888 = 1,
-	// 8-bit color index format, [7:0] C
-	C8 = 0x20203843,
-	// 8-bit RGB format, [7:0] R:G:B 3:3:2
-	Rgb332 = 0x38424752,
-	// 8-bit BGR format, [7:0] B:G:R 2:3:3
-	Bgr233 = 0x38524742,
-	// 16-bit xRGB format, [15:0] x:R:G:B 4:4:4:4 little endian
-	Xrgb4444 = 0x32315258,
-	// 16-bit xBGR format, [15:0] x:B:G:R 4:4:4:4 little endian
-	Xbgr4444 = 0x32314258,
-	// 16-bit RGBx format, [15:0] R:G:B:x 4:4:4:4 little endian
-	Rgbx4444 = 0x32315852,
-	// 16-bit BGRx format, [15:0] B:G:R:x 4:4:4:4 little endian
-	Bgrx4444 = 0x32315842,
-	// 16-bit ARGB format, [15:0] A:R:G:B 4:4:4:4 little endian
-	Argb4444 = 0x32315241,
-	// 16-bit ABGR format, [15:0] A:B:G:R 4:4:4:4 little endian
-	Abgr4444 = 0x32314241,
-	// 16-bit RBGA format, [15:0] R:G:B:A 4:4:4:4 little endian
-	Rgba4444 = 0x32314152,
-	// 16-bit BGRA format, [15:0] B:G:R:A 4:4:4:4 little endian
-	Bgra4444 = 0x32314142,
-	// 16-bit xRGB format, [15:0] x:R:G:B 1:5:5:5 little endian
-	Xrgb1555 = 0x35315258,
-	// 16-bit xBGR 1555 format, [15:0] x:B:G:R 1:5:5:5 little endian
-	Xbgr1555 = 0x35314258,
-	// 16-bit RGBx 5551 format, [15:0] R:G:B:x 5:5:5:1 little endian
-	Rgbx5551 = 0x35315852,
-	// 16-bit BGRx 5551 format, [15:0] B:G:R:x 5:5:5:1 little endian
-	Bgrx5551 = 0x35315842,
-	// 16-bit ARGB 1555 format, [15:0] A:R:G:B 1:5:5:5 little endian
-	Argb1555 = 0x35315241,
-	// 16-bit ABGR 1555 format, [15:0] A:B:G:R 1:5:5:5 little endian
-	Abgr1555 = 0x35314241,
-	// 16-bit RGBA 5551 format, [15:0] R:G:B:A 5:5:5:1 little endian
-	Rgba5551 = 0x35314152,
-	// 16-bit BGRA 5551 format, [15:0] B:G:R:A 5:5:5:1 little endian
-	Bgra5551 = 0x35314142,
-	// 16-bit RGB 565 format, [15:0] R:G:B 5:6:5 little endian
-	Rgb565 = 0x36314752,
-	// 16-bit BGR 565 format, [15:0] B:G:R 5:6:5 little endian
-	Bgr565 = 0x36314742,
-	// 24-bit RGB format, [23:0] R:G:B little endian
-	Rgb888 = 0x34324752,
-	// 24-bit BGR format, [23:0] B:G:R little endian
-	Bgr888 = 0x34324742,
-	// 32-bit xBGR format, [31:0] x:B:G:R 8:8:8:8 little endian
-	Xbgr8888 = 0x34324258,
-	// 32-bit RGBx format, [31:0] R:G:B:x 8:8:8:8 little endian
-	Rgbx8888 = 0x34325852,
-	// 32-bit BGRx format, [31:0] B:G:R:x 8:8:8:8 little endian
-	Bgrx8888 = 0x34325842,
-	// 32-bit ABGR format, [31:0] A:B:G:R 8:8:8:8 little endian
-	Abgr8888 = 0x34324241,
-	// 32-bit RGBA format, [31:0] R:G:B:A 8:8:8:8 little endian
-	Rgba8888 = 0x34324152,
-	// 32-bit BGRA format, [31:0] B:G:R:A 8:8:8:8 little endian
-	Bgra8888 = 0x34324142,
-	// 32-bit xRGB format, [31:0] x:R:G:B 2:10:10:10 little endian
-	Xrgb2101010 = 0x30335258,
-	// 32-bit xBGR format, [31:0] x:B:G:R 2:10:10:10 little endian
-	Xbgr2101010 = 0x30334258,
-	// 32-bit RGBx format, [31:0] R:G:B:x 10:10:10:2 little endian
-	Rgbx1010102 = 0x30335852,
-	// 32-bit BGRx format, [31:0] B:G:R:x 10:10:10:2 little endian
-	Bgrx1010102 = 0x30335842,
-	// 32-bit ARGB format, [31:0] A:R:G:B 2:10:10:10 little endian
-	Argb2101010 = 0x30335241,
-	// 32-bit ABGR format, [31:0] A:B:G:R 2:10:10:10 little endian
-	Abgr2101010 = 0x30334241,
-	// 32-bit RGBA format, [31:0] R:G:B:A 10:10:10:2 little endian
-	Rgba1010102 = 0x30334152,
-	// 32-bit BGRA format, [31:0] B:G:R:A 10:10:10:2 little endian
-	Bgra1010102 = 0x30334142,
-	// packed YCbCr format, [31:0] Cr0:Y1:Cb0:Y0 8:8:8:8 little endian
-	Yuyv = 0x56595559,
-	// packed YCbCr format, [31:0] Cb0:Y1:Cr0:Y0 8:8:8:8 little endian
-	Yvyu = 0x55595659,
-	// packed YCbCr format, [31:0] Y1:Cr0:Y0:Cb0 8:8:8:8 little endian
-	Uyvy = 0x59565955,
-	// packed YCbCr format, [31:0] Y1:Cb0:Y0:Cr0 8:8:8:8 little endian
-	Vyuy = 0x59555956,
-	// packed AYCbCr format, [31:0] A:Y:Cb:Cr 8:8:8:8 little endian
-	Ayuv = 0x56555941,
-	// 2 plane YCbCr Cr:Cb format, 2x2 subsampled Cr:Cb plane
-	Nv12 = 0x3231564e,
-	// 2 plane YCbCr Cb:Cr format, 2x2 subsampled Cb:Cr plane
-	Nv21 = 0x3132564e,
-	// 2 plane YCbCr Cr:Cb format, 2x1 subsampled Cr:Cb plane
-	Nv16 = 0x3631564e,
-	// 2 plane YCbCr Cb:Cr format, 2x1 subsampled Cb:Cr plane
-	Nv61 = 0x3136564e,
-	// 3 plane YCbCr format, 4x4 subsampled Cb (1) and Cr (2) planes
-	Yuv410 = 0x39565559,
-	// 3 plane YCbCr format, 4x4 subsampled Cr (1) and Cb (2) planes
-	Yvu410 = 0x39555659,
-	// 3 plane YCbCr format, 4x1 subsampled Cb (1) and Cr (2) planes
-	Yuv411 = 0x31315559,
-	// 3 plane YCbCr format, 4x1 subsampled Cr (1) and Cb (2) planes
-	Yvu411 = 0x31315659,
-	// 3 plane YCbCr format, 2x2 subsampled Cb (1) and Cr (2) planes
-	Yuv420 = 0x32315559,
-	// 3 plane YCbCr format, 2x2 subsampled Cr (1) and Cb (2) planes
-	Yvu420 = 0x32315659,
-	// 3 plane YCbCr format, 2x1 subsampled Cb (1) and Cr (2) planes
-	Yuv422 = 0x36315559,
-	// 3 plane YCbCr format, 2x1 subsampled Cr (1) and Cb (2) planes
-	Yvu422 = 0x36315659,
-	// 3 plane YCbCr format, non-subsampled Cb (1) and Cr (2) planes
-	Yuv444 = 0x34325559,
-	// 3 plane YCbCr format, non-subsampled Cr (1) and Cb (2) planes
-	Yvu444 = 0x34325659,
-	// [7:0] R
-	R8 = 0x20203852,
-	// [15:0] R little endian
-	R16 = 0x20363152,
-	// [15:0] R:G 8:8 little endian
-	Rg88 = 0x38384752,
-	// [15:0] G:R 8:8 little endian
-	Gr88 = 0x38385247,
-	// [31:0] R:G 16:16 little endian
-	Rg1616 = 0x32334752,
-	// [31:0] G:R 16:16 little endian
-	Gr1616 = 0x32335247,
-	// [63:0] x:R:G:B 16:16:16:16 little endian
-	Xrgb16161616f = 0x48345258,
-	// [63:0] x:B:G:R 16:16:16:16 little endian
-	Xbgr16161616f = 0x48344258,
-	// [63:0] A:R:G:B 16:16:16:16 little endian
-	Argb16161616f = 0x48345241,
-	// [63:0] A:B:G:R 16:16:16:16 little endian
-	Abgr16161616f = 0x48344241,
-	// [31:0] X:Y:Cb:Cr 8:8:8:8 little endian
-	Xyuv8888 = 0x56555958,
-	// [23:0] Cr:Cb:Y 8:8:8 little endian
-	Vuy888 = 0x34325556,
-	// Y followed by U then V, 10:10:10. Non-linear modifier only
-	Vuy101010 = 0x30335556,
-	// [63:0] Cr0:0:Y1:0:Cb0:0:Y0:0 10:6:10:6:10:6:10:6 little endian per 2 Y pixels
-	Y210 = 0x30313259,
-	// [63:0] Cr0:0:Y1:0:Cb0:0:Y0:0 12:4:12:4:12:4:12:4 little endian per 2 Y pixels
-	Y212 = 0x32313259,
-	// [63:0] Cr0:Y1:Cb0:Y0 16:16:16:16 little endian per 2 Y pixels
-	Y216 = 0x36313259,
-	// [31:0] A:Cr:Y:Cb 2:10:10:10 little endian
-	Y410 = 0x30313459,
-	// [63:0] A:0:Cr:0:Y:0:Cb:0 12:4:12:4:12:4:12:4 little endian
-	Y412 = 0x32313459,
-	// [63:0] A:Cr:Y:Cb 16:16:16:16 little endian
-	Y416 = 0x36313459,
-	// [31:0] X:Cr:Y:Cb 2:10:10:10 little endian
-	Xvyu2101010 = 0x30335658,
-	// [63:0] X:0:Cr:0:Y:0:Cb:0 12:4:12:4:12:4:12:4 little endian
-	Xvyu12_16161616 = 0x36335658,
-	// [63:0] X:Cr:Y:Cb 16:16:16:16 little endian
-	Xvyu16161616 = 0x38345658,
-	// [63:0] A3:A2:Y3:0:Cr0:0:Y2:0:A1:A0:Y1:0:Cb0:0:Y0:0 1:1:8:2:8:2:8:2:1:1:8:2:8:2:8:2 little endian
-	Y0l0 = 0x304c3059,
-	// [63:0] X3:X2:Y3:0:Cr0:0:Y2:0:X1:X0:Y1:0:Cb0:0:Y0:0 1:1:8:2:8:2:8:2:1:1:8:2:8:2:8:2 little endian
-	X0l0 = 0x304c3058,
-	// [63:0] A3:A2:Y3:Cr0:Y2:A1:A0:Y1:Cb0:Y0 1:1:10:10:10:1:1:10:10:10 little endian
-	Y0l2 = 0x324c3059,
-	// [63:0] X3:X2:Y3:Cr0:Y2:X1:X0:Y1:Cb0:Y0 1:1:10:10:10:1:1:10:10:10 little endian
-	X0l2 = 0x324c3058,
-	Yuv420_8bit = 0x38305559,
-	Yuv420_10bit = 0x30315559,
-	Xrgb8888_A8 = 0x38415258,
-	Xbgr8888_A8 = 0x38414258,
-	Rgbx8888_A8 = 0x38415852,
-	Bgrx8888_A8 = 0x38415842,
-	Rgb888_A8 = 0x38413852,
-	Bgr888_A8 = 0x38413842,
-	Rgb565_A8 = 0x38413552,
-	Bgr565_A8 = 0x38413542,
-	// non-subsampled Cr:Cb plane
-	Nv24 = 0x3432564e,
-	// non-subsampled Cb:Cr plane
-	Nv42 = 0x3234564e,
-	// 2x1 subsampled Cr:Cb plane, 10 bit per channel
-	P210 = 0x30313250,
-	// 2x2 subsampled Cr:Cb plane 10 bits per channel
-	P010 = 0x30313050,
-	// 2x2 subsampled Cr:Cb plane 12 bits per channel
-	P012 = 0x32313050,
-	// 2x2 subsampled Cr:Cb plane 16 bits per channel
-	P016 = 0x36313050,
-	// [63:0] A:x:B:x:G:x:R:x 10:6:10:6:10:6:10:6 little endian
-	Axbxgxrx106106106106 = 0x30314241,
-	// 2x2 subsampled Cr:Cb plane
-	Nv15 = 0x3531564e,
-	Q410 = 0x30313451,
-	Q401 = 0x31303451,
-	// [63:0] x:R:G:B 16:16:16:16 little endian
-	Xrgb16161616 = 0x38345258,
-	// [63:0] x:B:G:R 16:16:16:16 little endian
-	Xbgr16161616 = 0x38344258,
-	// [63:0] A:R:G:B 16:16:16:16 little endian
-	Argb16161616 = 0x38345241,
-	// [63:0] A:B:G:R 16:16:16:16 little endian
-	Abgr16161616 = 0x38344241,
-	// [7:0] C0:C1:C2:C3:C4:C5:C6:C7 1:1:1:1:1:1:1:1 eight pixels/byte
-	C1 = 0x20203143,
-	// [7:0] C0:C1:C2:C3 2:2:2:2 four pixels/byte
-	C2 = 0x20203243,
-	// [7:0] C0:C1 4:4 two pixels/byte
-	C4 = 0x20203443,
-	// [7:0] D0:D1:D2:D3:D4:D5:D6:D7 1:1:1:1:1:1:1:1 eight pixels/byte
-	D1 = 0x20203144,
-	// [7:0] D0:D1:D2:D3 2:2:2:2 four pixels/byte
-	D2 = 0x20203244,
-	// [7:0] D0:D1 4:4 two pixels/byte
-	D4 = 0x20203444,
-	// [7:0] D
-	D8 = 0x20203844,
-	// [7:0] R0:R1:R2:R3:R4:R5:R6:R7 1:1:1:1:1:1:1:1 eight pixels/byte
-	R1 = 0x20203152,
-	// [7:0] R0:R1:R2:R3 2:2:2:2 four pixels/byte
-	R2 = 0x20203252,
-	// [7:0] R0:R1 4:4 two pixels/byte
-	R4 = 0x20203452,
-	// [15:0] x:R 6:10 little endian
-	R10 = 0x20303152,
-	// [15:0] x:R 4:12 little endian
-	R12 = 0x20323152,
-	// [31:0] A:Cr:Cb:Y 8:8:8:8 little endian
-	Avuy8888 = 0x59555641,
-	// [31:0] X:Cr:Cb:Y 8:8:8:8 little endian
-	Xvuy8888 = 0x59555658,
-	// 2x2 subsampled Cr:Cb plane 10 bits per channel packed
-	P030 = 0x30333050,
-	// [47:0] R:G:B 16:16:16 little endian
-	Rgb161616 = 0x38344752,
-	// [47:0] B:G:R 16:16:16 little endian
-	Bgr161616 = 0x38344742,
-	// [15:0] R 16 little endian
-	R16f = 0x48202052,
-	// [31:0] G:R 16:16 little endian
-	Gr1616f = 0x48205247,
-	// [47:0] B:G:R 16:16:16 little endian
-	Bgr161616f = 0x48524742,
-	// [31:0] R 32 little endian
-	R32f = 0x46202052,
-	// [63:0] R:G 32:32 little endian
-	Gr3232f = 0x46205247,
-	// [95:0] R:G:B 32:32:32 little endian
-	Bgr323232f = 0x46524742,
-	// [127:0] R:G:B:A 32:32:32:32 little endian
-	Abgr32323232f = 0x46384241,
-	// 2x1 subsampled Cr:Cb plane
-	Nv20 = 0x3032564e,
-	// non-subsampled Cr:Cb plane
-	Nv30 = 0x3033564e,
-	// 2x2 subsampled Cb (1) and Cr (2) planes 10 bits per channel
-	S010 = 0x30313053,
-	// 2x1 subsampled Cb (1) and Cr (2) planes 10 bits per channel
-	S210 = 0x30313253,
-	// non-subsampled Cb (1) and Cr (2) planes 10 bits per channel
-	S410 = 0x30313453,
-	// 2x2 subsampled Cb (1) and Cr (2) planes 12 bits per channel
-	S012 = 0x32313053,
-	// 2x1 subsampled Cb (1) and Cr (2) planes 12 bits per channel
-	S212 = 0x32313253,
-	// non-subsampled Cb (1) and Cr (2) planes 12 bits per channel
-	S412 = 0x32313453,
-	// 2x2 subsampled Cb (1) and Cr (2) planes 16 bits per channel
-	S016 = 0x36313053,
-	// 2x1 subsampled Cb (1) and Cr (2) planes 16 bits per channel
-	S216 = 0x36313253,
-	// non-subsampled Cb (1) and Cr (2) planes 16 bits per channel
-	S416 = 0x36313453,
-}
-Data_Offer_Error :: enum u32 {
-	// finish request was called untimely
-	Invalid_Finish = 0,
-	// action mask contains invalid values
-	Invalid_Action_Mask = 1,
-	// action argument has an invalid value
-	Invalid_Action = 2,
-	// offer doesn't accept this request
-	Invalid_Offer = 3,
-}
-Data_Source_Error :: enum u32 {
-	// action mask contains invalid values
-	Invalid_Action_Mask = 0,
-	// source doesn't accept this request
-	Invalid_Source = 1,
-}
-Data_Device_Error :: enum u32 {
-	// given wl_surface has another role
-	Role = 0,
-	// source has already been used
-	Used_Source = 1,
-}
-Data_Device_Manager_Dnd_Action_Bits :: enum {
-	// copy action
-	Copy = 0,
-	// move action
-	Move = 1,
-	// ask action
-	Ask = 2,
-}
-Data_Device_Manager_Dnd_Action :: distinct bit_set[Data_Device_Manager_Dnd_Action_Bits; u32]
-Shell_Error :: enum u32 {
-	// given wl_surface has another role
-	Role = 0,
-}
-Shell_Surface_Resize_Bits :: enum {
-	// top edge
-	Top = 0,
-	// bottom edge
-	Bottom = 1,
-	// left edge
-	Left = 2,
-	// right edge
-	Right = 3,
-}
-Shell_Surface_Resize :: distinct bit_set[Shell_Surface_Resize_Bits; u32]
-Shell_Surface_Transient_Bits :: enum {
-	// do not set keyboard focus
-	Inactive = 0,
-}
-Shell_Surface_Transient :: distinct bit_set[Shell_Surface_Transient_Bits; u32]
-Shell_Surface_Fullscreen_Method :: enum u32 {
-	// no preference, apply default policy
-	Default = 0,
-	// scale, preserve the surface's aspect ratio and center on output
-	Scale = 1,
-	// switch output mode to the smallest mode that can fit the surface, add black borders to compensate size mismatch
-	Driver = 2,
-	// no upscaling, center on output and add black borders to compensate size mismatch
-	Fill = 3,
-}
-Surface_Error :: enum u32 {
-	// buffer scale value is invalid
-	Invalid_Scale = 0,
-	// buffer transform value is invalid
-	Invalid_Transform = 1,
-	// buffer size is invalid
-	Invalid_Size = 2,
-	// buffer offset is invalid
-	Invalid_Offset = 3,
-	// surface was destroyed before its role object
-	Defunct_Role_Object = 4,
-}
-Seat_Capability_Bits :: enum {
-	// the seat has pointer devices
-	Pointer = 0,
-	// the seat has one or more keyboards
-	Keyboard = 1,
-	// the seat has touch devices
-	Touch = 2,
-}
-Seat_Capability :: distinct bit_set[Seat_Capability_Bits; u32]
-Seat_Error :: enum u32 {
-	// get_pointer, get_keyboard or get_touch called on seat without the matching capability
-	Missing_Capability = 0,
-}
-Pointer_Error :: enum u32 {
-	// given wl_surface has another role
-	Role = 0,
-}
-Pointer_Button_State :: enum u32 {
-	// the button is not pressed
-	Released = 0,
-	// the button is pressed
-	Pressed = 1,
-}
-Pointer_Axis :: enum u32 {
-	// vertical axis
-	Vertical_Scroll = 0,
-	// horizontal axis
-	Horizontal_Scroll = 1,
-}
-Pointer_Axis_Source :: enum u32 {
-	// a physical wheel rotation
-	Wheel = 0,
-	// finger on a touch surface
-	Finger = 1,
-	// continuous coordinate space
-	Continuous = 2,
-	// a physical wheel tilt
-	Wheel_Tilt = 3,
-}
-Pointer_Axis_Relative_Direction :: enum u32 {
-	// physical motion matches axis direction
-	Identical = 0,
-	// physical motion is the inverse of the axis direction
-	Inverted = 1,
-}
-Keyboard_Keymap_Format :: enum u32 {
-	// no keymap; client must understand how to interpret the raw keycode
-	No_Keymap = 0,
-	// libxkbcommon compatible, null-terminated string; to determine the xkb keycode, clients must add 8 to the key event keycode
-	Xkb_V1 = 1,
-}
-Keyboard_Key_State :: enum u32 {
-	// key is not pressed
-	Released = 0,
-	// key is pressed
-	Pressed = 1,
-	// key was repeated
-	Repeated = 2,
-}
-Output_Subpixel :: enum u32 {
-	// unknown geometry
-	Unknown = 0,
-	// no geometry
-	None = 1,
-	// horizontal RGB
-	Horizontal_Rgb = 2,
-	// horizontal BGR
-	Horizontal_Bgr = 3,
-	// vertical RGB
-	Vertical_Rgb = 4,
-	// vertical BGR
-	Vertical_Bgr = 5,
-}
-Output_Transform :: enum u32 {
-	// no transform
-	Normal = 0,
-	// 90 degrees counter-clockwise
-	_90 = 1,
-	// 180 degrees counter-clockwise
-	_180 = 2,
-	// 270 degrees counter-clockwise
-	_270 = 3,
-	// 180 degree flip around a vertical axis
-	Flipped = 4,
-	// flip and rotate 90 degrees counter-clockwise
-	Flipped_90 = 5,
-	// flip and rotate 180 degrees counter-clockwise
-	Flipped_180 = 6,
-	// flip and rotate 270 degrees counter-clockwise
-	Flipped_270 = 7,
-}
-Output_Mode_Bits :: enum {
-	// indicates this is the current mode
-	Current = 0,
-	// indicates this is the preferred mode
-	Preferred = 1,
-}
-Output_Mode :: distinct bit_set[Output_Mode_Bits; u32]
-Subcompositor_Error :: enum u32 {
-	// the to-be sub-surface is invalid
-	Bad_Surface = 0,
-	// the to-be sub-surface parent is invalid
-	Bad_Parent = 1,
-}
-Subsurface_Error :: enum u32 {
-	// wl_surface is not a sibling or the parent
-	Bad_Surface = 0,
-}
-Zwp_Linux_Buffer_Params_V1_Error :: enum u32 {
-	// the dmabuf_batch object has already been used to create a wl_buffer
-	Already_Used = 0,
-	// plane index out of bounds
-	Plane_Idx = 1,
-	// the plane index was already set
-	Plane_Set = 2,
-	// missing or too many planes to create a buffer
-	Incomplete = 3,
-	// format not supported
-	Invalid_Format = 4,
-	// invalid width or height
-	Invalid_Dimensions = 5,
-	// offset + stride * height goes out of dmabuf bounds
-	Out_Of_Bounds = 6,
-	// invalid wl_buffer resulted from importing dmabufs via the create_immed request on given buffer_params
-	Invalid_Wl_Buffer = 7,
-}
-Zwp_Linux_Buffer_Params_V1_Flags_Bits :: enum {
-	// contents are y-inverted
-	Y_Invert = 0,
-	// content is interlaced
-	Interlaced = 1,
-	// bottom field first
-	Bottom_First = 2,
-}
-Zwp_Linux_Buffer_Params_V1_Flags :: distinct bit_set[Zwp_Linux_Buffer_Params_V1_Flags_Bits; u32]
-Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags_Bits :: enum {
-	// direct scan-out tranche
-	Scanout = 0,
-}
-Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags :: distinct bit_set[Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags_Bits; u32]
-Wp_Presentation_Error :: enum u32 {
-	// invalid value in tv_nsec
-	Invalid_Timestamp = 0,
-	// invalid flag
-	Invalid_Flag = 1,
-}
-Wp_Presentation_Feedback_Kind_Bits :: enum {
-	Vsync = 0,
-	Hw_Clock = 1,
-	Hw_Completion = 2,
-	Zero_Copy = 3,
-}
-Wp_Presentation_Feedback_Kind :: distinct bit_set[Wp_Presentation_Feedback_Kind_Bits; u32]
-Zwp_Tablet_Tool_V2_Type :: enum u32 {
-	// Pen
-	Pen = 0x140,
-	// Eraser
-	Eraser = 0x141,
-	// Brush
-	Brush = 0x142,
-	// Pencil
-	Pencil = 0x143,
-	// Airbrush
-	Airbrush = 0x144,
-	// Finger
-	Finger = 0x145,
-	// Mouse
-	Mouse = 0x146,
-	// Lens
-	Lens = 0x147,
-}
-Zwp_Tablet_Tool_V2_Capability :: enum u32 {
-	// Tilt axes
-	Tilt = 1,
-	// Pressure axis
-	Pressure = 2,
-	// Distance axis
-	Distance = 3,
-	// Z-rotation axis
-	Rotation = 4,
-	// Slider axis
-	Slider = 5,
-	// Wheel axis
-	Wheel = 6,
-}
-Zwp_Tablet_Tool_V2_Button_State :: enum u32 {
-	// button is not pressed
-	Released = 0,
-	// button is pressed
-	Pressed = 1,
-}
-Zwp_Tablet_Tool_V2_Error :: enum u32 {
-	// given wl_surface has another role
-	Role = 0,
-}
-Zwp_Tablet_V2_Bustype :: enum u32 {
-	// USB
-	Usb = 3,
-	// Bluetooth
-	Bluetooth = 5,
-	// Virtual
-	Virtual = 6,
-	// Serial
-	Serial = 17,
-	// I2C
-	I2c = 24,
-}
-Zwp_Tablet_Pad_Ring_V2_Source :: enum u32 {
-	// finger
-	Finger = 1,
-}
-Zwp_Tablet_Pad_Strip_V2_Source :: enum u32 {
-	// finger
-	Finger = 1,
-}
-Zwp_Tablet_Pad_V2_Button_State :: enum u32 {
-	// the button is not pressed
-	Released = 0,
-	// the button is pressed
-	Pressed = 1,
-}
-Wp_Viewporter_Error :: enum u32 {
-	// the surface already has a viewport object associated
-	Viewport_Exists = 0,
-}
-Wp_Viewport_Error :: enum u32 {
-	// negative or zero values in width or height
-	Bad_Value = 0,
-	// destination size is not integer
-	Bad_Size = 1,
-	// source rectangle extends outside of the content area
-	Out_Of_Buffer = 2,
-	// the wl_surface was destroyed
-	No_Surface = 3,
-}
-Xdg_Wm_Base_Error :: enum u32 {
-	// given wl_surface has another role
-	Role = 0,
-	// xdg_wm_base was destroyed before children
-	Defunct_Surfaces = 1,
-	// the client tried to map or destroy a non-topmost popup
-	Not_The_Topmost_Popup = 2,
-	// the client specified an invalid popup parent surface
-	Invalid_Popup_Parent = 3,
-	// the client provided an invalid surface state
-	Invalid_Surface_State = 4,
-	// the client provided an invalid positioner
-	Invalid_Positioner = 5,
-	// the client didn’t respond to a ping event in time
-	Unresponsive = 6,
-}
-Xdg_Positioner_Error :: enum u32 {
-	// invalid input provided
-	Invalid_Input = 0,
-}
-Xdg_Positioner_Anchor :: enum u32 {
-	None = 0,
-	Top = 1,
-	Bottom = 2,
-	Left = 3,
-	Right = 4,
-	Top_Left = 5,
-	Bottom_Left = 6,
-	Top_Right = 7,
-	Bottom_Right = 8,
-}
-Xdg_Positioner_Gravity :: enum u32 {
-	None = 0,
-	Top = 1,
-	Bottom = 2,
-	Left = 3,
-	Right = 4,
-	Top_Left = 5,
-	Bottom_Left = 6,
-	Top_Right = 7,
-	Bottom_Right = 8,
-}
-Xdg_Positioner_Constraint_Adjustment_Bits :: enum {
-	Slide_X = 0,
-	Slide_Y = 1,
-	Flip_X = 2,
-	Flip_Y = 3,
-	Resize_X = 4,
-	Resize_Y = 5,
-}
-Xdg_Positioner_Constraint_Adjustment :: distinct bit_set[Xdg_Positioner_Constraint_Adjustment_Bits; u32]
-Xdg_Surface_Error :: enum u32 {
-	// Surface was not fully constructed
-	Not_Constructed = 1,
-	// Surface was already constructed
-	Already_Constructed = 2,
-	// Attaching a buffer to an unconfigured surface
-	Unconfigured_Buffer = 3,
-	// Invalid serial number when acking a configure event
-	Invalid_Serial = 4,
-	// Width or height was zero or negative
-	Invalid_Size = 5,
-	// Surface was destroyed before its role object
-	Defunct_Role_Object = 6,
-}
-Xdg_Toplevel_Error :: enum u32 {
-	// provided value is not a valid variant of the resize_edge enum
-	Invalid_Resize_Edge = 0,
-	// invalid parent toplevel
-	Invalid_Parent = 1,
-	// client provided an invalid min or max size
-	Invalid_Size = 2,
-}
-Xdg_Toplevel_Resize_Edge :: enum u32 {
-	None = 0,
-	Top = 1,
-	Bottom = 2,
-	Left = 4,
-	Top_Left = 5,
-	Bottom_Left = 6,
-	Right = 8,
-	Top_Right = 9,
-	Bottom_Right = 10,
-}
-Xdg_Toplevel_State :: enum u32 {
-	// the surface is maximized
-	Maximized = 1,
-	// the surface is fullscreen
-	Fullscreen = 2,
-	// the surface is being resized
-	Resizing = 3,
-	// the surface is now activated
-	Activated = 4,
-	Tiled_Left = 5,
-	Tiled_Right = 6,
-	Tiled_Top = 7,
-	Tiled_Bottom = 8,
-	Suspended = 9,
-	Constrained_Left = 10,
-	Constrained_Right = 11,
-	Constrained_Top = 12,
-	Constrained_Bottom = 13,
-}
-Xdg_Toplevel_Wm_Capabilities :: enum u32 {
-	// show_window_menu is available
-	Window_Menu = 1,
-	// set_maximized and unset_maximized are available
-	Maximize = 2,
-	// set_fullscreen and unset_fullscreen are available
-	Fullscreen = 3,
-	// set_minimized is available
-	Minimize = 4,
-}
-Xdg_Popup_Error :: enum u32 {
-	// tried to grab after being mapped
-	Invalid_Grab = 0,
-}
-Wp_Alpha_Modifier_V1_Error :: enum u32 {
-	// wl_surface already has a alpha modifier object
-	Already_Constructed = 0,
-}
-Wp_Alpha_Modifier_Surface_V1_Error :: enum u32 {
-	// wl_surface was destroyed
-	No_Surface = 0,
-}
-Wp_Color_Manager_V1_Error :: enum u32 {
-	// request not supported
-	Unsupported_Feature = 0,
-	// color management surface exists already
-	Surface_Exists = 1,
-}
-Wp_Color_Manager_V1_Render_Intent :: enum u32 {
-	// perceptual
-	Perceptual = 0,
-	// media-relative colorimetric
-	Relative = 1,
-	// saturation
-	Saturation = 2,
-	// ICC-absolute colorimetric
-	Absolute = 3,
-	// media-relative colorimetric + black point compensation
-	Relative_Bpc = 4,
-	Absolute_No_Adaptation = 5,
-}
-Wp_Color_Manager_V1_Feature :: enum u32 {
-	// create_icc_creator request
-	Icc_V2_V4 = 0,
-	// create_parametric_creator request
-	Parametric = 1,
-	// parametric set_primaries request
-	Set_Primaries = 2,
-	// parametric set_tf_power request
-	Set_Tf_Power = 3,
-	// parametric set_luminances request
-	Set_Luminances = 4,
-	Set_Mastering_Display_Primaries = 5,
-	Extended_Target_Volume = 6,
-	// create_windows_scrgb request
-	Windows_Scrgb = 7,
-}
-Wp_Color_Manager_V1_Primaries :: enum u32 {
-	Srgb = 1,
-	Pal_M = 2,
-	Pal = 3,
-	Ntsc = 4,
-	Generic_Film = 5,
-	Bt2020 = 6,
-	Cie1931_Xyz = 7,
-	Dci_P3 = 8,
-	Display_P3 = 9,
-	Adobe_Rgb = 10,
-}
-Wp_Color_Manager_V1_Transfer_Function :: enum u32 {
-	Bt1886 = 1,
-	Gamma22 = 2,
-	Gamma28 = 3,
-	St240 = 4,
-	Ext_Linear = 5,
-	Log_100 = 6,
-	Log_316 = 7,
-	Xvycc = 8,
-	Srgb = 9,
-	Ext_Srgb = 10,
-	St2084_Pq = 11,
-	St428 = 12,
-	Hlg = 13,
-	Compound_Power_2_4 = 14,
-}
-Wp_Color_Management_Surface_V1_Error :: enum u32 {
-	// unsupported rendering intent
-	Render_Intent = 0,
-	// invalid image description
-	Image_Description = 1,
-	// forbidden request on inert object
-	Inert = 2,
-}
-Wp_Color_Management_Surface_Feedback_V1_Error :: enum u32 {
-	// forbidden request on inert object
-	Inert = 0,
-	// attempted to use an unsupported feature
-	Unsupported_Feature = 1,
-}
-Wp_Image_Description_Creator_Icc_V1_Error :: enum u32 {
-	// incomplete parameter set
-	Incomplete_Set = 0,
-	// property already set
-	Already_Set = 1,
-	// fd not seekable and readable
-	Bad_Fd = 2,
-	// no or too much data
-	Bad_Size = 3,
-	// offset + length exceeds file size
-	Out_Of_File = 4,
-}
-Wp_Image_Description_Creator_Params_V1_Error :: enum u32 {
-	// incomplete parameter set
-	Incomplete_Set = 0,
-	// property already set
-	Already_Set = 1,
-	// request not supported
-	Unsupported_Feature = 2,
-	// invalid transfer characteristic
-	Invalid_Tf = 3,
-	// invalid primaries named
-	Invalid_Primaries_Named = 4,
-	// invalid luminance value or range
-	Invalid_Luminance = 5,
-}
-Wp_Image_Description_V1_Error :: enum u32 {
-	// attempted to use an object which is not ready
-	Not_Ready = 0,
-	// get_information not allowed
-	No_Information = 1,
-}
-Wp_Image_Description_V1_Cause :: enum u32 {
-	// interface version too low
-	Low_Version = 0,
-	// unsupported image description data
-	Unsupported = 1,
-	// error independent of the client
-	Operating_System = 2,
-	// the relevant output no longer exists
-	No_Output = 3,
-}
-Wp_Color_Representation_Manager_V1_Error :: enum u32 {
-	// color representation surface exists already
-	Surface_Exists = 1,
-}
-Wp_Color_Representation_Surface_V1_Error :: enum u32 {
-	// unsupported alpha mode
-	Alpha_Mode = 1,
-	// unsupported coefficients
-	Coefficients = 2,
-	// the pixel format and a set value are incompatible
-	Pixel_Format = 3,
-	// forbidden request on inert object
-	Inert = 4,
-	// invalid chroma location
-	Chroma_Location = 5,
-}
-Wp_Color_Representation_Surface_V1_Alpha_Mode :: enum u32 {
-	Premultiplied_Electrical = 0,
-	Premultiplied_Optical = 1,
-	Straight = 2,
-}
-Wp_Color_Representation_Surface_V1_Coefficients :: enum u32 {
-	Identity = 1,
-	Bt709 = 2,
-	Fcc = 3,
-	Bt601 = 4,
-	Smpte240 = 5,
-	Bt2020 = 6,
-	Bt2020_Cl = 7,
-	Ictcp = 8,
-}
-Wp_Color_Representation_Surface_V1_Range :: enum u32 {
-	// Full color range
-	Full = 1,
-	// Limited color range
-	Limited = 2,
-}
-Wp_Color_Representation_Surface_V1_Chroma_Location :: enum u32 {
-	Type_0 = 1,
-	Type_1 = 2,
-	Type_2 = 3,
-	Type_3 = 4,
-	Type_4 = 5,
-	Type_5 = 6,
-}
-Wp_Commit_Timing_Manager_V1_Error :: enum u32 {
-	// commit timer already exists for surface
-	Commit_Timer_Exists = 0,
-}
-Wp_Commit_Timer_V1_Error :: enum u32 {
-	// timestamp contains an invalid value
-	Invalid_Timestamp = 0,
-	// timestamp exists
-	Timestamp_Exists = 1,
-	// the associated surface no longer exists
-	Surface_Destroyed = 2,
-}
-Wp_Content_Type_Manager_V1_Error :: enum u32 {
-	// wl_surface already has a content type object
-	Already_Constructed = 0,
-}
-Wp_Content_Type_V1_Type :: enum u32 {
-	None = 0,
-	Photo = 1,
-	Video = 2,
-	Game = 3,
-}
-Wp_Cursor_Shape_Device_V1_Shape :: enum u32 {
-	// default cursor
-	Default = 1,
-	// a context menu is available for the object under the cursor
-	Context_Menu = 2,
-	// help is available for the object under the cursor
-	Help = 3,
-	// pointer that indicates a link or another interactive element
-	Pointer = 4,
-	// progress indicator
-	Progress = 5,
-	// program is busy, user should wait
-	Wait = 6,
-	// a cell or set of cells may be selected
-	Cell = 7,
-	// simple crosshair
-	Crosshair = 8,
-	// text may be selected
-	Text = 9,
-	// vertical text may be selected
-	Vertical_Text = 10,
-	// drag-and-drop: alias of/shortcut to something is to be created
-	Alias = 11,
-	// drag-and-drop: something is to be copied
-	Copy = 12,
-	// drag-and-drop: something is to be moved
-	Move = 13,
-	// drag-and-drop: the dragged item cannot be dropped at the current cursor location
-	No_Drop = 14,
-	// drag-and-drop: the requested action will not be carried out
-	Not_Allowed = 15,
-	// drag-and-drop: something can be grabbed
-	Grab = 16,
-	// drag-and-drop: something is being grabbed
-	Grabbing = 17,
-	// resizing: the east border is to be moved
-	E_Resize = 18,
-	// resizing: the north border is to be moved
-	N_Resize = 19,
-	// resizing: the north-east corner is to be moved
-	Ne_Resize = 20,
-	// resizing: the north-west corner is to be moved
-	Nw_Resize = 21,
-	// resizing: the south border is to be moved
-	S_Resize = 22,
-	// resizing: the south-east corner is to be moved
-	Se_Resize = 23,
-	// resizing: the south-west corner is to be moved
-	Sw_Resize = 24,
-	// resizing: the west border is to be moved
-	W_Resize = 25,
-	// resizing: the east and west borders are to be moved
-	Ew_Resize = 26,
-	// resizing: the north and south borders are to be moved
-	Ns_Resize = 27,
-	// resizing: the north-east and south-west corners are to be moved
-	Nesw_Resize = 28,
-	// resizing: the north-west and south-east corners are to be moved
-	Nwse_Resize = 29,
-	// resizing: that the item/column can be resized horizontally
-	Col_Resize = 30,
-	// resizing: that the item/row can be resized vertically
-	Row_Resize = 31,
-	// something can be scrolled in any direction
-	All_Scroll = 32,
-	// something can be zoomed in
-	Zoom_In = 33,
-	// something can be zoomed out
-	Zoom_Out = 34,
-	// drag-and-drop: the user will select which action will be carried out (non-css value)
-	Dnd_Ask = 35,
-	// resizing: something can be moved or resized in any direction (non-css value)
-	All_Resize = 36,
-}
-Wp_Cursor_Shape_Device_V1_Error :: enum u32 {
-	// the specified shape value is invalid
-	Invalid_Shape = 1,
-}
-Wp_Drm_Lease_Request_V1_Error :: enum u32 {
-	// requested a connector from a different lease device
-	Wrong_Device = 0,
-	// requested a connector twice
-	Duplicate_Connector = 1,
-	// requested a lease without requesting a connector
-	Empty_Lease = 2,
-}
-Ext_Background_Effect_Manager_V1_Error :: enum u32 {
-	// the surface already has a background effect object
-	Background_Effect_Exists = 0,
-}
-Ext_Background_Effect_Manager_V1_Capability_Bits :: enum {
-	// the compositor supports applying blur
-	Blur = 0,
-}
-Ext_Background_Effect_Manager_V1_Capability :: distinct bit_set[Ext_Background_Effect_Manager_V1_Capability_Bits; u32]
-Ext_Background_Effect_Surface_V1_Error :: enum u32 {
-	// the associated surface has been destroyed
-	Surface_Destroyed = 0,
-}
-Ext_Data_Control_Device_V1_Error :: enum u32 {
-	// source given to set_selection or set_primary_selection was already used before
-	Used_Source = 1,
-}
-Ext_Data_Control_Source_V1_Error :: enum u32 {
-	// offer sent after ext_data_control_device.set_selection
-	Invalid_Offer = 1,
-}
-Ext_Image_Copy_Capture_Manager_V1_Error :: enum u32 {
-	// invalid option flag
-	Invalid_Option = 1,
-}
-Ext_Image_Copy_Capture_Manager_V1_Options_Bits :: enum {
-	// paint cursors onto captured frames
-	Paint_Cursors = 0,
-}
-Ext_Image_Copy_Capture_Manager_V1_Options :: distinct bit_set[Ext_Image_Copy_Capture_Manager_V1_Options_Bits; u32]
-Ext_Image_Copy_Capture_Session_V1_Error :: enum u32 {
-	// create_frame sent before destroying previous frame
-	Duplicate_Frame = 1,
-}
-Ext_Image_Copy_Capture_Frame_V1_Error :: enum u32 {
-	// capture sent without attach_buffer
-	No_Buffer = 1,
-	// invalid buffer damage
-	Invalid_Buffer_Damage = 2,
-	// capture request has been sent
-	Already_Captured = 3,
-}
-Ext_Image_Copy_Capture_Frame_V1_Failure_Reason :: enum u32 {
-	Unknown = 0,
-	Buffer_Constraints = 1,
-	Stopped = 2,
-}
-Ext_Image_Copy_Capture_Cursor_Session_V1_Error :: enum u32 {
-	// get_capture_session sent twice
-	Duplicate_Session = 1,
-}
-Ext_Session_Lock_V1_Error :: enum u32 {
-	// attempted to destroy session lock while locked
-	Invalid_Destroy = 0,
-	// unlock requested but locked event was never sent
-	Invalid_Unlock = 1,
-	// given wl_surface already has a role
-	Role = 2,
-	// given output already has a lock surface
-	Duplicate_Output = 3,
-	// given wl_surface has a buffer attached or committed
-	Already_Constructed = 4,
-}
-Ext_Session_Lock_Surface_V1_Error :: enum u32 {
-	// surface committed before first ack_configure request
-	Commit_Before_First_Ack = 0,
-	// surface committed with a null buffer
-	Null_Buffer = 1,
-	// failed to match ack'd width/height
-	Dimensions_Mismatch = 2,
-	// serial provided in ack_configure is invalid
-	Invalid_Serial = 3,
-}
-Ext_Workspace_Group_Handle_V1_Group_Capabilities_Bits :: enum {
-	// create_workspace request is available
-	Create_Workspace = 0,
-}
-Ext_Workspace_Group_Handle_V1_Group_Capabilities :: distinct bit_set[Ext_Workspace_Group_Handle_V1_Group_Capabilities_Bits; u32]
-Ext_Workspace_Handle_V1_State_Bits :: enum {
-	// the workspace is active
-	Active = 0,
-	// the workspace requests attention
-	Urgent = 1,
-	Hidden = 2,
-}
-Ext_Workspace_Handle_V1_State :: distinct bit_set[Ext_Workspace_Handle_V1_State_Bits; u32]
-Ext_Workspace_Handle_V1_Workspace_Capabilities_Bits :: enum {
-	// activate request is available
-	Activate = 0,
-	// deactivate request is available
-	Deactivate = 1,
-	// remove request is available
-	Remove = 2,
-	// assign request is available
-	Assign = 3,
-}
-Ext_Workspace_Handle_V1_Workspace_Capabilities :: distinct bit_set[Ext_Workspace_Handle_V1_Workspace_Capabilities_Bits; u32]
-Wp_Fifo_Manager_V1_Error :: enum u32 {
-	// fifo manager already exists for surface
-	Already_Exists = 0,
-}
-Wp_Fifo_V1_Error :: enum u32 {
-	// the associated surface no longer exists
-	Surface_Destroyed = 0,
-}
-Wp_Fractional_Scale_Manager_V1_Error :: enum u32 {
-	// the surface already has a fractional_scale object associated
-	Fractional_Scale_Exists = 0,
-}
-Wp_Linux_Drm_Syncobj_Manager_V1_Error :: enum u32 {
-	// the surface already has a synchronization object associated
-	Surface_Exists = 0,
-	// the timeline object could not be imported
-	Invalid_Timeline = 1,
-}
-Wp_Linux_Drm_Syncobj_Surface_V1_Error :: enum u32 {
-	// the associated wl_surface was destroyed
-	No_Surface = 1,
-	// the buffer does not support explicit synchronization
-	Unsupported_Buffer = 2,
-	// no buffer was attached
-	No_Buffer = 3,
-	// no acquire timeline point was set
-	No_Acquire_Point = 4,
-	// no release timeline point was set
-	No_Release_Point = 5,
-	// acquire and release timeline points are in conflict
-	Conflicting_Points = 6,
-}
-Wp_Security_Context_Manager_V1_Error :: enum u32 {
-	// listening socket FD is invalid
-	Invalid_Listen_Fd = 1,
-	// nested security contexts are forbidden
-	Nested = 2,
-}
-Wp_Security_Context_V1_Error :: enum u32 {
-	// security context has already been committed
-	Already_Used = 1,
-	// metadata has already been set
-	Already_Set = 2,
-	// metadata is invalid
-	Invalid_Metadata = 3,
-}
-Wp_Tearing_Control_Manager_V1_Error :: enum u32 {
-	// the surface already has a tearing object associated
-	Tearing_Control_Exists = 0,
-}
-Wp_Tearing_Control_V1_Presentation_Hint :: enum u32 {
-	Vsync = 0,
-	Async = 1,
-}
-Xdg_Activation_Token_V1_Error :: enum u32 {
-	// The token has already been used previously
-	Already_Used = 0,
-}
-Xdg_Wm_Dialog_V1_Error :: enum u32 {
-	// the xdg_toplevel object has already been used to create a xdg_dialog_v1
-	Already_Used = 0,
-}
-Xdg_Toplevel_Drag_Manager_V1_Error :: enum u32 {
-	// data_source already used for toplevel drag
-	Invalid_Source = 0,
-}
-Xdg_Toplevel_Drag_V1_Error :: enum u32 {
-	// valid toplevel already attached
-	Toplevel_Attached = 0,
-	// drag has not ended
-	Ongoing_Drag = 1,
-}
-Xdg_Toplevel_Icon_V1_Error :: enum u32 {
-	// the provided buffer does not satisfy requirements
-	Invalid_Buffer = 1,
-	// the icon has already been assigned to a toplevel and must not be changed
-	Immutable = 2,
-	// the provided buffer has been destroyed before the toplevel icon
-	No_Buffer = 3,
-}
-Xwayland_Shell_V1_Error :: enum u32 {
-	// given wl_surface has another role
-	Role = 0,
-}
-Xwayland_Surface_V1_Error :: enum u32 {
-	// given wl_surface is already associated with an X11 window
-	Already_Associated = 0,
-	// serial was not valid
-	Invalid_Serial = 1,
-}
-
-display_sync :: proc(connection: ^Connection, display: Display) -> (callback: Callback) {
-	_size: u16 = 8 + size_of(callback)
-	display := display
-	_buffer_write_ptr(&connection.buffer_out, &display, size_of(display))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	callback = auto_cast generate_id(connection, .Callback)
-	_buffer_write_ptr(&connection.buffer_out, &callback, size_of(callback))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_display@", display, ".sync:", " callback=", callback)
-	return
-}
-display_get_registry :: proc(connection: ^Connection, display: Display) -> (registry: Registry) {
-	_size: u16 = 8 + size_of(registry)
-	display := display
-	_buffer_write_ptr(&connection.buffer_out, &display, size_of(display))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	registry = auto_cast generate_id(connection, .Registry)
-	_buffer_write_ptr(&connection.buffer_out, &registry, size_of(registry))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_display@", display, ".get_registry:", " registry=", registry)
-	return
-}
-registry_bind :: proc(connection: ^Connection, registry: Registry, name: u32, interface: string, version: u32, $T: typeid, _location := #caller_location) -> (id: T) where intrinsics.type_is_named(T), intrinsics.type_base_type(T) == u32 {
-	_size: u16 = 8 + size_of(name) + 4 + u16((len(interface) + 1 + 3) & -4) + size_of(version) + size_of(id)
-	registry := registry
-	_buffer_write_ptr(&connection.buffer_out, &registry, size_of(registry))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	name := name
-	_buffer_write_ptr(&connection.buffer_out, &name, size_of(name))
-	_buffer_write_string(&connection.buffer_out, interface)
-	version := version
-	_buffer_write_ptr(&connection.buffer_out, &version, size_of(version))
-	_type := resolve_type(T, interface, _location)
-	id = auto_cast generate_id(connection, _type)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_registry@", registry, ".bind:", " name=", name, " id=", id)
-	return
-}
-compositor_create_surface :: proc(connection: ^Connection, compositor: Compositor) -> (id: Surface) {
-	_size: u16 = 8 + size_of(id)
-	compositor := compositor
-	_buffer_write_ptr(&connection.buffer_out, &compositor, size_of(compositor))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Surface)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_compositor@", compositor, ".create_surface:", " id=", id)
-	return
-}
-compositor_create_region :: proc(connection: ^Connection, compositor: Compositor) -> (id: Region) {
-	_size: u16 = 8 + size_of(id)
-	compositor := compositor
-	_buffer_write_ptr(&connection.buffer_out, &compositor, size_of(compositor))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Region)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_compositor@", compositor, ".create_region:", " id=", id)
-	return
-}
-shm_pool_create_buffer :: proc(connection: ^Connection, shm_pool: Shm_Pool, offset: i32, width: i32, height: i32, stride: i32, format: Shm_Format) -> (id: Buffer) {
-	_size: u16 = 8 + size_of(id) + size_of(offset) + size_of(width) + size_of(height) + size_of(stride) + size_of(format)
-	shm_pool := shm_pool
-	_buffer_write_ptr(&connection.buffer_out, &shm_pool, size_of(shm_pool))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Buffer)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	offset := offset
-	_buffer_write_ptr(&connection.buffer_out, &offset, size_of(offset))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	stride := stride
-	_buffer_write_ptr(&connection.buffer_out, &stride, size_of(stride))
-	format := format
-	_buffer_write_ptr(&connection.buffer_out, &format, size_of(format))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shm_pool@", shm_pool, ".create_buffer:", " id=", id, " offset=", offset, " width=", width, " height=", height, " stride=", stride, " format=", format)
-	return
-}
-shm_pool_destroy :: proc(connection: ^Connection, shm_pool: Shm_Pool) {
-	_size: u16 = 8
-	shm_pool := shm_pool
-	_buffer_write_ptr(&connection.buffer_out, &shm_pool, size_of(shm_pool))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shm_pool@", shm_pool, ".destroy:")
-	return
-}
-shm_pool_resize :: proc(connection: ^Connection, shm_pool: Shm_Pool, size: i32) {
-	_size: u16 = 8 + size_of(size)
-	shm_pool := shm_pool
-	_buffer_write_ptr(&connection.buffer_out, &shm_pool, size_of(shm_pool))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	size := size
-	_buffer_write_ptr(&connection.buffer_out, &size, size_of(size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shm_pool@", shm_pool, ".resize:", " size=", size)
-	return
-}
-shm_create_pool :: proc(connection: ^Connection, shm: Shm, fd: Fd, size: i32) -> (id: Shm_Pool) {
-	_size: u16 = 8 + size_of(id) + size_of(size)
-	shm := shm
-	_buffer_write_ptr(&connection.buffer_out, &shm, size_of(shm))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Shm_Pool)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	append(&connection.fds_out, fd)
-	size := size
-	_buffer_write_ptr(&connection.buffer_out, &size, size_of(size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shm@", shm, ".create_pool:", " id=", id, " fd=", fd, " size=", size)
-	return
-}
-shm_release :: proc(connection: ^Connection, shm: Shm) {
-	_size: u16 = 8
-	shm := shm
-	_buffer_write_ptr(&connection.buffer_out, &shm, size_of(shm))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shm@", shm, ".release:")
-	return
-}
-buffer_destroy :: proc(connection: ^Connection, buffer: Buffer) {
-	_size: u16 = 8
-	buffer := buffer
-	_buffer_write_ptr(&connection.buffer_out, &buffer, size_of(buffer))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_buffer@", buffer, ".destroy:")
-	return
-}
-data_offer_accept :: proc(connection: ^Connection, data_offer: Data_Offer, serial: u32, mime_type: string) {
-	_size: u16 = 8 + size_of(serial) + 4 + u16((len(mime_type) + 1 + 3) & -4)
-	data_offer := data_offer
-	_buffer_write_ptr(&connection.buffer_out, &data_offer, size_of(data_offer))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	_buffer_write_string(&connection.buffer_out, mime_type)
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_offer@", data_offer, ".accept:", " serial=", serial, " mime_type=", mime_type)
-	return
-}
-data_offer_receive :: proc(connection: ^Connection, data_offer: Data_Offer, mime_type: string, fd: Fd) {
-	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
-	data_offer := data_offer
-	_buffer_write_ptr(&connection.buffer_out, &data_offer, size_of(data_offer))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, mime_type)
-	append(&connection.fds_out, fd)
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_offer@", data_offer, ".receive:", " mime_type=", mime_type, " fd=", fd)
-	return
-}
-data_offer_destroy :: proc(connection: ^Connection, data_offer: Data_Offer) {
-	_size: u16 = 8
-	data_offer := data_offer
-	_buffer_write_ptr(&connection.buffer_out, &data_offer, size_of(data_offer))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_offer@", data_offer, ".destroy:")
-	return
-}
-data_offer_finish :: proc(connection: ^Connection, data_offer: Data_Offer) {
-	_size: u16 = 8
-	data_offer := data_offer
-	_buffer_write_ptr(&connection.buffer_out, &data_offer, size_of(data_offer))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_offer@", data_offer, ".finish:")
-	return
-}
-data_offer_set_actions :: proc(connection: ^Connection, data_offer: Data_Offer, dnd_actions: Data_Device_Manager_Dnd_Action, preferred_action: Data_Device_Manager_Dnd_Action) {
-	_size: u16 = 8 + size_of(dnd_actions) + size_of(preferred_action)
-	data_offer := data_offer
-	_buffer_write_ptr(&connection.buffer_out, &data_offer, size_of(data_offer))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	dnd_actions := dnd_actions
-	_buffer_write_ptr(&connection.buffer_out, &dnd_actions, size_of(dnd_actions))
-	preferred_action := preferred_action
-	_buffer_write_ptr(&connection.buffer_out, &preferred_action, size_of(preferred_action))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_offer@", data_offer, ".set_actions:", " dnd_actions=", dnd_actions, " preferred_action=", preferred_action)
-	return
-}
-data_source_offer :: proc(connection: ^Connection, data_source: Data_Source, mime_type: string) {
-	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
-	data_source := data_source
-	_buffer_write_ptr(&connection.buffer_out, &data_source, size_of(data_source))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, mime_type)
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_source@", data_source, ".offer:", " mime_type=", mime_type)
-	return
-}
-data_source_destroy :: proc(connection: ^Connection, data_source: Data_Source) {
-	_size: u16 = 8
-	data_source := data_source
-	_buffer_write_ptr(&connection.buffer_out, &data_source, size_of(data_source))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_source@", data_source, ".destroy:")
-	return
-}
-data_source_set_actions :: proc(connection: ^Connection, data_source: Data_Source, dnd_actions: Data_Device_Manager_Dnd_Action) {
-	_size: u16 = 8 + size_of(dnd_actions)
-	data_source := data_source
-	_buffer_write_ptr(&connection.buffer_out, &data_source, size_of(data_source))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	dnd_actions := dnd_actions
-	_buffer_write_ptr(&connection.buffer_out, &dnd_actions, size_of(dnd_actions))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_source@", data_source, ".set_actions:", " dnd_actions=", dnd_actions)
-	return
-}
-data_device_start_drag :: proc(connection: ^Connection, data_device: Data_Device, source: Data_Source, origin: Surface, icon: Surface, serial: u32) {
-	_size: u16 = 8 + size_of(source) + size_of(origin) + size_of(icon) + size_of(serial)
-	data_device := data_device
-	_buffer_write_ptr(&connection.buffer_out, &data_device, size_of(data_device))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	source := source
-	_buffer_write_ptr(&connection.buffer_out, &source, size_of(source))
-	origin := origin
-	_buffer_write_ptr(&connection.buffer_out, &origin, size_of(origin))
-	icon := icon
-	_buffer_write_ptr(&connection.buffer_out, &icon, size_of(icon))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_device@", data_device, ".start_drag:", " source=", source, " origin=", origin, " icon=", icon, " serial=", serial)
-	return
-}
-data_device_set_selection :: proc(connection: ^Connection, data_device: Data_Device, source: Data_Source, serial: u32) {
-	_size: u16 = 8 + size_of(source) + size_of(serial)
-	data_device := data_device
-	_buffer_write_ptr(&connection.buffer_out, &data_device, size_of(data_device))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	source := source
-	_buffer_write_ptr(&connection.buffer_out, &source, size_of(source))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_device@", data_device, ".set_selection:", " source=", source, " serial=", serial)
-	return
-}
-data_device_release :: proc(connection: ^Connection, data_device: Data_Device) {
-	_size: u16 = 8
-	data_device := data_device
-	_buffer_write_ptr(&connection.buffer_out, &data_device, size_of(data_device))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_device@", data_device, ".release:")
-	return
-}
-data_device_manager_create_data_source :: proc(connection: ^Connection, data_device_manager: Data_Device_Manager) -> (id: Data_Source) {
-	_size: u16 = 8 + size_of(id)
-	data_device_manager := data_device_manager
-	_buffer_write_ptr(&connection.buffer_out, &data_device_manager, size_of(data_device_manager))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Data_Source)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_device_manager@", data_device_manager, ".create_data_source:", " id=", id)
-	return
-}
-data_device_manager_get_data_device :: proc(connection: ^Connection, data_device_manager: Data_Device_Manager, seat: Seat) -> (id: Data_Device) {
-	_size: u16 = 8 + size_of(id) + size_of(seat)
-	data_device_manager := data_device_manager
-	_buffer_write_ptr(&connection.buffer_out, &data_device_manager, size_of(data_device_manager))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Data_Device)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_data_device_manager@", data_device_manager, ".get_data_device:", " id=", id, " seat=", seat)
-	return
-}
-shell_get_shell_surface :: proc(connection: ^Connection, shell: Shell, surface: Surface) -> (id: Shell_Surface) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	shell := shell
-	_buffer_write_ptr(&connection.buffer_out, &shell, size_of(shell))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Shell_Surface)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell@", shell, ".get_shell_surface:", " id=", id, " surface=", surface)
-	return
-}
-shell_surface_pong :: proc(connection: ^Connection, shell_surface: Shell_Surface, serial: u32) {
-	_size: u16 = 8 + size_of(serial)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".pong:", " serial=", serial)
-	return
-}
-shell_surface_move :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32) {
-	_size: u16 = 8 + size_of(seat) + size_of(serial)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".move:", " seat=", seat, " serial=", serial)
-	return
-}
-shell_surface_resize :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32, edges: Shell_Surface_Resize) {
-	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(edges)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	edges := edges
-	_buffer_write_ptr(&connection.buffer_out, &edges, size_of(edges))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".resize:", " seat=", seat, " serial=", serial, " edges=", edges)
-	return
-}
-shell_surface_set_toplevel :: proc(connection: ^Connection, shell_surface: Shell_Surface) {
-	_size: u16 = 8
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_toplevel:")
-	return
-}
-shell_surface_set_transient :: proc(connection: ^Connection, shell_surface: Shell_Surface, parent: Surface, x: i32, y: i32, flags: Shell_Surface_Transient) {
-	_size: u16 = 8 + size_of(parent) + size_of(x) + size_of(y) + size_of(flags)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	parent := parent
-	_buffer_write_ptr(&connection.buffer_out, &parent, size_of(parent))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	flags := flags
-	_buffer_write_ptr(&connection.buffer_out, &flags, size_of(flags))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_transient:", " parent=", parent, " x=", x, " y=", y, " flags=", flags)
-	return
-}
-shell_surface_set_fullscreen :: proc(connection: ^Connection, shell_surface: Shell_Surface, method: Shell_Surface_Fullscreen_Method, framerate: u32, output: Output) {
-	_size: u16 = 8 + size_of(method) + size_of(framerate) + size_of(output)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 5
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	method := method
-	_buffer_write_ptr(&connection.buffer_out, &method, size_of(method))
-	framerate := framerate
-	_buffer_write_ptr(&connection.buffer_out, &framerate, size_of(framerate))
-	output := output
-	_buffer_write_ptr(&connection.buffer_out, &output, size_of(output))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_fullscreen:", " method=", method, " framerate=", framerate, " output=", output)
-	return
-}
-shell_surface_set_popup :: proc(connection: ^Connection, shell_surface: Shell_Surface, seat: Seat, serial: u32, parent: Surface, x: i32, y: i32, flags: Shell_Surface_Transient) {
-	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(parent) + size_of(x) + size_of(y) + size_of(flags)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 6
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	parent := parent
-	_buffer_write_ptr(&connection.buffer_out, &parent, size_of(parent))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	flags := flags
-	_buffer_write_ptr(&connection.buffer_out, &flags, size_of(flags))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_popup:", " seat=", seat, " serial=", serial, " parent=", parent, " x=", x, " y=", y, " flags=", flags)
-	return
-}
-shell_surface_set_maximized :: proc(connection: ^Connection, shell_surface: Shell_Surface, output: Output) {
-	_size: u16 = 8 + size_of(output)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 7
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	output := output
-	_buffer_write_ptr(&connection.buffer_out, &output, size_of(output))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_maximized:", " output=", output)
-	return
-}
-shell_surface_set_title :: proc(connection: ^Connection, shell_surface: Shell_Surface, title: string) {
-	_size: u16 = 8 + 4 + u16((len(title) + 1 + 3) & -4)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 8
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, title)
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_title:", " title=", title)
-	return
-}
-shell_surface_set_class :: proc(connection: ^Connection, shell_surface: Shell_Surface, class_: string) {
-	_size: u16 = 8 + 4 + u16((len(class_) + 1 + 3) & -4)
-	shell_surface := shell_surface
-	_buffer_write_ptr(&connection.buffer_out, &shell_surface, size_of(shell_surface))
-	opcode: u16 = 9
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, class_)
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_shell_surface@", shell_surface, ".set_class:", " class_=", class_)
-	return
-}
-surface_destroy :: proc(connection: ^Connection, surface: Surface) {
-	_size: u16 = 8
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".destroy:")
-	return
-}
-surface_attach :: proc(connection: ^Connection, surface: Surface, buffer: Buffer, x: i32, y: i32) {
-	_size: u16 = 8 + size_of(buffer) + size_of(x) + size_of(y)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	buffer := buffer
-	_buffer_write_ptr(&connection.buffer_out, &buffer, size_of(buffer))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".attach:", " buffer=", buffer, " x=", x, " y=", y)
-	return
-}
-surface_damage :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".damage:", " x=", x, " y=", y, " width=", width, " height=", height)
-	return
-}
-surface_frame :: proc(connection: ^Connection, surface: Surface) -> (callback: Callback) {
-	_size: u16 = 8 + size_of(callback)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	callback = auto_cast generate_id(connection, .Callback)
-	_buffer_write_ptr(&connection.buffer_out, &callback, size_of(callback))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".frame:", " callback=", callback)
-	return
-}
-surface_set_opaque_region :: proc(connection: ^Connection, surface: Surface, region: Region) {
-	_size: u16 = 8 + size_of(region)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	region := region
-	_buffer_write_ptr(&connection.buffer_out, &region, size_of(region))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".set_opaque_region:", " region=", region)
-	return
-}
-surface_set_input_region :: proc(connection: ^Connection, surface: Surface, region: Region) {
-	_size: u16 = 8 + size_of(region)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 5
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	region := region
-	_buffer_write_ptr(&connection.buffer_out, &region, size_of(region))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".set_input_region:", " region=", region)
-	return
-}
-surface_commit :: proc(connection: ^Connection, surface: Surface) {
-	_size: u16 = 8
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 6
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".commit:")
-	return
-}
-surface_set_buffer_transform :: proc(connection: ^Connection, surface: Surface, transform: Output_Transform) {
-	_size: u16 = 8 + size_of(transform)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 7
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	transform := transform
-	_buffer_write_ptr(&connection.buffer_out, &transform, size_of(transform))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".set_buffer_transform:", " transform=", transform)
-	return
-}
-surface_set_buffer_scale :: proc(connection: ^Connection, surface: Surface, scale: i32) {
-	_size: u16 = 8 + size_of(scale)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 8
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	scale := scale
-	_buffer_write_ptr(&connection.buffer_out, &scale, size_of(scale))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".set_buffer_scale:", " scale=", scale)
-	return
-}
-surface_damage_buffer :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 9
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".damage_buffer:", " x=", x, " y=", y, " width=", width, " height=", height)
-	return
-}
-surface_offset :: proc(connection: ^Connection, surface: Surface, x: i32, y: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	opcode: u16 = 10
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_surface@", surface, ".offset:", " x=", x, " y=", y)
-	return
-}
-seat_get_pointer :: proc(connection: ^Connection, seat: Seat) -> (id: Pointer) {
-	_size: u16 = 8 + size_of(id)
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Pointer)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_seat@", seat, ".get_pointer:", " id=", id)
-	return
-}
-seat_get_keyboard :: proc(connection: ^Connection, seat: Seat) -> (id: Keyboard) {
-	_size: u16 = 8 + size_of(id)
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Keyboard)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_seat@", seat, ".get_keyboard:", " id=", id)
-	return
-}
-seat_get_touch :: proc(connection: ^Connection, seat: Seat) -> (id: Touch) {
-	_size: u16 = 8 + size_of(id)
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Touch)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_seat@", seat, ".get_touch:", " id=", id)
-	return
-}
-seat_release :: proc(connection: ^Connection, seat: Seat) {
-	_size: u16 = 8
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_seat@", seat, ".release:")
-	return
-}
-pointer_set_cursor :: proc(connection: ^Connection, pointer: Pointer, serial: u32, surface: Surface, hotspot_x: i32, hotspot_y: i32) {
-	_size: u16 = 8 + size_of(serial) + size_of(surface) + size_of(hotspot_x) + size_of(hotspot_y)
-	pointer := pointer
-	_buffer_write_ptr(&connection.buffer_out, &pointer, size_of(pointer))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	hotspot_x := hotspot_x
-	_buffer_write_ptr(&connection.buffer_out, &hotspot_x, size_of(hotspot_x))
-	hotspot_y := hotspot_y
-	_buffer_write_ptr(&connection.buffer_out, &hotspot_y, size_of(hotspot_y))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_pointer@", pointer, ".set_cursor:", " serial=", serial, " surface=", surface, " hotspot_x=", hotspot_x, " hotspot_y=", hotspot_y)
-	return
-}
-pointer_release :: proc(connection: ^Connection, pointer: Pointer) {
-	_size: u16 = 8
-	pointer := pointer
-	_buffer_write_ptr(&connection.buffer_out, &pointer, size_of(pointer))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_pointer@", pointer, ".release:")
-	return
-}
-keyboard_release :: proc(connection: ^Connection, keyboard: Keyboard) {
-	_size: u16 = 8
-	keyboard := keyboard
-	_buffer_write_ptr(&connection.buffer_out, &keyboard, size_of(keyboard))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_keyboard@", keyboard, ".release:")
-	return
-}
-touch_release :: proc(connection: ^Connection, touch: Touch) {
-	_size: u16 = 8
-	touch := touch
-	_buffer_write_ptr(&connection.buffer_out, &touch, size_of(touch))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_touch@", touch, ".release:")
-	return
-}
-output_release :: proc(connection: ^Connection, output: Output) {
-	_size: u16 = 8
-	output := output
-	_buffer_write_ptr(&connection.buffer_out, &output, size_of(output))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_output@", output, ".release:")
-	return
-}
-region_destroy :: proc(connection: ^Connection, region: Region) {
-	_size: u16 = 8
-	region := region
-	_buffer_write_ptr(&connection.buffer_out, &region, size_of(region))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_region@", region, ".destroy:")
-	return
-}
-region_add :: proc(connection: ^Connection, region: Region, x: i32, y: i32, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	region := region
-	_buffer_write_ptr(&connection.buffer_out, &region, size_of(region))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_region@", region, ".add:", " x=", x, " y=", y, " width=", width, " height=", height)
-	return
-}
-region_subtract :: proc(connection: ^Connection, region: Region, x: i32, y: i32, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	region := region
-	_buffer_write_ptr(&connection.buffer_out, &region, size_of(region))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_region@", region, ".subtract:", " x=", x, " y=", y, " width=", width, " height=", height)
-	return
-}
-subcompositor_destroy :: proc(connection: ^Connection, subcompositor: Subcompositor) {
-	_size: u16 = 8
-	subcompositor := subcompositor
-	_buffer_write_ptr(&connection.buffer_out, &subcompositor, size_of(subcompositor))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_subcompositor@", subcompositor, ".destroy:")
-	return
-}
-subcompositor_get_subsurface :: proc(connection: ^Connection, subcompositor: Subcompositor, surface: Surface, parent: Surface) -> (id: Subsurface) {
-	_size: u16 = 8 + size_of(id) + size_of(surface) + size_of(parent)
-	subcompositor := subcompositor
-	_buffer_write_ptr(&connection.buffer_out, &subcompositor, size_of(subcompositor))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Subsurface)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	parent := parent
-	_buffer_write_ptr(&connection.buffer_out, &parent, size_of(parent))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_subcompositor@", subcompositor, ".get_subsurface:", " id=", id, " surface=", surface, " parent=", parent)
-	return
-}
-subsurface_destroy :: proc(connection: ^Connection, subsurface: Subsurface) {
-	_size: u16 = 8
-	subsurface := subsurface
-	_buffer_write_ptr(&connection.buffer_out, &subsurface, size_of(subsurface))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_subsurface@", subsurface, ".destroy:")
-	return
-}
-subsurface_set_position :: proc(connection: ^Connection, subsurface: Subsurface, x: i32, y: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y)
-	subsurface := subsurface
-	_buffer_write_ptr(&connection.buffer_out, &subsurface, size_of(subsurface))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_subsurface@", subsurface, ".set_position:", " x=", x, " y=", y)
-	return
-}
-subsurface_place_above :: proc(connection: ^Connection, subsurface: Subsurface, sibling: Surface) {
-	_size: u16 = 8 + size_of(sibling)
-	subsurface := subsurface
-	_buffer_write_ptr(&connection.buffer_out, &subsurface, size_of(subsurface))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	sibling := sibling
-	_buffer_write_ptr(&connection.buffer_out, &sibling, size_of(sibling))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_subsurface@", subsurface, ".place_above:", " sibling=", sibling)
-	return
-}
-subsurface_place_below :: proc(connection: ^Connection, subsurface: Subsurface, sibling: Surface) {
-	_size: u16 = 8 + size_of(sibling)
-	subsurface := subsurface
-	_buffer_write_ptr(&connection.buffer_out, &subsurface, size_of(subsurface))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	sibling := sibling
-	_buffer_write_ptr(&connection.buffer_out, &sibling, size_of(sibling))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_subsurface@", subsurface, ".place_below:", " sibling=", sibling)
-	return
-}
-subsurface_set_sync :: proc(connection: ^Connection, subsurface: Subsurface) {
-	_size: u16 = 8
-	subsurface := subsurface
-	_buffer_write_ptr(&connection.buffer_out, &subsurface, size_of(subsurface))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_subsurface@", subsurface, ".set_sync:")
-	return
-}
-subsurface_set_desync :: proc(connection: ^Connection, subsurface: Subsurface) {
-	_size: u16 = 8
-	subsurface := subsurface
-	_buffer_write_ptr(&connection.buffer_out, &subsurface, size_of(subsurface))
-	opcode: u16 = 5
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_subsurface@", subsurface, ".set_desync:")
-	return
-}
-fixes_destroy :: proc(connection: ^Connection, fixes: Fixes) {
-	_size: u16 = 8
-	fixes := fixes
-	_buffer_write_ptr(&connection.buffer_out, &fixes, size_of(fixes))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_fixes@", fixes, ".destroy:")
-	return
-}
-fixes_destroy_registry :: proc(connection: ^Connection, fixes: Fixes, registry: Registry) {
-	_size: u16 = 8 + size_of(registry)
-	fixes := fixes
-	_buffer_write_ptr(&connection.buffer_out, &fixes, size_of(fixes))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	registry := registry
-	_buffer_write_ptr(&connection.buffer_out, &registry, size_of(registry))
-	if connection.log_fn != nil do _debug_log(connection, "-> wl_fixes@", fixes, ".destroy_registry:", " registry=", registry)
-	return
-}
-zwp_linux_dmabuf_v1_destroy :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) {
-	_size: u16 = 8
-	zwp_linux_dmabuf_v1 := zwp_linux_dmabuf_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".destroy:")
-	return
-}
-zwp_linux_dmabuf_v1_create_params :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) -> (params_id: Zwp_Linux_Buffer_Params_V1) {
-	_size: u16 = 8 + size_of(params_id)
-	zwp_linux_dmabuf_v1 := zwp_linux_dmabuf_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	params_id = auto_cast generate_id(connection, .Zwp_Linux_Buffer_Params_V1)
-	_buffer_write_ptr(&connection.buffer_out, &params_id, size_of(params_id))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".create_params:", " params_id=", params_id)
-	return
-}
-zwp_linux_dmabuf_v1_get_default_feedback :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1) -> (id: Zwp_Linux_Dmabuf_Feedback_V1) {
-	_size: u16 = 8 + size_of(id)
-	zwp_linux_dmabuf_v1 := zwp_linux_dmabuf_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Zwp_Linux_Dmabuf_Feedback_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".get_default_feedback:", " id=", id)
-	return
-}
-zwp_linux_dmabuf_v1_get_surface_feedback :: proc(connection: ^Connection, zwp_linux_dmabuf_v1: Zwp_Linux_Dmabuf_V1, surface: Surface) -> (id: Zwp_Linux_Dmabuf_Feedback_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	zwp_linux_dmabuf_v1 := zwp_linux_dmabuf_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_dmabuf_v1, size_of(zwp_linux_dmabuf_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Zwp_Linux_Dmabuf_Feedback_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_dmabuf_v1@", zwp_linux_dmabuf_v1, ".get_surface_feedback:", " id=", id, " surface=", surface)
-	return
-}
-zwp_linux_buffer_params_v1_destroy :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1) {
-	_size: u16 = 8
-	zwp_linux_buffer_params_v1 := zwp_linux_buffer_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".destroy:")
-	return
-}
-zwp_linux_buffer_params_v1_add :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, fd: Fd, plane_idx: u32, offset: u32, stride: u32, modifier_hi: u32, modifier_lo: u32) {
-	_size: u16 = 8 + size_of(plane_idx) + size_of(offset) + size_of(stride) + size_of(modifier_hi) + size_of(modifier_lo)
-	zwp_linux_buffer_params_v1 := zwp_linux_buffer_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	append(&connection.fds_out, fd)
-	plane_idx := plane_idx
-	_buffer_write_ptr(&connection.buffer_out, &plane_idx, size_of(plane_idx))
-	offset := offset
-	_buffer_write_ptr(&connection.buffer_out, &offset, size_of(offset))
-	stride := stride
-	_buffer_write_ptr(&connection.buffer_out, &stride, size_of(stride))
-	modifier_hi := modifier_hi
-	_buffer_write_ptr(&connection.buffer_out, &modifier_hi, size_of(modifier_hi))
-	modifier_lo := modifier_lo
-	_buffer_write_ptr(&connection.buffer_out, &modifier_lo, size_of(modifier_lo))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".add:", " fd=", fd, " plane_idx=", plane_idx, " offset=", offset, " stride=", stride, " modifier_hi=", modifier_hi, " modifier_lo=", modifier_lo)
-	return
-}
-zwp_linux_buffer_params_v1_create :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, width: i32, height: i32, format: u32, flags: Zwp_Linux_Buffer_Params_V1_Flags) {
-	_size: u16 = 8 + size_of(width) + size_of(height) + size_of(format) + size_of(flags)
-	zwp_linux_buffer_params_v1 := zwp_linux_buffer_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	format := format
-	_buffer_write_ptr(&connection.buffer_out, &format, size_of(format))
-	flags := flags
-	_buffer_write_ptr(&connection.buffer_out, &flags, size_of(flags))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".create:", " width=", width, " height=", height, " format=", format, " flags=", flags)
-	return
-}
-zwp_linux_buffer_params_v1_create_immed :: proc(connection: ^Connection, zwp_linux_buffer_params_v1: Zwp_Linux_Buffer_Params_V1, width: i32, height: i32, format: u32, flags: Zwp_Linux_Buffer_Params_V1_Flags) -> (buffer_id: Buffer) {
-	_size: u16 = 8 + size_of(buffer_id) + size_of(width) + size_of(height) + size_of(format) + size_of(flags)
-	zwp_linux_buffer_params_v1 := zwp_linux_buffer_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_buffer_params_v1, size_of(zwp_linux_buffer_params_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	buffer_id = auto_cast generate_id(connection, .Buffer)
-	_buffer_write_ptr(&connection.buffer_out, &buffer_id, size_of(buffer_id))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	format := format
-	_buffer_write_ptr(&connection.buffer_out, &format, size_of(format))
-	flags := flags
-	_buffer_write_ptr(&connection.buffer_out, &flags, size_of(flags))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_buffer_params_v1@", zwp_linux_buffer_params_v1, ".create_immed:", " buffer_id=", buffer_id, " width=", width, " height=", height, " format=", format, " flags=", flags)
-	return
-}
-zwp_linux_dmabuf_feedback_v1_destroy :: proc(connection: ^Connection, zwp_linux_dmabuf_feedback_v1: Zwp_Linux_Dmabuf_Feedback_V1) {
-	_size: u16 = 8
-	zwp_linux_dmabuf_feedback_v1 := zwp_linux_dmabuf_feedback_v1
-	_buffer_write_ptr(&connection.buffer_out, &zwp_linux_dmabuf_feedback_v1, size_of(zwp_linux_dmabuf_feedback_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_linux_dmabuf_feedback_v1@", zwp_linux_dmabuf_feedback_v1, ".destroy:")
-	return
-}
-wp_presentation_destroy :: proc(connection: ^Connection, wp_presentation: Wp_Presentation) {
-	_size: u16 = 8
-	wp_presentation := wp_presentation
-	_buffer_write_ptr(&connection.buffer_out, &wp_presentation, size_of(wp_presentation))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_presentation@", wp_presentation, ".destroy:")
-	return
-}
-wp_presentation_feedback :: proc(connection: ^Connection, wp_presentation: Wp_Presentation, surface: Surface) -> (callback: Wp_Presentation_Feedback) {
-	_size: u16 = 8 + size_of(surface) + size_of(callback)
-	wp_presentation := wp_presentation
-	_buffer_write_ptr(&connection.buffer_out, &wp_presentation, size_of(wp_presentation))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	callback = auto_cast generate_id(connection, .Wp_Presentation_Feedback)
-	_buffer_write_ptr(&connection.buffer_out, &callback, size_of(callback))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_presentation@", wp_presentation, ".feedback:", " surface=", surface, " callback=", callback)
-	return
-}
-zwp_tablet_manager_v2_get_tablet_seat :: proc(connection: ^Connection, zwp_tablet_manager_v2: Zwp_Tablet_Manager_V2, seat: Seat) -> (tablet_seat: Zwp_Tablet_Seat_V2) {
-	_size: u16 = 8 + size_of(tablet_seat) + size_of(seat)
-	zwp_tablet_manager_v2 := zwp_tablet_manager_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_manager_v2, size_of(zwp_tablet_manager_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	tablet_seat = auto_cast generate_id(connection, .Zwp_Tablet_Seat_V2)
-	_buffer_write_ptr(&connection.buffer_out, &tablet_seat, size_of(tablet_seat))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_manager_v2@", zwp_tablet_manager_v2, ".get_tablet_seat:", " tablet_seat=", tablet_seat, " seat=", seat)
-	return
-}
-zwp_tablet_manager_v2_destroy :: proc(connection: ^Connection, zwp_tablet_manager_v2: Zwp_Tablet_Manager_V2) {
-	_size: u16 = 8
-	zwp_tablet_manager_v2 := zwp_tablet_manager_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_manager_v2, size_of(zwp_tablet_manager_v2))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_manager_v2@", zwp_tablet_manager_v2, ".destroy:")
-	return
-}
-zwp_tablet_seat_v2_destroy :: proc(connection: ^Connection, zwp_tablet_seat_v2: Zwp_Tablet_Seat_V2) {
-	_size: u16 = 8
-	zwp_tablet_seat_v2 := zwp_tablet_seat_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_seat_v2, size_of(zwp_tablet_seat_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_seat_v2@", zwp_tablet_seat_v2, ".destroy:")
-	return
-}
-zwp_tablet_tool_v2_set_cursor :: proc(connection: ^Connection, zwp_tablet_tool_v2: Zwp_Tablet_Tool_V2, serial: u32, surface: Surface, hotspot_x: i32, hotspot_y: i32) {
-	_size: u16 = 8 + size_of(serial) + size_of(surface) + size_of(hotspot_x) + size_of(hotspot_y)
-	zwp_tablet_tool_v2 := zwp_tablet_tool_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_tool_v2, size_of(zwp_tablet_tool_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	hotspot_x := hotspot_x
-	_buffer_write_ptr(&connection.buffer_out, &hotspot_x, size_of(hotspot_x))
-	hotspot_y := hotspot_y
-	_buffer_write_ptr(&connection.buffer_out, &hotspot_y, size_of(hotspot_y))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_tool_v2@", zwp_tablet_tool_v2, ".set_cursor:", " serial=", serial, " surface=", surface, " hotspot_x=", hotspot_x, " hotspot_y=", hotspot_y)
-	return
-}
-zwp_tablet_tool_v2_destroy :: proc(connection: ^Connection, zwp_tablet_tool_v2: Zwp_Tablet_Tool_V2) {
-	_size: u16 = 8
-	zwp_tablet_tool_v2 := zwp_tablet_tool_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_tool_v2, size_of(zwp_tablet_tool_v2))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_tool_v2@", zwp_tablet_tool_v2, ".destroy:")
-	return
-}
-zwp_tablet_v2_destroy :: proc(connection: ^Connection, zwp_tablet_v2: Zwp_Tablet_V2) {
-	_size: u16 = 8
-	zwp_tablet_v2 := zwp_tablet_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_v2, size_of(zwp_tablet_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_v2@", zwp_tablet_v2, ".destroy:")
-	return
-}
-zwp_tablet_pad_ring_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_ring_v2: Zwp_Tablet_Pad_Ring_V2, description: string, serial: u32) {
-	_size: u16 = 8 + 4 + u16((len(description) + 1 + 3) & -4) + size_of(serial)
-	zwp_tablet_pad_ring_v2 := zwp_tablet_pad_ring_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_ring_v2, size_of(zwp_tablet_pad_ring_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, description)
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_ring_v2@", zwp_tablet_pad_ring_v2, ".set_feedback:", " description=", description, " serial=", serial)
-	return
-}
-zwp_tablet_pad_ring_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_ring_v2: Zwp_Tablet_Pad_Ring_V2) {
-	_size: u16 = 8
-	zwp_tablet_pad_ring_v2 := zwp_tablet_pad_ring_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_ring_v2, size_of(zwp_tablet_pad_ring_v2))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_ring_v2@", zwp_tablet_pad_ring_v2, ".destroy:")
-	return
-}
-zwp_tablet_pad_strip_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_strip_v2: Zwp_Tablet_Pad_Strip_V2, description: string, serial: u32) {
-	_size: u16 = 8 + 4 + u16((len(description) + 1 + 3) & -4) + size_of(serial)
-	zwp_tablet_pad_strip_v2 := zwp_tablet_pad_strip_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_strip_v2, size_of(zwp_tablet_pad_strip_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, description)
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_strip_v2@", zwp_tablet_pad_strip_v2, ".set_feedback:", " description=", description, " serial=", serial)
-	return
-}
-zwp_tablet_pad_strip_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_strip_v2: Zwp_Tablet_Pad_Strip_V2) {
-	_size: u16 = 8
-	zwp_tablet_pad_strip_v2 := zwp_tablet_pad_strip_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_strip_v2, size_of(zwp_tablet_pad_strip_v2))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_strip_v2@", zwp_tablet_pad_strip_v2, ".destroy:")
-	return
-}
-zwp_tablet_pad_group_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_group_v2: Zwp_Tablet_Pad_Group_V2) {
-	_size: u16 = 8
-	zwp_tablet_pad_group_v2 := zwp_tablet_pad_group_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_group_v2, size_of(zwp_tablet_pad_group_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_group_v2@", zwp_tablet_pad_group_v2, ".destroy:")
-	return
-}
-zwp_tablet_pad_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_v2: Zwp_Tablet_Pad_V2, button: u32, description: string, serial: u32) {
-	_size: u16 = 8 + size_of(button) + 4 + u16((len(description) + 1 + 3) & -4) + size_of(serial)
-	zwp_tablet_pad_v2 := zwp_tablet_pad_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_v2, size_of(zwp_tablet_pad_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	button := button
-	_buffer_write_ptr(&connection.buffer_out, &button, size_of(button))
-	_buffer_write_string(&connection.buffer_out, description)
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_v2@", zwp_tablet_pad_v2, ".set_feedback:", " button=", button, " description=", description, " serial=", serial)
-	return
-}
-zwp_tablet_pad_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_v2: Zwp_Tablet_Pad_V2) {
-	_size: u16 = 8
-	zwp_tablet_pad_v2 := zwp_tablet_pad_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_v2, size_of(zwp_tablet_pad_v2))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_v2@", zwp_tablet_pad_v2, ".destroy:")
-	return
-}
-zwp_tablet_pad_dial_v2_set_feedback :: proc(connection: ^Connection, zwp_tablet_pad_dial_v2: Zwp_Tablet_Pad_Dial_V2, description: string, serial: u32) {
-	_size: u16 = 8 + 4 + u16((len(description) + 1 + 3) & -4) + size_of(serial)
-	zwp_tablet_pad_dial_v2 := zwp_tablet_pad_dial_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_dial_v2, size_of(zwp_tablet_pad_dial_v2))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, description)
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_dial_v2@", zwp_tablet_pad_dial_v2, ".set_feedback:", " description=", description, " serial=", serial)
-	return
-}
-zwp_tablet_pad_dial_v2_destroy :: proc(connection: ^Connection, zwp_tablet_pad_dial_v2: Zwp_Tablet_Pad_Dial_V2) {
-	_size: u16 = 8
-	zwp_tablet_pad_dial_v2 := zwp_tablet_pad_dial_v2
-	_buffer_write_ptr(&connection.buffer_out, &zwp_tablet_pad_dial_v2, size_of(zwp_tablet_pad_dial_v2))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> zwp_tablet_pad_dial_v2@", zwp_tablet_pad_dial_v2, ".destroy:")
-	return
-}
-wp_viewporter_destroy :: proc(connection: ^Connection, wp_viewporter: Wp_Viewporter) {
-	_size: u16 = 8
-	wp_viewporter := wp_viewporter
-	_buffer_write_ptr(&connection.buffer_out, &wp_viewporter, size_of(wp_viewporter))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_viewporter@", wp_viewporter, ".destroy:")
-	return
-}
-wp_viewporter_get_viewport :: proc(connection: ^Connection, wp_viewporter: Wp_Viewporter, surface: Surface) -> (id: Wp_Viewport) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_viewporter := wp_viewporter
-	_buffer_write_ptr(&connection.buffer_out, &wp_viewporter, size_of(wp_viewporter))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Viewport)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_viewporter@", wp_viewporter, ".get_viewport:", " id=", id, " surface=", surface)
-	return
-}
-wp_viewport_destroy :: proc(connection: ^Connection, wp_viewport: Wp_Viewport) {
-	_size: u16 = 8
-	wp_viewport := wp_viewport
-	_buffer_write_ptr(&connection.buffer_out, &wp_viewport, size_of(wp_viewport))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_viewport@", wp_viewport, ".destroy:")
-	return
-}
-wp_viewport_set_source :: proc(connection: ^Connection, wp_viewport: Wp_Viewport, x: f64, y: f64, width: f64, height: f64) {
-	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	wp_viewport := wp_viewport
-	_buffer_write_ptr(&connection.buffer_out, &wp_viewport, size_of(wp_viewport))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_viewport@", wp_viewport, ".set_source:", " x=", x, " y=", y, " width=", width, " height=", height)
-	return
-}
-wp_viewport_set_destination :: proc(connection: ^Connection, wp_viewport: Wp_Viewport, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(width) + size_of(height)
-	wp_viewport := wp_viewport
-	_buffer_write_ptr(&connection.buffer_out, &wp_viewport, size_of(wp_viewport))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_viewport@", wp_viewport, ".set_destination:", " width=", width, " height=", height)
-	return
-}
-xdg_wm_base_destroy :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base) {
-	_size: u16 = 8
-	xdg_wm_base := xdg_wm_base
-	_buffer_write_ptr(&connection.buffer_out, &xdg_wm_base, size_of(xdg_wm_base))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".destroy:")
-	return
-}
-xdg_wm_base_create_positioner :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base) -> (id: Xdg_Positioner) {
-	_size: u16 = 8 + size_of(id)
-	xdg_wm_base := xdg_wm_base
-	_buffer_write_ptr(&connection.buffer_out, &xdg_wm_base, size_of(xdg_wm_base))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xdg_Positioner)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".create_positioner:", " id=", id)
-	return
-}
-xdg_wm_base_get_xdg_surface :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base, surface: Surface) -> (id: Xdg_Surface) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	xdg_wm_base := xdg_wm_base
-	_buffer_write_ptr(&connection.buffer_out, &xdg_wm_base, size_of(xdg_wm_base))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xdg_Surface)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".get_xdg_surface:", " id=", id, " surface=", surface)
-	return
-}
-xdg_wm_base_pong :: proc(connection: ^Connection, xdg_wm_base: Xdg_Wm_Base, serial: u32) {
-	_size: u16 = 8 + size_of(serial)
-	xdg_wm_base := xdg_wm_base
-	_buffer_write_ptr(&connection.buffer_out, &xdg_wm_base, size_of(xdg_wm_base))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_wm_base@", xdg_wm_base, ".pong:", " serial=", serial)
-	return
-}
-xdg_positioner_destroy :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner) {
-	_size: u16 = 8
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".destroy:")
-	return
-}
-xdg_positioner_set_size :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(width) + size_of(height)
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_size:", " width=", width, " height=", height)
-	return
-}
-xdg_positioner_set_anchor_rect :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, x: i32, y: i32, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_anchor_rect:", " x=", x, " y=", y, " width=", width, " height=", height)
-	return
-}
-xdg_positioner_set_anchor :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, anchor: Xdg_Positioner_Anchor) {
-	_size: u16 = 8 + size_of(anchor)
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	anchor := anchor
-	_buffer_write_ptr(&connection.buffer_out, &anchor, size_of(anchor))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_anchor:", " anchor=", anchor)
-	return
-}
-xdg_positioner_set_gravity :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, gravity: Xdg_Positioner_Gravity) {
-	_size: u16 = 8 + size_of(gravity)
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	gravity := gravity
-	_buffer_write_ptr(&connection.buffer_out, &gravity, size_of(gravity))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_gravity:", " gravity=", gravity)
-	return
-}
-xdg_positioner_set_constraint_adjustment :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, constraint_adjustment: Xdg_Positioner_Constraint_Adjustment) {
-	_size: u16 = 8 + size_of(constraint_adjustment)
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 5
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	constraint_adjustment := constraint_adjustment
-	_buffer_write_ptr(&connection.buffer_out, &constraint_adjustment, size_of(constraint_adjustment))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_constraint_adjustment:", " constraint_adjustment=", constraint_adjustment)
-	return
-}
-xdg_positioner_set_offset :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, x: i32, y: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y)
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 6
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_offset:", " x=", x, " y=", y)
-	return
-}
-xdg_positioner_set_reactive :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner) {
-	_size: u16 = 8
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 7
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_reactive:")
-	return
-}
-xdg_positioner_set_parent_size :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, parent_width: i32, parent_height: i32) {
-	_size: u16 = 8 + size_of(parent_width) + size_of(parent_height)
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 8
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	parent_width := parent_width
-	_buffer_write_ptr(&connection.buffer_out, &parent_width, size_of(parent_width))
-	parent_height := parent_height
-	_buffer_write_ptr(&connection.buffer_out, &parent_height, size_of(parent_height))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_parent_size:", " parent_width=", parent_width, " parent_height=", parent_height)
-	return
-}
-xdg_positioner_set_parent_configure :: proc(connection: ^Connection, xdg_positioner: Xdg_Positioner, serial: u32) {
-	_size: u16 = 8 + size_of(serial)
-	xdg_positioner := xdg_positioner
-	_buffer_write_ptr(&connection.buffer_out, &xdg_positioner, size_of(xdg_positioner))
-	opcode: u16 = 9
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_positioner@", xdg_positioner, ".set_parent_configure:", " serial=", serial)
-	return
-}
-xdg_surface_destroy :: proc(connection: ^Connection, xdg_surface: Xdg_Surface) {
-	_size: u16 = 8
-	xdg_surface := xdg_surface
-	_buffer_write_ptr(&connection.buffer_out, &xdg_surface, size_of(xdg_surface))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_surface@", xdg_surface, ".destroy:")
-	return
-}
-xdg_surface_get_toplevel :: proc(connection: ^Connection, xdg_surface: Xdg_Surface) -> (id: Xdg_Toplevel) {
-	_size: u16 = 8 + size_of(id)
-	xdg_surface := xdg_surface
-	_buffer_write_ptr(&connection.buffer_out, &xdg_surface, size_of(xdg_surface))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xdg_Toplevel)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_surface@", xdg_surface, ".get_toplevel:", " id=", id)
-	return
-}
-xdg_surface_get_popup :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, parent: Xdg_Surface, positioner: Xdg_Positioner) -> (id: Xdg_Popup) {
-	_size: u16 = 8 + size_of(id) + size_of(parent) + size_of(positioner)
-	xdg_surface := xdg_surface
-	_buffer_write_ptr(&connection.buffer_out, &xdg_surface, size_of(xdg_surface))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xdg_Popup)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	parent := parent
-	_buffer_write_ptr(&connection.buffer_out, &parent, size_of(parent))
-	positioner := positioner
-	_buffer_write_ptr(&connection.buffer_out, &positioner, size_of(positioner))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_surface@", xdg_surface, ".get_popup:", " id=", id, " parent=", parent, " positioner=", positioner)
-	return
-}
-xdg_surface_set_window_geometry :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, x: i32, y: i32, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	xdg_surface := xdg_surface
-	_buffer_write_ptr(&connection.buffer_out, &xdg_surface, size_of(xdg_surface))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_surface@", xdg_surface, ".set_window_geometry:", " x=", x, " y=", y, " width=", width, " height=", height)
-	return
-}
-xdg_surface_ack_configure :: proc(connection: ^Connection, xdg_surface: Xdg_Surface, serial: u32) {
-	_size: u16 = 8 + size_of(serial)
-	xdg_surface := xdg_surface
-	_buffer_write_ptr(&connection.buffer_out, &xdg_surface, size_of(xdg_surface))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_surface@", xdg_surface, ".ack_configure:", " serial=", serial)
-	return
-}
-xdg_toplevel_destroy :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
-	_size: u16 = 8
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".destroy:")
-	return
-}
-xdg_toplevel_set_parent :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, parent: Xdg_Toplevel) {
-	_size: u16 = 8 + size_of(parent)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	parent := parent
-	_buffer_write_ptr(&connection.buffer_out, &parent, size_of(parent))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_parent:", " parent=", parent)
-	return
-}
-xdg_toplevel_set_title :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, title: string) {
-	_size: u16 = 8 + 4 + u16((len(title) + 1 + 3) & -4)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, title)
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_title:", " title=", title)
-	return
-}
-xdg_toplevel_set_app_id :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, app_id: string) {
-	_size: u16 = 8 + 4 + u16((len(app_id) + 1 + 3) & -4)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, app_id)
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_app_id:", " app_id=", app_id)
-	return
-}
-xdg_toplevel_show_window_menu :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32, x: i32, y: i32) {
-	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(x) + size_of(y)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".show_window_menu:", " seat=", seat, " serial=", serial, " x=", x, " y=", y)
-	return
-}
-xdg_toplevel_move :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32) {
-	_size: u16 = 8 + size_of(seat) + size_of(serial)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 5
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".move:", " seat=", seat, " serial=", serial)
-	return
-}
-xdg_toplevel_resize :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, seat: Seat, serial: u32, edges: Xdg_Toplevel_Resize_Edge) {
-	_size: u16 = 8 + size_of(seat) + size_of(serial) + size_of(edges)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 6
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	edges := edges
-	_buffer_write_ptr(&connection.buffer_out, &edges, size_of(edges))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".resize:", " seat=", seat, " serial=", serial, " edges=", edges)
-	return
-}
-xdg_toplevel_set_max_size :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(width) + size_of(height)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 7
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_max_size:", " width=", width, " height=", height)
-	return
-}
-xdg_toplevel_set_min_size :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(width) + size_of(height)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 8
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_min_size:", " width=", width, " height=", height)
-	return
-}
-xdg_toplevel_set_maximized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
-	_size: u16 = 8
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 9
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_maximized:")
-	return
-}
-xdg_toplevel_unset_maximized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
-	_size: u16 = 8
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 10
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".unset_maximized:")
-	return
-}
-xdg_toplevel_set_fullscreen :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel, output: Output) {
-	_size: u16 = 8 + size_of(output)
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 11
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	output := output
-	_buffer_write_ptr(&connection.buffer_out, &output, size_of(output))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_fullscreen:", " output=", output)
-	return
-}
-xdg_toplevel_unset_fullscreen :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
-	_size: u16 = 8
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 12
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".unset_fullscreen:")
-	return
-}
-xdg_toplevel_set_minimized :: proc(connection: ^Connection, xdg_toplevel: Xdg_Toplevel) {
-	_size: u16 = 8
-	xdg_toplevel := xdg_toplevel
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel, size_of(xdg_toplevel))
-	opcode: u16 = 13
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel@", xdg_toplevel, ".set_minimized:")
-	return
-}
-xdg_popup_destroy :: proc(connection: ^Connection, xdg_popup: Xdg_Popup) {
-	_size: u16 = 8
-	xdg_popup := xdg_popup
-	_buffer_write_ptr(&connection.buffer_out, &xdg_popup, size_of(xdg_popup))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_popup@", xdg_popup, ".destroy:")
-	return
-}
-xdg_popup_grab :: proc(connection: ^Connection, xdg_popup: Xdg_Popup, seat: Seat, serial: u32) {
-	_size: u16 = 8 + size_of(seat) + size_of(serial)
-	xdg_popup := xdg_popup
-	_buffer_write_ptr(&connection.buffer_out, &xdg_popup, size_of(xdg_popup))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_popup@", xdg_popup, ".grab:", " seat=", seat, " serial=", serial)
-	return
-}
-xdg_popup_reposition :: proc(connection: ^Connection, xdg_popup: Xdg_Popup, positioner: Xdg_Positioner, token: u32) {
-	_size: u16 = 8 + size_of(positioner) + size_of(token)
-	xdg_popup := xdg_popup
-	_buffer_write_ptr(&connection.buffer_out, &xdg_popup, size_of(xdg_popup))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	positioner := positioner
-	_buffer_write_ptr(&connection.buffer_out, &positioner, size_of(positioner))
-	token := token
-	_buffer_write_ptr(&connection.buffer_out, &token, size_of(token))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_popup@", xdg_popup, ".reposition:", " positioner=", positioner, " token=", token)
-	return
-}
-wp_alpha_modifier_v1_destroy :: proc(connection: ^Connection, wp_alpha_modifier_v1: Wp_Alpha_Modifier_V1) {
-	_size: u16 = 8
-	wp_alpha_modifier_v1 := wp_alpha_modifier_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_alpha_modifier_v1, size_of(wp_alpha_modifier_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_alpha_modifier_v1@", wp_alpha_modifier_v1, ".destroy:")
-	return
-}
-wp_alpha_modifier_v1_get_surface :: proc(connection: ^Connection, wp_alpha_modifier_v1: Wp_Alpha_Modifier_V1, surface: Surface) -> (id: Wp_Alpha_Modifier_Surface_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_alpha_modifier_v1 := wp_alpha_modifier_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_alpha_modifier_v1, size_of(wp_alpha_modifier_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Alpha_Modifier_Surface_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_alpha_modifier_v1@", wp_alpha_modifier_v1, ".get_surface:", " id=", id, " surface=", surface)
-	return
-}
-wp_alpha_modifier_surface_v1_destroy :: proc(connection: ^Connection, wp_alpha_modifier_surface_v1: Wp_Alpha_Modifier_Surface_V1) {
-	_size: u16 = 8
-	wp_alpha_modifier_surface_v1 := wp_alpha_modifier_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_alpha_modifier_surface_v1, size_of(wp_alpha_modifier_surface_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_alpha_modifier_surface_v1@", wp_alpha_modifier_surface_v1, ".destroy:")
-	return
-}
-wp_alpha_modifier_surface_v1_set_multiplier :: proc(connection: ^Connection, wp_alpha_modifier_surface_v1: Wp_Alpha_Modifier_Surface_V1, factor: u32) {
-	_size: u16 = 8 + size_of(factor)
-	wp_alpha_modifier_surface_v1 := wp_alpha_modifier_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_alpha_modifier_surface_v1, size_of(wp_alpha_modifier_surface_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	factor := factor
-	_buffer_write_ptr(&connection.buffer_out, &factor, size_of(factor))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_alpha_modifier_surface_v1@", wp_alpha_modifier_surface_v1, ".set_multiplier:", " factor=", factor)
-	return
-}
-wp_color_manager_v1_destroy :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) {
-	_size: u16 = 8
-	wp_color_manager_v1 := wp_color_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_manager_v1, size_of(wp_color_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".destroy:")
-	return
-}
-wp_color_manager_v1_get_output :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, output: Output) -> (id: Wp_Color_Management_Output_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(output)
-	wp_color_manager_v1 := wp_color_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_manager_v1, size_of(wp_color_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Color_Management_Output_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	output := output
-	_buffer_write_ptr(&connection.buffer_out, &output, size_of(output))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_output:", " id=", id, " output=", output)
-	return
-}
-wp_color_manager_v1_get_surface :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, surface: Surface) -> (id: Wp_Color_Management_Surface_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_color_manager_v1 := wp_color_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_manager_v1, size_of(wp_color_manager_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Color_Management_Surface_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
-	return
-}
-wp_color_manager_v1_get_surface_feedback :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, surface: Surface) -> (id: Wp_Color_Management_Surface_Feedback_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_color_manager_v1 := wp_color_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_manager_v1, size_of(wp_color_manager_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Color_Management_Surface_Feedback_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_surface_feedback:", " id=", id, " surface=", surface)
-	return
-}
-wp_color_manager_v1_create_icc_creator :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (obj: Wp_Image_Description_Creator_Icc_V1) {
-	_size: u16 = 8 + size_of(obj)
-	wp_color_manager_v1 := wp_color_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_manager_v1, size_of(wp_color_manager_v1))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	obj = auto_cast generate_id(connection, .Wp_Image_Description_Creator_Icc_V1)
-	_buffer_write_ptr(&connection.buffer_out, &obj, size_of(obj))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_icc_creator:", " obj=", obj)
-	return
-}
-wp_color_manager_v1_create_parametric_creator :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (obj: Wp_Image_Description_Creator_Params_V1) {
-	_size: u16 = 8 + size_of(obj)
-	wp_color_manager_v1 := wp_color_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_manager_v1, size_of(wp_color_manager_v1))
-	opcode: u16 = 5
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	obj = auto_cast generate_id(connection, .Wp_Image_Description_Creator_Params_V1)
-	_buffer_write_ptr(&connection.buffer_out, &obj, size_of(obj))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_parametric_creator:", " obj=", obj)
-	return
-}
-wp_color_manager_v1_create_windows_scrgb :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1) -> (image_description: Wp_Image_Description_V1) {
-	_size: u16 = 8 + size_of(image_description)
-	wp_color_manager_v1 := wp_color_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_manager_v1, size_of(wp_color_manager_v1))
-	opcode: u16 = 6
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	_buffer_write_ptr(&connection.buffer_out, &image_description, size_of(image_description))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".create_windows_scrgb:", " image_description=", image_description)
-	return
-}
-wp_color_manager_v1_get_image_description :: proc(connection: ^Connection, wp_color_manager_v1: Wp_Color_Manager_V1, reference: Wp_Image_Description_Reference_V1) -> (image_description: Wp_Image_Description_V1) {
-	_size: u16 = 8 + size_of(image_description) + size_of(reference)
-	wp_color_manager_v1 := wp_color_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_manager_v1, size_of(wp_color_manager_v1))
-	opcode: u16 = 7
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	_buffer_write_ptr(&connection.buffer_out, &image_description, size_of(image_description))
-	reference := reference
-	_buffer_write_ptr(&connection.buffer_out, &reference, size_of(reference))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_manager_v1@", wp_color_manager_v1, ".get_image_description:", " image_description=", image_description, " reference=", reference)
-	return
-}
-wp_color_management_output_v1_destroy :: proc(connection: ^Connection, wp_color_management_output_v1: Wp_Color_Management_Output_V1) {
-	_size: u16 = 8
-	wp_color_management_output_v1 := wp_color_management_output_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_management_output_v1, size_of(wp_color_management_output_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_management_output_v1@", wp_color_management_output_v1, ".destroy:")
-	return
-}
-wp_color_management_output_v1_get_image_description :: proc(connection: ^Connection, wp_color_management_output_v1: Wp_Color_Management_Output_V1) -> (image_description: Wp_Image_Description_V1) {
-	_size: u16 = 8 + size_of(image_description)
-	wp_color_management_output_v1 := wp_color_management_output_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_management_output_v1, size_of(wp_color_management_output_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	_buffer_write_ptr(&connection.buffer_out, &image_description, size_of(image_description))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_management_output_v1@", wp_color_management_output_v1, ".get_image_description:", " image_description=", image_description)
-	return
-}
-wp_color_management_surface_v1_destroy :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1) {
-	_size: u16 = 8
-	wp_color_management_surface_v1 := wp_color_management_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".destroy:")
-	return
-}
-wp_color_management_surface_v1_set_image_description :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1, image_description: Wp_Image_Description_V1, render_intent: Wp_Color_Manager_V1_Render_Intent) {
-	_size: u16 = 8 + size_of(image_description) + size_of(render_intent)
-	wp_color_management_surface_v1 := wp_color_management_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	image_description := image_description
-	_buffer_write_ptr(&connection.buffer_out, &image_description, size_of(image_description))
-	render_intent := render_intent
-	_buffer_write_ptr(&connection.buffer_out, &render_intent, size_of(render_intent))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".set_image_description:", " image_description=", image_description, " render_intent=", render_intent)
-	return
-}
-wp_color_management_surface_v1_unset_image_description :: proc(connection: ^Connection, wp_color_management_surface_v1: Wp_Color_Management_Surface_V1) {
-	_size: u16 = 8
-	wp_color_management_surface_v1 := wp_color_management_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_management_surface_v1, size_of(wp_color_management_surface_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_management_surface_v1@", wp_color_management_surface_v1, ".unset_image_description:")
-	return
-}
-wp_color_management_surface_feedback_v1_destroy :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) {
-	_size: u16 = 8
-	wp_color_management_surface_feedback_v1 := wp_color_management_surface_feedback_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".destroy:")
-	return
-}
-wp_color_management_surface_feedback_v1_get_preferred :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) -> (image_description: Wp_Image_Description_V1) {
-	_size: u16 = 8 + size_of(image_description)
-	wp_color_management_surface_feedback_v1 := wp_color_management_surface_feedback_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	_buffer_write_ptr(&connection.buffer_out, &image_description, size_of(image_description))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".get_preferred:", " image_description=", image_description)
-	return
-}
-wp_color_management_surface_feedback_v1_get_preferred_parametric :: proc(connection: ^Connection, wp_color_management_surface_feedback_v1: Wp_Color_Management_Surface_Feedback_V1) -> (image_description: Wp_Image_Description_V1) {
-	_size: u16 = 8 + size_of(image_description)
-	wp_color_management_surface_feedback_v1 := wp_color_management_surface_feedback_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_management_surface_feedback_v1, size_of(wp_color_management_surface_feedback_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	_buffer_write_ptr(&connection.buffer_out, &image_description, size_of(image_description))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_management_surface_feedback_v1@", wp_color_management_surface_feedback_v1, ".get_preferred_parametric:", " image_description=", image_description)
-	return
-}
-wp_image_description_creator_icc_v1_create :: proc(connection: ^Connection, wp_image_description_creator_icc_v1: Wp_Image_Description_Creator_Icc_V1) -> (image_description: Wp_Image_Description_V1) {
-	_size: u16 = 8 + size_of(image_description)
-	wp_image_description_creator_icc_v1 := wp_image_description_creator_icc_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_icc_v1, size_of(wp_image_description_creator_icc_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	_buffer_write_ptr(&connection.buffer_out, &image_description, size_of(image_description))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_icc_v1@", wp_image_description_creator_icc_v1, ".create:", " image_description=", image_description)
-	return
-}
-wp_image_description_creator_icc_v1_set_icc_file :: proc(connection: ^Connection, wp_image_description_creator_icc_v1: Wp_Image_Description_Creator_Icc_V1, icc_profile: Fd, offset: u32, length: u32) {
-	_size: u16 = 8 + size_of(offset) + size_of(length)
-	wp_image_description_creator_icc_v1 := wp_image_description_creator_icc_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_icc_v1, size_of(wp_image_description_creator_icc_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	append(&connection.fds_out, icc_profile)
-	offset := offset
-	_buffer_write_ptr(&connection.buffer_out, &offset, size_of(offset))
-	length := length
-	_buffer_write_ptr(&connection.buffer_out, &length, size_of(length))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_icc_v1@", wp_image_description_creator_icc_v1, ".set_icc_file:", " icc_profile=", icc_profile, " offset=", offset, " length=", length)
-	return
-}
-wp_image_description_creator_params_v1_create :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1) -> (image_description: Wp_Image_Description_V1) {
-	_size: u16 = 8 + size_of(image_description)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	image_description = auto_cast generate_id(connection, .Wp_Image_Description_V1)
-	_buffer_write_ptr(&connection.buffer_out, &image_description, size_of(image_description))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".create:", " image_description=", image_description)
-	return
-}
-wp_image_description_creator_params_v1_set_tf_named :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, tf: Wp_Color_Manager_V1_Transfer_Function) {
-	_size: u16 = 8 + size_of(tf)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	tf := tf
-	_buffer_write_ptr(&connection.buffer_out, &tf, size_of(tf))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_tf_named:", " tf=", tf)
-	return
-}
-wp_image_description_creator_params_v1_set_tf_power :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, eexp: u32) {
-	_size: u16 = 8 + size_of(eexp)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	eexp := eexp
-	_buffer_write_ptr(&connection.buffer_out, &eexp, size_of(eexp))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_tf_power:", " eexp=", eexp)
-	return
-}
-wp_image_description_creator_params_v1_set_primaries_named :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, primaries: Wp_Color_Manager_V1_Primaries) {
-	_size: u16 = 8 + size_of(primaries)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	primaries := primaries
-	_buffer_write_ptr(&connection.buffer_out, &primaries, size_of(primaries))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_primaries_named:", " primaries=", primaries)
-	return
-}
-wp_image_description_creator_params_v1_set_primaries :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, r_x: i32, r_y: i32, g_x: i32, g_y: i32, b_x: i32, b_y: i32, w_x: i32, w_y: i32) {
-	_size: u16 = 8 + size_of(r_x) + size_of(r_y) + size_of(g_x) + size_of(g_y) + size_of(b_x) + size_of(b_y) + size_of(w_x) + size_of(w_y)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	r_x := r_x
-	_buffer_write_ptr(&connection.buffer_out, &r_x, size_of(r_x))
-	r_y := r_y
-	_buffer_write_ptr(&connection.buffer_out, &r_y, size_of(r_y))
-	g_x := g_x
-	_buffer_write_ptr(&connection.buffer_out, &g_x, size_of(g_x))
-	g_y := g_y
-	_buffer_write_ptr(&connection.buffer_out, &g_y, size_of(g_y))
-	b_x := b_x
-	_buffer_write_ptr(&connection.buffer_out, &b_x, size_of(b_x))
-	b_y := b_y
-	_buffer_write_ptr(&connection.buffer_out, &b_y, size_of(b_y))
-	w_x := w_x
-	_buffer_write_ptr(&connection.buffer_out, &w_x, size_of(w_x))
-	w_y := w_y
-	_buffer_write_ptr(&connection.buffer_out, &w_y, size_of(w_y))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_primaries:", " r_x=", r_x, " r_y=", r_y, " g_x=", g_x, " g_y=", g_y, " b_x=", b_x, " b_y=", b_y, " w_x=", w_x, " w_y=", w_y)
-	return
-}
-wp_image_description_creator_params_v1_set_luminances :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, min_lum: u32, max_lum: u32, reference_lum: u32) {
-	_size: u16 = 8 + size_of(min_lum) + size_of(max_lum) + size_of(reference_lum)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 5
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	min_lum := min_lum
-	_buffer_write_ptr(&connection.buffer_out, &min_lum, size_of(min_lum))
-	max_lum := max_lum
-	_buffer_write_ptr(&connection.buffer_out, &max_lum, size_of(max_lum))
-	reference_lum := reference_lum
-	_buffer_write_ptr(&connection.buffer_out, &reference_lum, size_of(reference_lum))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_luminances:", " min_lum=", min_lum, " max_lum=", max_lum, " reference_lum=", reference_lum)
-	return
-}
-wp_image_description_creator_params_v1_set_mastering_display_primaries :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, r_x: i32, r_y: i32, g_x: i32, g_y: i32, b_x: i32, b_y: i32, w_x: i32, w_y: i32) {
-	_size: u16 = 8 + size_of(r_x) + size_of(r_y) + size_of(g_x) + size_of(g_y) + size_of(b_x) + size_of(b_y) + size_of(w_x) + size_of(w_y)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 6
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	r_x := r_x
-	_buffer_write_ptr(&connection.buffer_out, &r_x, size_of(r_x))
-	r_y := r_y
-	_buffer_write_ptr(&connection.buffer_out, &r_y, size_of(r_y))
-	g_x := g_x
-	_buffer_write_ptr(&connection.buffer_out, &g_x, size_of(g_x))
-	g_y := g_y
-	_buffer_write_ptr(&connection.buffer_out, &g_y, size_of(g_y))
-	b_x := b_x
-	_buffer_write_ptr(&connection.buffer_out, &b_x, size_of(b_x))
-	b_y := b_y
-	_buffer_write_ptr(&connection.buffer_out, &b_y, size_of(b_y))
-	w_x := w_x
-	_buffer_write_ptr(&connection.buffer_out, &w_x, size_of(w_x))
-	w_y := w_y
-	_buffer_write_ptr(&connection.buffer_out, &w_y, size_of(w_y))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_mastering_display_primaries:", " r_x=", r_x, " r_y=", r_y, " g_x=", g_x, " g_y=", g_y, " b_x=", b_x, " b_y=", b_y, " w_x=", w_x, " w_y=", w_y)
-	return
-}
-wp_image_description_creator_params_v1_set_mastering_luminance :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, min_lum: u32, max_lum: u32) {
-	_size: u16 = 8 + size_of(min_lum) + size_of(max_lum)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 7
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	min_lum := min_lum
-	_buffer_write_ptr(&connection.buffer_out, &min_lum, size_of(min_lum))
-	max_lum := max_lum
-	_buffer_write_ptr(&connection.buffer_out, &max_lum, size_of(max_lum))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_mastering_luminance:", " min_lum=", min_lum, " max_lum=", max_lum)
-	return
-}
-wp_image_description_creator_params_v1_set_max_cll :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, max_cll: u32) {
-	_size: u16 = 8 + size_of(max_cll)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 8
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	max_cll := max_cll
-	_buffer_write_ptr(&connection.buffer_out, &max_cll, size_of(max_cll))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_max_cll:", " max_cll=", max_cll)
-	return
-}
-wp_image_description_creator_params_v1_set_max_fall :: proc(connection: ^Connection, wp_image_description_creator_params_v1: Wp_Image_Description_Creator_Params_V1, max_fall: u32) {
-	_size: u16 = 8 + size_of(max_fall)
-	wp_image_description_creator_params_v1 := wp_image_description_creator_params_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_creator_params_v1, size_of(wp_image_description_creator_params_v1))
-	opcode: u16 = 9
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	max_fall := max_fall
-	_buffer_write_ptr(&connection.buffer_out, &max_fall, size_of(max_fall))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_creator_params_v1@", wp_image_description_creator_params_v1, ".set_max_fall:", " max_fall=", max_fall)
-	return
-}
-wp_image_description_v1_destroy :: proc(connection: ^Connection, wp_image_description_v1: Wp_Image_Description_V1) {
-	_size: u16 = 8
-	wp_image_description_v1 := wp_image_description_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_v1, size_of(wp_image_description_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_v1@", wp_image_description_v1, ".destroy:")
-	return
-}
-wp_image_description_v1_get_information :: proc(connection: ^Connection, wp_image_description_v1: Wp_Image_Description_V1) -> (information: Wp_Image_Description_Info_V1) {
-	_size: u16 = 8 + size_of(information)
-	wp_image_description_v1 := wp_image_description_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_v1, size_of(wp_image_description_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	information = auto_cast generate_id(connection, .Wp_Image_Description_Info_V1)
-	_buffer_write_ptr(&connection.buffer_out, &information, size_of(information))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_v1@", wp_image_description_v1, ".get_information:", " information=", information)
-	return
-}
-wp_image_description_reference_v1_destroy :: proc(connection: ^Connection, wp_image_description_reference_v1: Wp_Image_Description_Reference_V1) {
-	_size: u16 = 8
-	wp_image_description_reference_v1 := wp_image_description_reference_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_image_description_reference_v1, size_of(wp_image_description_reference_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_image_description_reference_v1@", wp_image_description_reference_v1, ".destroy:")
-	return
-}
-wp_color_representation_manager_v1_destroy :: proc(connection: ^Connection, wp_color_representation_manager_v1: Wp_Color_Representation_Manager_V1) {
-	_size: u16 = 8
-	wp_color_representation_manager_v1 := wp_color_representation_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_representation_manager_v1, size_of(wp_color_representation_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_representation_manager_v1@", wp_color_representation_manager_v1, ".destroy:")
-	return
-}
-wp_color_representation_manager_v1_get_surface :: proc(connection: ^Connection, wp_color_representation_manager_v1: Wp_Color_Representation_Manager_V1, surface: Surface) -> (id: Wp_Color_Representation_Surface_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_color_representation_manager_v1 := wp_color_representation_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_representation_manager_v1, size_of(wp_color_representation_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Color_Representation_Surface_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_representation_manager_v1@", wp_color_representation_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
-	return
-}
-wp_color_representation_surface_v1_destroy :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1) {
-	_size: u16 = 8
-	wp_color_representation_surface_v1 := wp_color_representation_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".destroy:")
-	return
-}
-wp_color_representation_surface_v1_set_alpha_mode :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, alpha_mode: Wp_Color_Representation_Surface_V1_Alpha_Mode) {
-	_size: u16 = 8 + size_of(alpha_mode)
-	wp_color_representation_surface_v1 := wp_color_representation_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	alpha_mode := alpha_mode
-	_buffer_write_ptr(&connection.buffer_out, &alpha_mode, size_of(alpha_mode))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_alpha_mode:", " alpha_mode=", alpha_mode)
-	return
-}
-wp_color_representation_surface_v1_set_coefficients_and_range :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, coefficients: Wp_Color_Representation_Surface_V1_Coefficients, range: Wp_Color_Representation_Surface_V1_Range) {
-	_size: u16 = 8 + size_of(coefficients) + size_of(range)
-	wp_color_representation_surface_v1 := wp_color_representation_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	coefficients := coefficients
-	_buffer_write_ptr(&connection.buffer_out, &coefficients, size_of(coefficients))
-	range := range
-	_buffer_write_ptr(&connection.buffer_out, &range, size_of(range))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_coefficients_and_range:", " coefficients=", coefficients, " range=", range)
-	return
-}
-wp_color_representation_surface_v1_set_chroma_location :: proc(connection: ^Connection, wp_color_representation_surface_v1: Wp_Color_Representation_Surface_V1, chroma_location: Wp_Color_Representation_Surface_V1_Chroma_Location) {
-	_size: u16 = 8 + size_of(chroma_location)
-	wp_color_representation_surface_v1 := wp_color_representation_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_color_representation_surface_v1, size_of(wp_color_representation_surface_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	chroma_location := chroma_location
-	_buffer_write_ptr(&connection.buffer_out, &chroma_location, size_of(chroma_location))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_color_representation_surface_v1@", wp_color_representation_surface_v1, ".set_chroma_location:", " chroma_location=", chroma_location)
-	return
-}
-wp_commit_timing_manager_v1_destroy :: proc(connection: ^Connection, wp_commit_timing_manager_v1: Wp_Commit_Timing_Manager_V1) {
-	_size: u16 = 8
-	wp_commit_timing_manager_v1 := wp_commit_timing_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_commit_timing_manager_v1, size_of(wp_commit_timing_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_commit_timing_manager_v1@", wp_commit_timing_manager_v1, ".destroy:")
-	return
-}
-wp_commit_timing_manager_v1_get_timer :: proc(connection: ^Connection, wp_commit_timing_manager_v1: Wp_Commit_Timing_Manager_V1, surface: Surface) -> (id: Wp_Commit_Timer_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_commit_timing_manager_v1 := wp_commit_timing_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_commit_timing_manager_v1, size_of(wp_commit_timing_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Commit_Timer_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_commit_timing_manager_v1@", wp_commit_timing_manager_v1, ".get_timer:", " id=", id, " surface=", surface)
-	return
-}
-wp_commit_timer_v1_set_timestamp :: proc(connection: ^Connection, wp_commit_timer_v1: Wp_Commit_Timer_V1, tv_sec_hi: u32, tv_sec_lo: u32, tv_nsec: u32) {
-	_size: u16 = 8 + size_of(tv_sec_hi) + size_of(tv_sec_lo) + size_of(tv_nsec)
-	wp_commit_timer_v1 := wp_commit_timer_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_commit_timer_v1, size_of(wp_commit_timer_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	tv_sec_hi := tv_sec_hi
-	_buffer_write_ptr(&connection.buffer_out, &tv_sec_hi, size_of(tv_sec_hi))
-	tv_sec_lo := tv_sec_lo
-	_buffer_write_ptr(&connection.buffer_out, &tv_sec_lo, size_of(tv_sec_lo))
-	tv_nsec := tv_nsec
-	_buffer_write_ptr(&connection.buffer_out, &tv_nsec, size_of(tv_nsec))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_commit_timer_v1@", wp_commit_timer_v1, ".set_timestamp:", " tv_sec_hi=", tv_sec_hi, " tv_sec_lo=", tv_sec_lo, " tv_nsec=", tv_nsec)
-	return
-}
-wp_commit_timer_v1_destroy :: proc(connection: ^Connection, wp_commit_timer_v1: Wp_Commit_Timer_V1) {
-	_size: u16 = 8
-	wp_commit_timer_v1 := wp_commit_timer_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_commit_timer_v1, size_of(wp_commit_timer_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_commit_timer_v1@", wp_commit_timer_v1, ".destroy:")
-	return
-}
-wp_content_type_manager_v1_destroy :: proc(connection: ^Connection, wp_content_type_manager_v1: Wp_Content_Type_Manager_V1) {
-	_size: u16 = 8
-	wp_content_type_manager_v1 := wp_content_type_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_content_type_manager_v1, size_of(wp_content_type_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_content_type_manager_v1@", wp_content_type_manager_v1, ".destroy:")
-	return
-}
-wp_content_type_manager_v1_get_surface_content_type :: proc(connection: ^Connection, wp_content_type_manager_v1: Wp_Content_Type_Manager_V1, surface: Surface) -> (id: Wp_Content_Type_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_content_type_manager_v1 := wp_content_type_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_content_type_manager_v1, size_of(wp_content_type_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Content_Type_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_content_type_manager_v1@", wp_content_type_manager_v1, ".get_surface_content_type:", " id=", id, " surface=", surface)
-	return
-}
-wp_content_type_v1_destroy :: proc(connection: ^Connection, wp_content_type_v1: Wp_Content_Type_V1) {
-	_size: u16 = 8
-	wp_content_type_v1 := wp_content_type_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_content_type_v1, size_of(wp_content_type_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_content_type_v1@", wp_content_type_v1, ".destroy:")
-	return
-}
-wp_content_type_v1_set_content_type :: proc(connection: ^Connection, wp_content_type_v1: Wp_Content_Type_V1, content_type: Wp_Content_Type_V1_Type) {
-	_size: u16 = 8 + size_of(content_type)
-	wp_content_type_v1 := wp_content_type_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_content_type_v1, size_of(wp_content_type_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	content_type := content_type
-	_buffer_write_ptr(&connection.buffer_out, &content_type, size_of(content_type))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_content_type_v1@", wp_content_type_v1, ".set_content_type:", " content_type=", content_type)
-	return
-}
-wp_cursor_shape_manager_v1_destroy :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1) {
-	_size: u16 = 8
-	wp_cursor_shape_manager_v1 := wp_cursor_shape_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".destroy:")
-	return
-}
-wp_cursor_shape_manager_v1_get_pointer :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1, pointer: Pointer) -> (cursor_shape_device: Wp_Cursor_Shape_Device_V1) {
-	_size: u16 = 8 + size_of(cursor_shape_device) + size_of(pointer)
-	wp_cursor_shape_manager_v1 := wp_cursor_shape_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	cursor_shape_device = auto_cast generate_id(connection, .Wp_Cursor_Shape_Device_V1)
-	_buffer_write_ptr(&connection.buffer_out, &cursor_shape_device, size_of(cursor_shape_device))
-	pointer := pointer
-	_buffer_write_ptr(&connection.buffer_out, &pointer, size_of(pointer))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".get_pointer:", " cursor_shape_device=", cursor_shape_device, " pointer=", pointer)
-	return
-}
-wp_cursor_shape_manager_v1_get_tablet_tool_v2 :: proc(connection: ^Connection, wp_cursor_shape_manager_v1: Wp_Cursor_Shape_Manager_V1, tablet_tool: Zwp_Tablet_Tool_V2) -> (cursor_shape_device: Wp_Cursor_Shape_Device_V1) {
-	_size: u16 = 8 + size_of(cursor_shape_device) + size_of(tablet_tool)
-	wp_cursor_shape_manager_v1 := wp_cursor_shape_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_cursor_shape_manager_v1, size_of(wp_cursor_shape_manager_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	cursor_shape_device = auto_cast generate_id(connection, .Wp_Cursor_Shape_Device_V1)
-	_buffer_write_ptr(&connection.buffer_out, &cursor_shape_device, size_of(cursor_shape_device))
-	tablet_tool := tablet_tool
-	_buffer_write_ptr(&connection.buffer_out, &tablet_tool, size_of(tablet_tool))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_cursor_shape_manager_v1@", wp_cursor_shape_manager_v1, ".get_tablet_tool_v2:", " cursor_shape_device=", cursor_shape_device, " tablet_tool=", tablet_tool)
-	return
-}
-wp_cursor_shape_device_v1_destroy :: proc(connection: ^Connection, wp_cursor_shape_device_v1: Wp_Cursor_Shape_Device_V1) {
-	_size: u16 = 8
-	wp_cursor_shape_device_v1 := wp_cursor_shape_device_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_cursor_shape_device_v1, size_of(wp_cursor_shape_device_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_cursor_shape_device_v1@", wp_cursor_shape_device_v1, ".destroy:")
-	return
-}
-wp_cursor_shape_device_v1_set_shape :: proc(connection: ^Connection, wp_cursor_shape_device_v1: Wp_Cursor_Shape_Device_V1, serial: u32, shape: Wp_Cursor_Shape_Device_V1_Shape) {
-	_size: u16 = 8 + size_of(serial) + size_of(shape)
-	wp_cursor_shape_device_v1 := wp_cursor_shape_device_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_cursor_shape_device_v1, size_of(wp_cursor_shape_device_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	shape := shape
-	_buffer_write_ptr(&connection.buffer_out, &shape, size_of(shape))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_cursor_shape_device_v1@", wp_cursor_shape_device_v1, ".set_shape:", " serial=", serial, " shape=", shape)
-	return
-}
-wp_drm_lease_device_v1_create_lease_request :: proc(connection: ^Connection, wp_drm_lease_device_v1: Wp_Drm_Lease_Device_V1) -> (id: Wp_Drm_Lease_Request_V1) {
-	_size: u16 = 8 + size_of(id)
-	wp_drm_lease_device_v1 := wp_drm_lease_device_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_drm_lease_device_v1, size_of(wp_drm_lease_device_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Drm_Lease_Request_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_drm_lease_device_v1@", wp_drm_lease_device_v1, ".create_lease_request:", " id=", id)
-	return
-}
-wp_drm_lease_device_v1_release :: proc(connection: ^Connection, wp_drm_lease_device_v1: Wp_Drm_Lease_Device_V1) {
-	_size: u16 = 8
-	wp_drm_lease_device_v1 := wp_drm_lease_device_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_drm_lease_device_v1, size_of(wp_drm_lease_device_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_drm_lease_device_v1@", wp_drm_lease_device_v1, ".release:")
-	return
-}
-wp_drm_lease_connector_v1_destroy :: proc(connection: ^Connection, wp_drm_lease_connector_v1: Wp_Drm_Lease_Connector_V1) {
-	_size: u16 = 8
-	wp_drm_lease_connector_v1 := wp_drm_lease_connector_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_drm_lease_connector_v1, size_of(wp_drm_lease_connector_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_drm_lease_connector_v1@", wp_drm_lease_connector_v1, ".destroy:")
-	return
-}
-wp_drm_lease_request_v1_request_connector :: proc(connection: ^Connection, wp_drm_lease_request_v1: Wp_Drm_Lease_Request_V1, connector: Wp_Drm_Lease_Connector_V1) {
-	_size: u16 = 8 + size_of(connector)
-	wp_drm_lease_request_v1 := wp_drm_lease_request_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_drm_lease_request_v1, size_of(wp_drm_lease_request_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	connector := connector
-	_buffer_write_ptr(&connection.buffer_out, &connector, size_of(connector))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_drm_lease_request_v1@", wp_drm_lease_request_v1, ".request_connector:", " connector=", connector)
-	return
-}
-wp_drm_lease_request_v1_submit :: proc(connection: ^Connection, wp_drm_lease_request_v1: Wp_Drm_Lease_Request_V1) -> (id: Wp_Drm_Lease_V1) {
-	_size: u16 = 8 + size_of(id)
-	wp_drm_lease_request_v1 := wp_drm_lease_request_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_drm_lease_request_v1, size_of(wp_drm_lease_request_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Drm_Lease_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_drm_lease_request_v1@", wp_drm_lease_request_v1, ".submit:", " id=", id)
-	return
-}
-wp_drm_lease_v1_destroy :: proc(connection: ^Connection, wp_drm_lease_v1: Wp_Drm_Lease_V1) {
-	_size: u16 = 8
-	wp_drm_lease_v1 := wp_drm_lease_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_drm_lease_v1, size_of(wp_drm_lease_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_drm_lease_v1@", wp_drm_lease_v1, ".destroy:")
-	return
-}
-ext_background_effect_manager_v1_destroy :: proc(connection: ^Connection, ext_background_effect_manager_v1: Ext_Background_Effect_Manager_V1) {
-	_size: u16 = 8
-	ext_background_effect_manager_v1 := ext_background_effect_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_background_effect_manager_v1, size_of(ext_background_effect_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_background_effect_manager_v1@", ext_background_effect_manager_v1, ".destroy:")
-	return
-}
-ext_background_effect_manager_v1_get_background_effect :: proc(connection: ^Connection, ext_background_effect_manager_v1: Ext_Background_Effect_Manager_V1, surface: Surface) -> (id: Ext_Background_Effect_Surface_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	ext_background_effect_manager_v1 := ext_background_effect_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_background_effect_manager_v1, size_of(ext_background_effect_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Ext_Background_Effect_Surface_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_background_effect_manager_v1@", ext_background_effect_manager_v1, ".get_background_effect:", " id=", id, " surface=", surface)
-	return
-}
-ext_background_effect_surface_v1_destroy :: proc(connection: ^Connection, ext_background_effect_surface_v1: Ext_Background_Effect_Surface_V1) {
-	_size: u16 = 8
-	ext_background_effect_surface_v1 := ext_background_effect_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_background_effect_surface_v1, size_of(ext_background_effect_surface_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_background_effect_surface_v1@", ext_background_effect_surface_v1, ".destroy:")
-	return
-}
-ext_background_effect_surface_v1_set_blur_region :: proc(connection: ^Connection, ext_background_effect_surface_v1: Ext_Background_Effect_Surface_V1, region: Region) {
-	_size: u16 = 8 + size_of(region)
-	ext_background_effect_surface_v1 := ext_background_effect_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_background_effect_surface_v1, size_of(ext_background_effect_surface_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	region := region
-	_buffer_write_ptr(&connection.buffer_out, &region, size_of(region))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_background_effect_surface_v1@", ext_background_effect_surface_v1, ".set_blur_region:", " region=", region)
-	return
-}
-ext_data_control_manager_v1_create_data_source :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1) -> (id: Ext_Data_Control_Source_V1) {
-	_size: u16 = 8 + size_of(id)
-	ext_data_control_manager_v1 := ext_data_control_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Ext_Data_Control_Source_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".create_data_source:", " id=", id)
-	return
-}
-ext_data_control_manager_v1_get_data_device :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1, seat: Seat) -> (id: Ext_Data_Control_Device_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(seat)
-	ext_data_control_manager_v1 := ext_data_control_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Ext_Data_Control_Device_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".get_data_device:", " id=", id, " seat=", seat)
-	return
-}
-ext_data_control_manager_v1_destroy :: proc(connection: ^Connection, ext_data_control_manager_v1: Ext_Data_Control_Manager_V1) {
-	_size: u16 = 8
-	ext_data_control_manager_v1 := ext_data_control_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_manager_v1, size_of(ext_data_control_manager_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_manager_v1@", ext_data_control_manager_v1, ".destroy:")
-	return
-}
-ext_data_control_device_v1_set_selection :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1, source: Ext_Data_Control_Source_V1) {
-	_size: u16 = 8 + size_of(source)
-	ext_data_control_device_v1 := ext_data_control_device_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	source := source
-	_buffer_write_ptr(&connection.buffer_out, &source, size_of(source))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".set_selection:", " source=", source)
-	return
-}
-ext_data_control_device_v1_destroy :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1) {
-	_size: u16 = 8
-	ext_data_control_device_v1 := ext_data_control_device_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".destroy:")
-	return
-}
-ext_data_control_device_v1_set_primary_selection :: proc(connection: ^Connection, ext_data_control_device_v1: Ext_Data_Control_Device_V1, source: Ext_Data_Control_Source_V1) {
-	_size: u16 = 8 + size_of(source)
-	ext_data_control_device_v1 := ext_data_control_device_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_device_v1, size_of(ext_data_control_device_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	source := source
-	_buffer_write_ptr(&connection.buffer_out, &source, size_of(source))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_device_v1@", ext_data_control_device_v1, ".set_primary_selection:", " source=", source)
-	return
-}
-ext_data_control_source_v1_offer :: proc(connection: ^Connection, ext_data_control_source_v1: Ext_Data_Control_Source_V1, mime_type: string) {
-	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
-	ext_data_control_source_v1 := ext_data_control_source_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_source_v1, size_of(ext_data_control_source_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, mime_type)
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_source_v1@", ext_data_control_source_v1, ".offer:", " mime_type=", mime_type)
-	return
-}
-ext_data_control_source_v1_destroy :: proc(connection: ^Connection, ext_data_control_source_v1: Ext_Data_Control_Source_V1) {
-	_size: u16 = 8
-	ext_data_control_source_v1 := ext_data_control_source_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_source_v1, size_of(ext_data_control_source_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_source_v1@", ext_data_control_source_v1, ".destroy:")
-	return
-}
-ext_data_control_offer_v1_receive :: proc(connection: ^Connection, ext_data_control_offer_v1: Ext_Data_Control_Offer_V1, mime_type: string, fd: Fd) {
-	_size: u16 = 8 + 4 + u16((len(mime_type) + 1 + 3) & -4)
-	ext_data_control_offer_v1 := ext_data_control_offer_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_offer_v1, size_of(ext_data_control_offer_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, mime_type)
-	append(&connection.fds_out, fd)
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_offer_v1@", ext_data_control_offer_v1, ".receive:", " mime_type=", mime_type, " fd=", fd)
-	return
-}
-ext_data_control_offer_v1_destroy :: proc(connection: ^Connection, ext_data_control_offer_v1: Ext_Data_Control_Offer_V1) {
-	_size: u16 = 8
-	ext_data_control_offer_v1 := ext_data_control_offer_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_data_control_offer_v1, size_of(ext_data_control_offer_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_data_control_offer_v1@", ext_data_control_offer_v1, ".destroy:")
-	return
-}
-ext_foreign_toplevel_list_v1_stop :: proc(connection: ^Connection, ext_foreign_toplevel_list_v1: Ext_Foreign_Toplevel_List_V1) {
-	_size: u16 = 8
-	ext_foreign_toplevel_list_v1 := ext_foreign_toplevel_list_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_foreign_toplevel_list_v1, size_of(ext_foreign_toplevel_list_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_foreign_toplevel_list_v1@", ext_foreign_toplevel_list_v1, ".stop:")
-	return
-}
-ext_foreign_toplevel_list_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_list_v1: Ext_Foreign_Toplevel_List_V1) {
-	_size: u16 = 8
-	ext_foreign_toplevel_list_v1 := ext_foreign_toplevel_list_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_foreign_toplevel_list_v1, size_of(ext_foreign_toplevel_list_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_foreign_toplevel_list_v1@", ext_foreign_toplevel_list_v1, ".destroy:")
-	return
-}
-ext_foreign_toplevel_handle_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_handle_v1: Ext_Foreign_Toplevel_Handle_V1) {
-	_size: u16 = 8
-	ext_foreign_toplevel_handle_v1 := ext_foreign_toplevel_handle_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_foreign_toplevel_handle_v1, size_of(ext_foreign_toplevel_handle_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_foreign_toplevel_handle_v1@", ext_foreign_toplevel_handle_v1, ".destroy:")
-	return
-}
-ext_idle_notifier_v1_destroy :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1) {
-	_size: u16 = 8
-	ext_idle_notifier_v1 := ext_idle_notifier_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".destroy:")
-	return
-}
-ext_idle_notifier_v1_get_idle_notification :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1, timeout: u32, seat: Seat) -> (id: Ext_Idle_Notification_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(timeout) + size_of(seat)
-	ext_idle_notifier_v1 := ext_idle_notifier_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Ext_Idle_Notification_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	timeout := timeout
-	_buffer_write_ptr(&connection.buffer_out, &timeout, size_of(timeout))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".get_idle_notification:", " id=", id, " timeout=", timeout, " seat=", seat)
-	return
-}
-ext_idle_notifier_v1_get_input_idle_notification :: proc(connection: ^Connection, ext_idle_notifier_v1: Ext_Idle_Notifier_V1, timeout: u32, seat: Seat) -> (id: Ext_Idle_Notification_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(timeout) + size_of(seat)
-	ext_idle_notifier_v1 := ext_idle_notifier_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_idle_notifier_v1, size_of(ext_idle_notifier_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Ext_Idle_Notification_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	timeout := timeout
-	_buffer_write_ptr(&connection.buffer_out, &timeout, size_of(timeout))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_idle_notifier_v1@", ext_idle_notifier_v1, ".get_input_idle_notification:", " id=", id, " timeout=", timeout, " seat=", seat)
-	return
-}
-ext_idle_notification_v1_destroy :: proc(connection: ^Connection, ext_idle_notification_v1: Ext_Idle_Notification_V1) {
-	_size: u16 = 8
-	ext_idle_notification_v1 := ext_idle_notification_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_idle_notification_v1, size_of(ext_idle_notification_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_idle_notification_v1@", ext_idle_notification_v1, ".destroy:")
-	return
-}
-ext_image_capture_source_v1_destroy :: proc(connection: ^Connection, ext_image_capture_source_v1: Ext_Image_Capture_Source_V1) {
-	_size: u16 = 8
-	ext_image_capture_source_v1 := ext_image_capture_source_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_capture_source_v1, size_of(ext_image_capture_source_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_capture_source_v1@", ext_image_capture_source_v1, ".destroy:")
-	return
-}
-ext_output_image_capture_source_manager_v1_create_source :: proc(connection: ^Connection, ext_output_image_capture_source_manager_v1: Ext_Output_Image_Capture_Source_Manager_V1, output: Output) -> (source: Ext_Image_Capture_Source_V1) {
-	_size: u16 = 8 + size_of(source) + size_of(output)
-	ext_output_image_capture_source_manager_v1 := ext_output_image_capture_source_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_output_image_capture_source_manager_v1, size_of(ext_output_image_capture_source_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	source = auto_cast generate_id(connection, .Ext_Image_Capture_Source_V1)
-	_buffer_write_ptr(&connection.buffer_out, &source, size_of(source))
-	output := output
-	_buffer_write_ptr(&connection.buffer_out, &output, size_of(output))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_output_image_capture_source_manager_v1@", ext_output_image_capture_source_manager_v1, ".create_source:", " source=", source, " output=", output)
-	return
-}
-ext_output_image_capture_source_manager_v1_destroy :: proc(connection: ^Connection, ext_output_image_capture_source_manager_v1: Ext_Output_Image_Capture_Source_Manager_V1) {
-	_size: u16 = 8
-	ext_output_image_capture_source_manager_v1 := ext_output_image_capture_source_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_output_image_capture_source_manager_v1, size_of(ext_output_image_capture_source_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_output_image_capture_source_manager_v1@", ext_output_image_capture_source_manager_v1, ".destroy:")
-	return
-}
-ext_foreign_toplevel_image_capture_source_manager_v1_create_source :: proc(connection: ^Connection, ext_foreign_toplevel_image_capture_source_manager_v1: Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1, toplevel_handle: Ext_Foreign_Toplevel_Handle_V1) -> (source: Ext_Image_Capture_Source_V1) {
-	_size: u16 = 8 + size_of(source) + size_of(toplevel_handle)
-	ext_foreign_toplevel_image_capture_source_manager_v1 := ext_foreign_toplevel_image_capture_source_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_foreign_toplevel_image_capture_source_manager_v1, size_of(ext_foreign_toplevel_image_capture_source_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	source = auto_cast generate_id(connection, .Ext_Image_Capture_Source_V1)
-	_buffer_write_ptr(&connection.buffer_out, &source, size_of(source))
-	toplevel_handle := toplevel_handle
-	_buffer_write_ptr(&connection.buffer_out, &toplevel_handle, size_of(toplevel_handle))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_foreign_toplevel_image_capture_source_manager_v1@", ext_foreign_toplevel_image_capture_source_manager_v1, ".create_source:", " source=", source, " toplevel_handle=", toplevel_handle)
-	return
-}
-ext_foreign_toplevel_image_capture_source_manager_v1_destroy :: proc(connection: ^Connection, ext_foreign_toplevel_image_capture_source_manager_v1: Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1) {
-	_size: u16 = 8
-	ext_foreign_toplevel_image_capture_source_manager_v1 := ext_foreign_toplevel_image_capture_source_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_foreign_toplevel_image_capture_source_manager_v1, size_of(ext_foreign_toplevel_image_capture_source_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_foreign_toplevel_image_capture_source_manager_v1@", ext_foreign_toplevel_image_capture_source_manager_v1, ".destroy:")
-	return
-}
-ext_image_copy_capture_manager_v1_create_session :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1, source: Ext_Image_Capture_Source_V1, options: Ext_Image_Copy_Capture_Manager_V1_Options) -> (session: Ext_Image_Copy_Capture_Session_V1) {
-	_size: u16 = 8 + size_of(session) + size_of(source) + size_of(options)
-	ext_image_copy_capture_manager_v1 := ext_image_copy_capture_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	session = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Session_V1)
-	_buffer_write_ptr(&connection.buffer_out, &session, size_of(session))
-	source := source
-	_buffer_write_ptr(&connection.buffer_out, &source, size_of(source))
-	options := options
-	_buffer_write_ptr(&connection.buffer_out, &options, size_of(options))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".create_session:", " session=", session, " source=", source, " options=", options)
-	return
-}
-ext_image_copy_capture_manager_v1_create_pointer_cursor_session :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1, source: Ext_Image_Capture_Source_V1, pointer: Pointer) -> (session: Ext_Image_Copy_Capture_Cursor_Session_V1) {
-	_size: u16 = 8 + size_of(session) + size_of(source) + size_of(pointer)
-	ext_image_copy_capture_manager_v1 := ext_image_copy_capture_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	session = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Cursor_Session_V1)
-	_buffer_write_ptr(&connection.buffer_out, &session, size_of(session))
-	source := source
-	_buffer_write_ptr(&connection.buffer_out, &source, size_of(source))
-	pointer := pointer
-	_buffer_write_ptr(&connection.buffer_out, &pointer, size_of(pointer))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".create_pointer_cursor_session:", " session=", session, " source=", source, " pointer=", pointer)
-	return
-}
-ext_image_copy_capture_manager_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_manager_v1: Ext_Image_Copy_Capture_Manager_V1) {
-	_size: u16 = 8
-	ext_image_copy_capture_manager_v1 := ext_image_copy_capture_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_manager_v1, size_of(ext_image_copy_capture_manager_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_manager_v1@", ext_image_copy_capture_manager_v1, ".destroy:")
-	return
-}
-ext_image_copy_capture_session_v1_create_frame :: proc(connection: ^Connection, ext_image_copy_capture_session_v1: Ext_Image_Copy_Capture_Session_V1) -> (frame: Ext_Image_Copy_Capture_Frame_V1) {
-	_size: u16 = 8 + size_of(frame)
-	ext_image_copy_capture_session_v1 := ext_image_copy_capture_session_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_session_v1, size_of(ext_image_copy_capture_session_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	frame = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Frame_V1)
-	_buffer_write_ptr(&connection.buffer_out, &frame, size_of(frame))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_session_v1@", ext_image_copy_capture_session_v1, ".create_frame:", " frame=", frame)
-	return
-}
-ext_image_copy_capture_session_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_session_v1: Ext_Image_Copy_Capture_Session_V1) {
-	_size: u16 = 8
-	ext_image_copy_capture_session_v1 := ext_image_copy_capture_session_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_session_v1, size_of(ext_image_copy_capture_session_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_session_v1@", ext_image_copy_capture_session_v1, ".destroy:")
-	return
-}
-ext_image_copy_capture_frame_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1) {
-	_size: u16 = 8
-	ext_image_copy_capture_frame_v1 := ext_image_copy_capture_frame_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".destroy:")
-	return
-}
-ext_image_copy_capture_frame_v1_attach_buffer :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1, buffer: Buffer) {
-	_size: u16 = 8 + size_of(buffer)
-	ext_image_copy_capture_frame_v1 := ext_image_copy_capture_frame_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	buffer := buffer
-	_buffer_write_ptr(&connection.buffer_out, &buffer, size_of(buffer))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".attach_buffer:", " buffer=", buffer)
-	return
-}
-ext_image_copy_capture_frame_v1_damage_buffer :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1, x: i32, y: i32, width: i32, height: i32) {
-	_size: u16 = 8 + size_of(x) + size_of(y) + size_of(width) + size_of(height)
-	ext_image_copy_capture_frame_v1 := ext_image_copy_capture_frame_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	width := width
-	_buffer_write_ptr(&connection.buffer_out, &width, size_of(width))
-	height := height
-	_buffer_write_ptr(&connection.buffer_out, &height, size_of(height))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".damage_buffer:", " x=", x, " y=", y, " width=", width, " height=", height)
-	return
-}
-ext_image_copy_capture_frame_v1_capture :: proc(connection: ^Connection, ext_image_copy_capture_frame_v1: Ext_Image_Copy_Capture_Frame_V1) {
-	_size: u16 = 8
-	ext_image_copy_capture_frame_v1 := ext_image_copy_capture_frame_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_frame_v1, size_of(ext_image_copy_capture_frame_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_frame_v1@", ext_image_copy_capture_frame_v1, ".capture:")
-	return
-}
-ext_image_copy_capture_cursor_session_v1_destroy :: proc(connection: ^Connection, ext_image_copy_capture_cursor_session_v1: Ext_Image_Copy_Capture_Cursor_Session_V1) {
-	_size: u16 = 8
-	ext_image_copy_capture_cursor_session_v1 := ext_image_copy_capture_cursor_session_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_cursor_session_v1, size_of(ext_image_copy_capture_cursor_session_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_cursor_session_v1@", ext_image_copy_capture_cursor_session_v1, ".destroy:")
-	return
-}
-ext_image_copy_capture_cursor_session_v1_get_capture_session :: proc(connection: ^Connection, ext_image_copy_capture_cursor_session_v1: Ext_Image_Copy_Capture_Cursor_Session_V1) -> (session: Ext_Image_Copy_Capture_Session_V1) {
-	_size: u16 = 8 + size_of(session)
-	ext_image_copy_capture_cursor_session_v1 := ext_image_copy_capture_cursor_session_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_image_copy_capture_cursor_session_v1, size_of(ext_image_copy_capture_cursor_session_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	session = auto_cast generate_id(connection, .Ext_Image_Copy_Capture_Session_V1)
-	_buffer_write_ptr(&connection.buffer_out, &session, size_of(session))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_image_copy_capture_cursor_session_v1@", ext_image_copy_capture_cursor_session_v1, ".get_capture_session:", " session=", session)
-	return
-}
-ext_session_lock_manager_v1_destroy :: proc(connection: ^Connection, ext_session_lock_manager_v1: Ext_Session_Lock_Manager_V1) {
-	_size: u16 = 8
-	ext_session_lock_manager_v1 := ext_session_lock_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_session_lock_manager_v1, size_of(ext_session_lock_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_session_lock_manager_v1@", ext_session_lock_manager_v1, ".destroy:")
-	return
-}
-ext_session_lock_manager_v1_lock :: proc(connection: ^Connection, ext_session_lock_manager_v1: Ext_Session_Lock_Manager_V1) -> (id: Ext_Session_Lock_V1) {
-	_size: u16 = 8 + size_of(id)
-	ext_session_lock_manager_v1 := ext_session_lock_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_session_lock_manager_v1, size_of(ext_session_lock_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Ext_Session_Lock_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_session_lock_manager_v1@", ext_session_lock_manager_v1, ".lock:", " id=", id)
-	return
-}
-ext_session_lock_v1_destroy :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1) {
-	_size: u16 = 8
-	ext_session_lock_v1 := ext_session_lock_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_session_lock_v1, size_of(ext_session_lock_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".destroy:")
-	return
-}
-ext_session_lock_v1_get_lock_surface :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1, surface: Surface, output: Output) -> (id: Ext_Session_Lock_Surface_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface) + size_of(output)
-	ext_session_lock_v1 := ext_session_lock_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_session_lock_v1, size_of(ext_session_lock_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Ext_Session_Lock_Surface_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	output := output
-	_buffer_write_ptr(&connection.buffer_out, &output, size_of(output))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".get_lock_surface:", " id=", id, " surface=", surface, " output=", output)
-	return
-}
-ext_session_lock_v1_unlock_and_destroy :: proc(connection: ^Connection, ext_session_lock_v1: Ext_Session_Lock_V1) {
-	_size: u16 = 8
-	ext_session_lock_v1 := ext_session_lock_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_session_lock_v1, size_of(ext_session_lock_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_session_lock_v1@", ext_session_lock_v1, ".unlock_and_destroy:")
-	return
-}
-ext_session_lock_surface_v1_destroy :: proc(connection: ^Connection, ext_session_lock_surface_v1: Ext_Session_Lock_Surface_V1) {
-	_size: u16 = 8
-	ext_session_lock_surface_v1 := ext_session_lock_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_session_lock_surface_v1, size_of(ext_session_lock_surface_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_session_lock_surface_v1@", ext_session_lock_surface_v1, ".destroy:")
-	return
-}
-ext_session_lock_surface_v1_ack_configure :: proc(connection: ^Connection, ext_session_lock_surface_v1: Ext_Session_Lock_Surface_V1, serial: u32) {
-	_size: u16 = 8 + size_of(serial)
-	ext_session_lock_surface_v1 := ext_session_lock_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_session_lock_surface_v1, size_of(ext_session_lock_surface_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_session_lock_surface_v1@", ext_session_lock_surface_v1, ".ack_configure:", " serial=", serial)
-	return
-}
-ext_transient_seat_manager_v1_create :: proc(connection: ^Connection, ext_transient_seat_manager_v1: Ext_Transient_Seat_Manager_V1) -> (seat: Ext_Transient_Seat_V1) {
-	_size: u16 = 8 + size_of(seat)
-	ext_transient_seat_manager_v1 := ext_transient_seat_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_transient_seat_manager_v1, size_of(ext_transient_seat_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	seat = auto_cast generate_id(connection, .Ext_Transient_Seat_V1)
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_transient_seat_manager_v1@", ext_transient_seat_manager_v1, ".create:", " seat=", seat)
-	return
-}
-ext_transient_seat_manager_v1_destroy :: proc(connection: ^Connection, ext_transient_seat_manager_v1: Ext_Transient_Seat_Manager_V1) {
-	_size: u16 = 8
-	ext_transient_seat_manager_v1 := ext_transient_seat_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_transient_seat_manager_v1, size_of(ext_transient_seat_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_transient_seat_manager_v1@", ext_transient_seat_manager_v1, ".destroy:")
-	return
-}
-ext_transient_seat_v1_destroy :: proc(connection: ^Connection, ext_transient_seat_v1: Ext_Transient_Seat_V1) {
-	_size: u16 = 8
-	ext_transient_seat_v1 := ext_transient_seat_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_transient_seat_v1, size_of(ext_transient_seat_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_transient_seat_v1@", ext_transient_seat_v1, ".destroy:")
-	return
-}
-ext_workspace_manager_v1_commit :: proc(connection: ^Connection, ext_workspace_manager_v1: Ext_Workspace_Manager_V1) {
-	_size: u16 = 8
-	ext_workspace_manager_v1 := ext_workspace_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_manager_v1, size_of(ext_workspace_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_manager_v1@", ext_workspace_manager_v1, ".commit:")
-	return
-}
-ext_workspace_manager_v1_stop :: proc(connection: ^Connection, ext_workspace_manager_v1: Ext_Workspace_Manager_V1) {
-	_size: u16 = 8
-	ext_workspace_manager_v1 := ext_workspace_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_manager_v1, size_of(ext_workspace_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_manager_v1@", ext_workspace_manager_v1, ".stop:")
-	return
-}
-ext_workspace_group_handle_v1_create_workspace :: proc(connection: ^Connection, ext_workspace_group_handle_v1: Ext_Workspace_Group_Handle_V1, workspace: string) {
-	_size: u16 = 8 + 4 + u16((len(workspace) + 1 + 3) & -4)
-	ext_workspace_group_handle_v1 := ext_workspace_group_handle_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_group_handle_v1, size_of(ext_workspace_group_handle_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, workspace)
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_group_handle_v1@", ext_workspace_group_handle_v1, ".create_workspace:", " workspace=", workspace)
-	return
-}
-ext_workspace_group_handle_v1_destroy :: proc(connection: ^Connection, ext_workspace_group_handle_v1: Ext_Workspace_Group_Handle_V1) {
-	_size: u16 = 8
-	ext_workspace_group_handle_v1 := ext_workspace_group_handle_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_group_handle_v1, size_of(ext_workspace_group_handle_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_group_handle_v1@", ext_workspace_group_handle_v1, ".destroy:")
-	return
-}
-ext_workspace_handle_v1_destroy :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
-	_size: u16 = 8
-	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".destroy:")
-	return
-}
-ext_workspace_handle_v1_activate :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
-	_size: u16 = 8
-	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".activate:")
-	return
-}
-ext_workspace_handle_v1_deactivate :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
-	_size: u16 = 8
-	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".deactivate:")
-	return
-}
-ext_workspace_handle_v1_assign :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1, workspace_group: Ext_Workspace_Group_Handle_V1) {
-	_size: u16 = 8 + size_of(workspace_group)
-	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	workspace_group := workspace_group
-	_buffer_write_ptr(&connection.buffer_out, &workspace_group, size_of(workspace_group))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".assign:", " workspace_group=", workspace_group)
-	return
-}
-ext_workspace_handle_v1_remove :: proc(connection: ^Connection, ext_workspace_handle_v1: Ext_Workspace_Handle_V1) {
-	_size: u16 = 8
-	ext_workspace_handle_v1 := ext_workspace_handle_v1
-	_buffer_write_ptr(&connection.buffer_out, &ext_workspace_handle_v1, size_of(ext_workspace_handle_v1))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> ext_workspace_handle_v1@", ext_workspace_handle_v1, ".remove:")
-	return
-}
-wp_fifo_manager_v1_destroy :: proc(connection: ^Connection, wp_fifo_manager_v1: Wp_Fifo_Manager_V1) {
-	_size: u16 = 8
-	wp_fifo_manager_v1 := wp_fifo_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_fifo_manager_v1, size_of(wp_fifo_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_fifo_manager_v1@", wp_fifo_manager_v1, ".destroy:")
-	return
-}
-wp_fifo_manager_v1_get_fifo :: proc(connection: ^Connection, wp_fifo_manager_v1: Wp_Fifo_Manager_V1, surface: Surface) -> (id: Wp_Fifo_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_fifo_manager_v1 := wp_fifo_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_fifo_manager_v1, size_of(wp_fifo_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Fifo_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_fifo_manager_v1@", wp_fifo_manager_v1, ".get_fifo:", " id=", id, " surface=", surface)
-	return
-}
-wp_fifo_v1_set_barrier :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
-	_size: u16 = 8
-	wp_fifo_v1 := wp_fifo_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_fifo_v1, size_of(wp_fifo_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".set_barrier:")
-	return
-}
-wp_fifo_v1_wait_barrier :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
-	_size: u16 = 8
-	wp_fifo_v1 := wp_fifo_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_fifo_v1, size_of(wp_fifo_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".wait_barrier:")
-	return
-}
-wp_fifo_v1_destroy :: proc(connection: ^Connection, wp_fifo_v1: Wp_Fifo_V1) {
-	_size: u16 = 8
-	wp_fifo_v1 := wp_fifo_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_fifo_v1, size_of(wp_fifo_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_fifo_v1@", wp_fifo_v1, ".destroy:")
-	return
-}
-wp_fractional_scale_manager_v1_destroy :: proc(connection: ^Connection, wp_fractional_scale_manager_v1: Wp_Fractional_Scale_Manager_V1) {
-	_size: u16 = 8
-	wp_fractional_scale_manager_v1 := wp_fractional_scale_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_fractional_scale_manager_v1, size_of(wp_fractional_scale_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_fractional_scale_manager_v1@", wp_fractional_scale_manager_v1, ".destroy:")
-	return
-}
-wp_fractional_scale_manager_v1_get_fractional_scale :: proc(connection: ^Connection, wp_fractional_scale_manager_v1: Wp_Fractional_Scale_Manager_V1, surface: Surface) -> (id: Wp_Fractional_Scale_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_fractional_scale_manager_v1 := wp_fractional_scale_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_fractional_scale_manager_v1, size_of(wp_fractional_scale_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Fractional_Scale_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_fractional_scale_manager_v1@", wp_fractional_scale_manager_v1, ".get_fractional_scale:", " id=", id, " surface=", surface)
-	return
-}
-wp_fractional_scale_v1_destroy :: proc(connection: ^Connection, wp_fractional_scale_v1: Wp_Fractional_Scale_V1) {
-	_size: u16 = 8
-	wp_fractional_scale_v1 := wp_fractional_scale_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_fractional_scale_v1, size_of(wp_fractional_scale_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_fractional_scale_v1@", wp_fractional_scale_v1, ".destroy:")
-	return
-}
-wp_linux_drm_syncobj_manager_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1) {
-	_size: u16 = 8
-	wp_linux_drm_syncobj_manager_v1 := wp_linux_drm_syncobj_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".destroy:")
-	return
-}
-wp_linux_drm_syncobj_manager_v1_get_surface :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1, surface: Surface) -> (id: Wp_Linux_Drm_Syncobj_Surface_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_linux_drm_syncobj_manager_v1 := wp_linux_drm_syncobj_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Linux_Drm_Syncobj_Surface_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".get_surface:", " id=", id, " surface=", surface)
-	return
-}
-wp_linux_drm_syncobj_manager_v1_import_timeline :: proc(connection: ^Connection, wp_linux_drm_syncobj_manager_v1: Wp_Linux_Drm_Syncobj_Manager_V1, fd: Fd) -> (id: Wp_Linux_Drm_Syncobj_Timeline_V1) {
-	_size: u16 = 8 + size_of(id)
-	wp_linux_drm_syncobj_manager_v1 := wp_linux_drm_syncobj_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_linux_drm_syncobj_manager_v1, size_of(wp_linux_drm_syncobj_manager_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Linux_Drm_Syncobj_Timeline_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	append(&connection.fds_out, fd)
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_linux_drm_syncobj_manager_v1@", wp_linux_drm_syncobj_manager_v1, ".import_timeline:", " id=", id, " fd=", fd)
-	return
-}
-wp_linux_drm_syncobj_timeline_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_timeline_v1: Wp_Linux_Drm_Syncobj_Timeline_V1) {
-	_size: u16 = 8
-	wp_linux_drm_syncobj_timeline_v1 := wp_linux_drm_syncobj_timeline_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_linux_drm_syncobj_timeline_v1, size_of(wp_linux_drm_syncobj_timeline_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_linux_drm_syncobj_timeline_v1@", wp_linux_drm_syncobj_timeline_v1, ".destroy:")
-	return
-}
-wp_linux_drm_syncobj_surface_v1_destroy :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1) {
-	_size: u16 = 8
-	wp_linux_drm_syncobj_surface_v1 := wp_linux_drm_syncobj_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".destroy:")
-	return
-}
-wp_linux_drm_syncobj_surface_v1_set_acquire_point :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1, timeline: Wp_Linux_Drm_Syncobj_Timeline_V1, point_hi: u32, point_lo: u32) {
-	_size: u16 = 8 + size_of(timeline) + size_of(point_hi) + size_of(point_lo)
-	wp_linux_drm_syncobj_surface_v1 := wp_linux_drm_syncobj_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	timeline := timeline
-	_buffer_write_ptr(&connection.buffer_out, &timeline, size_of(timeline))
-	point_hi := point_hi
-	_buffer_write_ptr(&connection.buffer_out, &point_hi, size_of(point_hi))
-	point_lo := point_lo
-	_buffer_write_ptr(&connection.buffer_out, &point_lo, size_of(point_lo))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".set_acquire_point:", " timeline=", timeline, " point_hi=", point_hi, " point_lo=", point_lo)
-	return
-}
-wp_linux_drm_syncobj_surface_v1_set_release_point :: proc(connection: ^Connection, wp_linux_drm_syncobj_surface_v1: Wp_Linux_Drm_Syncobj_Surface_V1, timeline: Wp_Linux_Drm_Syncobj_Timeline_V1, point_hi: u32, point_lo: u32) {
-	_size: u16 = 8 + size_of(timeline) + size_of(point_hi) + size_of(point_lo)
-	wp_linux_drm_syncobj_surface_v1 := wp_linux_drm_syncobj_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_linux_drm_syncobj_surface_v1, size_of(wp_linux_drm_syncobj_surface_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	timeline := timeline
-	_buffer_write_ptr(&connection.buffer_out, &timeline, size_of(timeline))
-	point_hi := point_hi
-	_buffer_write_ptr(&connection.buffer_out, &point_hi, size_of(point_hi))
-	point_lo := point_lo
-	_buffer_write_ptr(&connection.buffer_out, &point_lo, size_of(point_lo))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_linux_drm_syncobj_surface_v1@", wp_linux_drm_syncobj_surface_v1, ".set_release_point:", " timeline=", timeline, " point_hi=", point_hi, " point_lo=", point_lo)
-	return
-}
-wp_pointer_warp_v1_destroy :: proc(connection: ^Connection, wp_pointer_warp_v1: Wp_Pointer_Warp_V1) {
-	_size: u16 = 8
-	wp_pointer_warp_v1 := wp_pointer_warp_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_pointer_warp_v1, size_of(wp_pointer_warp_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_pointer_warp_v1@", wp_pointer_warp_v1, ".destroy:")
-	return
-}
-wp_pointer_warp_v1_warp_pointer :: proc(connection: ^Connection, wp_pointer_warp_v1: Wp_Pointer_Warp_V1, surface: Surface, pointer: Pointer, x: f64, y: f64, serial: u32) {
-	_size: u16 = 8 + size_of(surface) + size_of(pointer) + size_of(x) + size_of(y) + size_of(serial)
-	wp_pointer_warp_v1 := wp_pointer_warp_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_pointer_warp_v1, size_of(wp_pointer_warp_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	pointer := pointer
-	_buffer_write_ptr(&connection.buffer_out, &pointer, size_of(pointer))
-	x := x
-	_buffer_write_ptr(&connection.buffer_out, &x, size_of(x))
-	y := y
-	_buffer_write_ptr(&connection.buffer_out, &y, size_of(y))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_pointer_warp_v1@", wp_pointer_warp_v1, ".warp_pointer:", " surface=", surface, " pointer=", pointer, " x=", x, " y=", y, " serial=", serial)
-	return
-}
-wp_security_context_manager_v1_destroy :: proc(connection: ^Connection, wp_security_context_manager_v1: Wp_Security_Context_Manager_V1) {
-	_size: u16 = 8
-	wp_security_context_manager_v1 := wp_security_context_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_security_context_manager_v1, size_of(wp_security_context_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_security_context_manager_v1@", wp_security_context_manager_v1, ".destroy:")
-	return
-}
-wp_security_context_manager_v1_create_listener :: proc(connection: ^Connection, wp_security_context_manager_v1: Wp_Security_Context_Manager_V1, listen_fd: Fd, close_fd: Fd) -> (id: Wp_Security_Context_V1) {
-	_size: u16 = 8 + size_of(id)
-	wp_security_context_manager_v1 := wp_security_context_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_security_context_manager_v1, size_of(wp_security_context_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Security_Context_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	append(&connection.fds_out, listen_fd)
-	append(&connection.fds_out, close_fd)
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_security_context_manager_v1@", wp_security_context_manager_v1, ".create_listener:", " id=", id, " listen_fd=", listen_fd, " close_fd=", close_fd)
-	return
-}
-wp_security_context_v1_destroy :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1) {
-	_size: u16 = 8
-	wp_security_context_v1 := wp_security_context_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_security_context_v1, size_of(wp_security_context_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".destroy:")
-	return
-}
-wp_security_context_v1_set_sandbox_engine :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, name: string) {
-	_size: u16 = 8 + 4 + u16((len(name) + 1 + 3) & -4)
-	wp_security_context_v1 := wp_security_context_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_security_context_v1, size_of(wp_security_context_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, name)
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_sandbox_engine:", " name=", name)
-	return
-}
-wp_security_context_v1_set_app_id :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, app_id: string) {
-	_size: u16 = 8 + 4 + u16((len(app_id) + 1 + 3) & -4)
-	wp_security_context_v1 := wp_security_context_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_security_context_v1, size_of(wp_security_context_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, app_id)
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_app_id:", " app_id=", app_id)
-	return
-}
-wp_security_context_v1_set_instance_id :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1, instance_id: string) {
-	_size: u16 = 8 + 4 + u16((len(instance_id) + 1 + 3) & -4)
-	wp_security_context_v1 := wp_security_context_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_security_context_v1, size_of(wp_security_context_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, instance_id)
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".set_instance_id:", " instance_id=", instance_id)
-	return
-}
-wp_security_context_v1_commit :: proc(connection: ^Connection, wp_security_context_v1: Wp_Security_Context_V1) {
-	_size: u16 = 8
-	wp_security_context_v1 := wp_security_context_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_security_context_v1, size_of(wp_security_context_v1))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_security_context_v1@", wp_security_context_v1, ".commit:")
-	return
-}
-wp_single_pixel_buffer_manager_v1_destroy :: proc(connection: ^Connection, wp_single_pixel_buffer_manager_v1: Wp_Single_Pixel_Buffer_Manager_V1) {
-	_size: u16 = 8
-	wp_single_pixel_buffer_manager_v1 := wp_single_pixel_buffer_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_single_pixel_buffer_manager_v1, size_of(wp_single_pixel_buffer_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_single_pixel_buffer_manager_v1@", wp_single_pixel_buffer_manager_v1, ".destroy:")
-	return
-}
-wp_single_pixel_buffer_manager_v1_create_u32_rgba_buffer :: proc(connection: ^Connection, wp_single_pixel_buffer_manager_v1: Wp_Single_Pixel_Buffer_Manager_V1, r: u32, g: u32, b: u32, a: u32) -> (id: Buffer) {
-	_size: u16 = 8 + size_of(id) + size_of(r) + size_of(g) + size_of(b) + size_of(a)
-	wp_single_pixel_buffer_manager_v1 := wp_single_pixel_buffer_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_single_pixel_buffer_manager_v1, size_of(wp_single_pixel_buffer_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Buffer)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	r := r
-	_buffer_write_ptr(&connection.buffer_out, &r, size_of(r))
-	g := g
-	_buffer_write_ptr(&connection.buffer_out, &g, size_of(g))
-	b := b
-	_buffer_write_ptr(&connection.buffer_out, &b, size_of(b))
-	a := a
-	_buffer_write_ptr(&connection.buffer_out, &a, size_of(a))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_single_pixel_buffer_manager_v1@", wp_single_pixel_buffer_manager_v1, ".create_u32_rgba_buffer:", " id=", id, " r=", r, " g=", g, " b=", b, " a=", a)
-	return
-}
-wp_tearing_control_manager_v1_destroy :: proc(connection: ^Connection, wp_tearing_control_manager_v1: Wp_Tearing_Control_Manager_V1) {
-	_size: u16 = 8
-	wp_tearing_control_manager_v1 := wp_tearing_control_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_tearing_control_manager_v1, size_of(wp_tearing_control_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_tearing_control_manager_v1@", wp_tearing_control_manager_v1, ".destroy:")
-	return
-}
-wp_tearing_control_manager_v1_get_tearing_control :: proc(connection: ^Connection, wp_tearing_control_manager_v1: Wp_Tearing_Control_Manager_V1, surface: Surface) -> (id: Wp_Tearing_Control_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	wp_tearing_control_manager_v1 := wp_tearing_control_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_tearing_control_manager_v1, size_of(wp_tearing_control_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Wp_Tearing_Control_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_tearing_control_manager_v1@", wp_tearing_control_manager_v1, ".get_tearing_control:", " id=", id, " surface=", surface)
-	return
-}
-wp_tearing_control_v1_set_presentation_hint :: proc(connection: ^Connection, wp_tearing_control_v1: Wp_Tearing_Control_V1, hint: Wp_Tearing_Control_V1_Presentation_Hint) {
-	_size: u16 = 8 + size_of(hint)
-	wp_tearing_control_v1 := wp_tearing_control_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_tearing_control_v1, size_of(wp_tearing_control_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	hint := hint
-	_buffer_write_ptr(&connection.buffer_out, &hint, size_of(hint))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_tearing_control_v1@", wp_tearing_control_v1, ".set_presentation_hint:", " hint=", hint)
-	return
-}
-wp_tearing_control_v1_destroy :: proc(connection: ^Connection, wp_tearing_control_v1: Wp_Tearing_Control_V1) {
-	_size: u16 = 8
-	wp_tearing_control_v1 := wp_tearing_control_v1
-	_buffer_write_ptr(&connection.buffer_out, &wp_tearing_control_v1, size_of(wp_tearing_control_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> wp_tearing_control_v1@", wp_tearing_control_v1, ".destroy:")
-	return
-}
-xdg_activation_v1_destroy :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1) {
-	_size: u16 = 8
-	xdg_activation_v1 := xdg_activation_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_activation_v1, size_of(xdg_activation_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".destroy:")
-	return
-}
-xdg_activation_v1_get_activation_token :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1) -> (id: Xdg_Activation_Token_V1) {
-	_size: u16 = 8 + size_of(id)
-	xdg_activation_v1 := xdg_activation_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_activation_v1, size_of(xdg_activation_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xdg_Activation_Token_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".get_activation_token:", " id=", id)
-	return
-}
-xdg_activation_v1_activate :: proc(connection: ^Connection, xdg_activation_v1: Xdg_Activation_V1, token: string, surface: Surface) {
-	_size: u16 = 8 + 4 + u16((len(token) + 1 + 3) & -4) + size_of(surface)
-	xdg_activation_v1 := xdg_activation_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_activation_v1, size_of(xdg_activation_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, token)
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_activation_v1@", xdg_activation_v1, ".activate:", " token=", token, " surface=", surface)
-	return
-}
-xdg_activation_token_v1_set_serial :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, serial: u32, seat: Seat) {
-	_size: u16 = 8 + size_of(serial) + size_of(seat)
-	xdg_activation_token_v1 := xdg_activation_token_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial := serial
-	_buffer_write_ptr(&connection.buffer_out, &serial, size_of(serial))
-	seat := seat
-	_buffer_write_ptr(&connection.buffer_out, &seat, size_of(seat))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_serial:", " serial=", serial, " seat=", seat)
-	return
-}
-xdg_activation_token_v1_set_app_id :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, app_id: string) {
-	_size: u16 = 8 + 4 + u16((len(app_id) + 1 + 3) & -4)
-	xdg_activation_token_v1 := xdg_activation_token_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, app_id)
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_app_id:", " app_id=", app_id)
-	return
-}
-xdg_activation_token_v1_set_surface :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1, surface: Surface) {
-	_size: u16 = 8 + size_of(surface)
-	xdg_activation_token_v1 := xdg_activation_token_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".set_surface:", " surface=", surface)
-	return
-}
-xdg_activation_token_v1_commit :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1) {
-	_size: u16 = 8
-	xdg_activation_token_v1 := xdg_activation_token_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
-	opcode: u16 = 3
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".commit:")
-	return
-}
-xdg_activation_token_v1_destroy :: proc(connection: ^Connection, xdg_activation_token_v1: Xdg_Activation_Token_V1) {
-	_size: u16 = 8
-	xdg_activation_token_v1 := xdg_activation_token_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_activation_token_v1, size_of(xdg_activation_token_v1))
-	opcode: u16 = 4
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_activation_token_v1@", xdg_activation_token_v1, ".destroy:")
-	return
-}
-xdg_wm_dialog_v1_destroy :: proc(connection: ^Connection, xdg_wm_dialog_v1: Xdg_Wm_Dialog_V1) {
-	_size: u16 = 8
-	xdg_wm_dialog_v1 := xdg_wm_dialog_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_wm_dialog_v1, size_of(xdg_wm_dialog_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_wm_dialog_v1@", xdg_wm_dialog_v1, ".destroy:")
-	return
-}
-xdg_wm_dialog_v1_get_xdg_dialog :: proc(connection: ^Connection, xdg_wm_dialog_v1: Xdg_Wm_Dialog_V1, toplevel: Xdg_Toplevel) -> (id: Xdg_Dialog_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(toplevel)
-	xdg_wm_dialog_v1 := xdg_wm_dialog_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_wm_dialog_v1, size_of(xdg_wm_dialog_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xdg_Dialog_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	toplevel := toplevel
-	_buffer_write_ptr(&connection.buffer_out, &toplevel, size_of(toplevel))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_wm_dialog_v1@", xdg_wm_dialog_v1, ".get_xdg_dialog:", " id=", id, " toplevel=", toplevel)
-	return
-}
-xdg_dialog_v1_destroy :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
-	_size: u16 = 8
-	xdg_dialog_v1 := xdg_dialog_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_dialog_v1, size_of(xdg_dialog_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".destroy:")
-	return
-}
-xdg_dialog_v1_set_modal :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
-	_size: u16 = 8
-	xdg_dialog_v1 := xdg_dialog_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_dialog_v1, size_of(xdg_dialog_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".set_modal:")
-	return
-}
-xdg_dialog_v1_unset_modal :: proc(connection: ^Connection, xdg_dialog_v1: Xdg_Dialog_V1) {
-	_size: u16 = 8
-	xdg_dialog_v1 := xdg_dialog_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_dialog_v1, size_of(xdg_dialog_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_dialog_v1@", xdg_dialog_v1, ".unset_modal:")
-	return
-}
-xdg_system_bell_v1_destroy :: proc(connection: ^Connection, xdg_system_bell_v1: Xdg_System_Bell_V1) {
-	_size: u16 = 8
-	xdg_system_bell_v1 := xdg_system_bell_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_system_bell_v1, size_of(xdg_system_bell_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_system_bell_v1@", xdg_system_bell_v1, ".destroy:")
-	return
-}
-xdg_system_bell_v1_ring :: proc(connection: ^Connection, xdg_system_bell_v1: Xdg_System_Bell_V1, surface: Surface) {
-	_size: u16 = 8 + size_of(surface)
-	xdg_system_bell_v1 := xdg_system_bell_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_system_bell_v1, size_of(xdg_system_bell_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_system_bell_v1@", xdg_system_bell_v1, ".ring:", " surface=", surface)
-	return
-}
-xdg_toplevel_drag_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_drag_manager_v1: Xdg_Toplevel_Drag_Manager_V1) {
-	_size: u16 = 8
-	xdg_toplevel_drag_manager_v1 := xdg_toplevel_drag_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_drag_manager_v1, size_of(xdg_toplevel_drag_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_drag_manager_v1@", xdg_toplevel_drag_manager_v1, ".destroy:")
-	return
-}
-xdg_toplevel_drag_manager_v1_get_xdg_toplevel_drag :: proc(connection: ^Connection, xdg_toplevel_drag_manager_v1: Xdg_Toplevel_Drag_Manager_V1, data_source: Data_Source) -> (id: Xdg_Toplevel_Drag_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(data_source)
-	xdg_toplevel_drag_manager_v1 := xdg_toplevel_drag_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_drag_manager_v1, size_of(xdg_toplevel_drag_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xdg_Toplevel_Drag_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	data_source := data_source
-	_buffer_write_ptr(&connection.buffer_out, &data_source, size_of(data_source))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_drag_manager_v1@", xdg_toplevel_drag_manager_v1, ".get_xdg_toplevel_drag:", " id=", id, " data_source=", data_source)
-	return
-}
-xdg_toplevel_drag_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_drag_v1: Xdg_Toplevel_Drag_V1) {
-	_size: u16 = 8
-	xdg_toplevel_drag_v1 := xdg_toplevel_drag_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_drag_v1, size_of(xdg_toplevel_drag_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_drag_v1@", xdg_toplevel_drag_v1, ".destroy:")
-	return
-}
-xdg_toplevel_drag_v1_attach :: proc(connection: ^Connection, xdg_toplevel_drag_v1: Xdg_Toplevel_Drag_V1, toplevel: Xdg_Toplevel, x_offset: i32, y_offset: i32) {
-	_size: u16 = 8 + size_of(toplevel) + size_of(x_offset) + size_of(y_offset)
-	xdg_toplevel_drag_v1 := xdg_toplevel_drag_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_drag_v1, size_of(xdg_toplevel_drag_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	toplevel := toplevel
-	_buffer_write_ptr(&connection.buffer_out, &toplevel, size_of(toplevel))
-	x_offset := x_offset
-	_buffer_write_ptr(&connection.buffer_out, &x_offset, size_of(x_offset))
-	y_offset := y_offset
-	_buffer_write_ptr(&connection.buffer_out, &y_offset, size_of(y_offset))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_drag_v1@", xdg_toplevel_drag_v1, ".attach:", " toplevel=", toplevel, " x_offset=", x_offset, " y_offset=", y_offset)
-	return
-}
-xdg_toplevel_icon_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1) {
-	_size: u16 = 8
-	xdg_toplevel_icon_manager_v1 := xdg_toplevel_icon_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".destroy:")
-	return
-}
-xdg_toplevel_icon_manager_v1_create_icon :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1) -> (id: Xdg_Toplevel_Icon_V1) {
-	_size: u16 = 8 + size_of(id)
-	xdg_toplevel_icon_manager_v1 := xdg_toplevel_icon_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xdg_Toplevel_Icon_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".create_icon:", " id=", id)
-	return
-}
-xdg_toplevel_icon_manager_v1_set_icon :: proc(connection: ^Connection, xdg_toplevel_icon_manager_v1: Xdg_Toplevel_Icon_Manager_V1, toplevel: Xdg_Toplevel, icon: Xdg_Toplevel_Icon_V1) {
-	_size: u16 = 8 + size_of(toplevel) + size_of(icon)
-	xdg_toplevel_icon_manager_v1 := xdg_toplevel_icon_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_icon_manager_v1, size_of(xdg_toplevel_icon_manager_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	toplevel := toplevel
-	_buffer_write_ptr(&connection.buffer_out, &toplevel, size_of(toplevel))
-	icon := icon
-	_buffer_write_ptr(&connection.buffer_out, &icon, size_of(icon))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_icon_manager_v1@", xdg_toplevel_icon_manager_v1, ".set_icon:", " toplevel=", toplevel, " icon=", icon)
-	return
-}
-xdg_toplevel_icon_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1) {
-	_size: u16 = 8
-	xdg_toplevel_icon_v1 := xdg_toplevel_icon_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".destroy:")
-	return
-}
-xdg_toplevel_icon_v1_set_name :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1, icon_name: string) {
-	_size: u16 = 8 + 4 + u16((len(icon_name) + 1 + 3) & -4)
-	xdg_toplevel_icon_v1 := xdg_toplevel_icon_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	_buffer_write_string(&connection.buffer_out, icon_name)
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".set_name:", " icon_name=", icon_name)
-	return
-}
-xdg_toplevel_icon_v1_add_buffer :: proc(connection: ^Connection, xdg_toplevel_icon_v1: Xdg_Toplevel_Icon_V1, buffer: Buffer, scale: i32) {
-	_size: u16 = 8 + size_of(buffer) + size_of(scale)
-	xdg_toplevel_icon_v1 := xdg_toplevel_icon_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_icon_v1, size_of(xdg_toplevel_icon_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	buffer := buffer
-	_buffer_write_ptr(&connection.buffer_out, &buffer, size_of(buffer))
-	scale := scale
-	_buffer_write_ptr(&connection.buffer_out, &scale, size_of(scale))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_icon_v1@", xdg_toplevel_icon_v1, ".add_buffer:", " buffer=", buffer, " scale=", scale)
-	return
-}
-xdg_toplevel_tag_manager_v1_destroy :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1) {
-	_size: u16 = 8
-	xdg_toplevel_tag_manager_v1 := xdg_toplevel_tag_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".destroy:")
-	return
-}
-xdg_toplevel_tag_manager_v1_set_toplevel_tag :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1, toplevel: Xdg_Toplevel, tag: string) {
-	_size: u16 = 8 + size_of(toplevel) + 4 + u16((len(tag) + 1 + 3) & -4)
-	xdg_toplevel_tag_manager_v1 := xdg_toplevel_tag_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	toplevel := toplevel
-	_buffer_write_ptr(&connection.buffer_out, &toplevel, size_of(toplevel))
-	_buffer_write_string(&connection.buffer_out, tag)
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".set_toplevel_tag:", " toplevel=", toplevel, " tag=", tag)
-	return
-}
-xdg_toplevel_tag_manager_v1_set_toplevel_description :: proc(connection: ^Connection, xdg_toplevel_tag_manager_v1: Xdg_Toplevel_Tag_Manager_V1, toplevel: Xdg_Toplevel, description: string) {
-	_size: u16 = 8 + size_of(toplevel) + 4 + u16((len(description) + 1 + 3) & -4)
-	xdg_toplevel_tag_manager_v1 := xdg_toplevel_tag_manager_v1
-	_buffer_write_ptr(&connection.buffer_out, &xdg_toplevel_tag_manager_v1, size_of(xdg_toplevel_tag_manager_v1))
-	opcode: u16 = 2
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	toplevel := toplevel
-	_buffer_write_ptr(&connection.buffer_out, &toplevel, size_of(toplevel))
-	_buffer_write_string(&connection.buffer_out, description)
-	if connection.log_fn != nil do _debug_log(connection, "-> xdg_toplevel_tag_manager_v1@", xdg_toplevel_tag_manager_v1, ".set_toplevel_description:", " toplevel=", toplevel, " description=", description)
-	return
-}
-xwayland_shell_v1_destroy :: proc(connection: ^Connection, xwayland_shell_v1: Xwayland_Shell_V1) {
-	_size: u16 = 8
-	xwayland_shell_v1 := xwayland_shell_v1
-	_buffer_write_ptr(&connection.buffer_out, &xwayland_shell_v1, size_of(xwayland_shell_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xwayland_shell_v1@", xwayland_shell_v1, ".destroy:")
-	return
-}
-xwayland_shell_v1_get_xwayland_surface :: proc(connection: ^Connection, xwayland_shell_v1: Xwayland_Shell_V1, surface: Surface) -> (id: Xwayland_Surface_V1) {
-	_size: u16 = 8 + size_of(id) + size_of(surface)
-	xwayland_shell_v1 := xwayland_shell_v1
-	_buffer_write_ptr(&connection.buffer_out, &xwayland_shell_v1, size_of(xwayland_shell_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	id = auto_cast generate_id(connection, .Xwayland_Surface_V1)
-	_buffer_write_ptr(&connection.buffer_out, &id, size_of(id))
-	surface := surface
-	_buffer_write_ptr(&connection.buffer_out, &surface, size_of(surface))
-	if connection.log_fn != nil do _debug_log(connection, "-> xwayland_shell_v1@", xwayland_shell_v1, ".get_xwayland_surface:", " id=", id, " surface=", surface)
-	return
-}
-xwayland_surface_v1_set_serial :: proc(connection: ^Connection, xwayland_surface_v1: Xwayland_Surface_V1, serial_lo: u32, serial_hi: u32) {
-	_size: u16 = 8 + size_of(serial_lo) + size_of(serial_hi)
-	xwayland_surface_v1 := xwayland_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &xwayland_surface_v1, size_of(xwayland_surface_v1))
-	opcode: u16 = 0
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	serial_lo := serial_lo
-	_buffer_write_ptr(&connection.buffer_out, &serial_lo, size_of(serial_lo))
-	serial_hi := serial_hi
-	_buffer_write_ptr(&connection.buffer_out, &serial_hi, size_of(serial_hi))
-	if connection.log_fn != nil do _debug_log(connection, "-> xwayland_surface_v1@", xwayland_surface_v1, ".set_serial:", " serial_lo=", serial_lo, " serial_hi=", serial_hi)
-	return
-}
-xwayland_surface_v1_destroy :: proc(connection: ^Connection, xwayland_surface_v1: Xwayland_Surface_V1) {
-	_size: u16 = 8
-	xwayland_surface_v1 := xwayland_surface_v1
-	_buffer_write_ptr(&connection.buffer_out, &xwayland_surface_v1, size_of(xwayland_surface_v1))
-	opcode: u16 = 1
-	_buffer_write_ptr(&connection.buffer_out, &opcode, size_of(opcode))
-	_buffer_write_ptr(&connection.buffer_out, &_size, size_of(_size))
-	if connection.log_fn != nil do _debug_log(connection, "-> xwayland_surface_v1@", xwayland_surface_v1, ".destroy:")
-	return
-}
+import "ext"
+import "wl"
+import "wp"
+import "zwp"
+import "xdg"
+import "xwayland"
 
 Event :: union {
-	Event_Display_Error,
-	Event_Display_Delete_Id,
-	Event_Registry_Global,
-	Event_Registry_Global_Remove,
-	Event_Callback_Done,
-	Event_Shm_Format,
-	Event_Buffer_Release,
-	Event_Data_Offer_Offer,
-	Event_Data_Offer_Source_Actions,
-	Event_Data_Offer_Action,
-	Event_Data_Source_Target,
-	Event_Data_Source_Send,
-	Event_Data_Source_Cancelled,
-	Event_Data_Source_Dnd_Drop_Performed,
-	Event_Data_Source_Dnd_Finished,
-	Event_Data_Source_Action,
-	Event_Data_Device_Data_Offer,
-	Event_Data_Device_Enter,
-	Event_Data_Device_Leave,
-	Event_Data_Device_Motion,
-	Event_Data_Device_Drop,
-	Event_Data_Device_Selection,
-	Event_Shell_Surface_Ping,
-	Event_Shell_Surface_Configure,
-	Event_Shell_Surface_Popup_Done,
-	Event_Surface_Enter,
-	Event_Surface_Leave,
-	Event_Surface_Preferred_Buffer_Scale,
-	Event_Surface_Preferred_Buffer_Transform,
-	Event_Seat_Capabilities,
-	Event_Seat_Name,
-	Event_Pointer_Enter,
-	Event_Pointer_Leave,
-	Event_Pointer_Motion,
-	Event_Pointer_Button,
-	Event_Pointer_Axis,
-	Event_Pointer_Frame,
-	Event_Pointer_Axis_Source,
-	Event_Pointer_Axis_Stop,
-	Event_Pointer_Axis_Discrete,
-	Event_Pointer_Axis_Value120,
-	Event_Pointer_Axis_Relative_Direction,
-	Event_Keyboard_Keymap,
-	Event_Keyboard_Enter,
-	Event_Keyboard_Leave,
-	Event_Keyboard_Key,
-	Event_Keyboard_Modifiers,
-	Event_Keyboard_Repeat_Info,
-	Event_Touch_Down,
-	Event_Touch_Up,
-	Event_Touch_Motion,
-	Event_Touch_Frame,
-	Event_Touch_Cancel,
-	Event_Touch_Shape,
-	Event_Touch_Orientation,
-	Event_Output_Geometry,
-	Event_Output_Mode,
-	Event_Output_Done,
-	Event_Output_Scale,
-	Event_Output_Name,
-	Event_Output_Description,
-	Event_Zwp_Linux_Dmabuf_V1_Format,
-	Event_Zwp_Linux_Dmabuf_V1_Modifier,
-	Event_Zwp_Linux_Buffer_Params_V1_Created,
-	Event_Zwp_Linux_Buffer_Params_V1_Failed,
-	Event_Zwp_Linux_Dmabuf_Feedback_V1_Done,
-	Event_Zwp_Linux_Dmabuf_Feedback_V1_Format_Table,
-	Event_Zwp_Linux_Dmabuf_Feedback_V1_Main_Device,
-	Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Done,
-	Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Target_Device,
-	Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Formats,
-	Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags,
-	Event_Wp_Presentation_Clock_Id,
-	Event_Wp_Presentation_Feedback_Sync_Output,
-	Event_Wp_Presentation_Feedback_Presented,
-	Event_Wp_Presentation_Feedback_Discarded,
-	Event_Zwp_Tablet_Seat_V2_Tablet_Added,
-	Event_Zwp_Tablet_Seat_V2_Tool_Added,
-	Event_Zwp_Tablet_Seat_V2_Pad_Added,
-	Event_Zwp_Tablet_Tool_V2_Type,
-	Event_Zwp_Tablet_Tool_V2_Hardware_Serial,
-	Event_Zwp_Tablet_Tool_V2_Hardware_Id_Wacom,
-	Event_Zwp_Tablet_Tool_V2_Capability,
-	Event_Zwp_Tablet_Tool_V2_Done,
-	Event_Zwp_Tablet_Tool_V2_Removed,
-	Event_Zwp_Tablet_Tool_V2_Proximity_In,
-	Event_Zwp_Tablet_Tool_V2_Proximity_Out,
-	Event_Zwp_Tablet_Tool_V2_Down,
-	Event_Zwp_Tablet_Tool_V2_Up,
-	Event_Zwp_Tablet_Tool_V2_Motion,
-	Event_Zwp_Tablet_Tool_V2_Pressure,
-	Event_Zwp_Tablet_Tool_V2_Distance,
-	Event_Zwp_Tablet_Tool_V2_Tilt,
-	Event_Zwp_Tablet_Tool_V2_Rotation,
-	Event_Zwp_Tablet_Tool_V2_Slider,
-	Event_Zwp_Tablet_Tool_V2_Wheel,
-	Event_Zwp_Tablet_Tool_V2_Button,
-	Event_Zwp_Tablet_Tool_V2_Frame,
-	Event_Zwp_Tablet_V2_Name,
-	Event_Zwp_Tablet_V2_Id,
-	Event_Zwp_Tablet_V2_Path,
-	Event_Zwp_Tablet_V2_Done,
-	Event_Zwp_Tablet_V2_Removed,
-	Event_Zwp_Tablet_V2_Bustype,
-	Event_Zwp_Tablet_Pad_Ring_V2_Source,
-	Event_Zwp_Tablet_Pad_Ring_V2_Angle,
-	Event_Zwp_Tablet_Pad_Ring_V2_Stop,
-	Event_Zwp_Tablet_Pad_Ring_V2_Frame,
-	Event_Zwp_Tablet_Pad_Strip_V2_Source,
-	Event_Zwp_Tablet_Pad_Strip_V2_Position,
-	Event_Zwp_Tablet_Pad_Strip_V2_Stop,
-	Event_Zwp_Tablet_Pad_Strip_V2_Frame,
-	Event_Zwp_Tablet_Pad_Group_V2_Buttons,
-	Event_Zwp_Tablet_Pad_Group_V2_Ring,
-	Event_Zwp_Tablet_Pad_Group_V2_Strip,
-	Event_Zwp_Tablet_Pad_Group_V2_Modes,
-	Event_Zwp_Tablet_Pad_Group_V2_Done,
-	Event_Zwp_Tablet_Pad_Group_V2_Mode_Switch,
-	Event_Zwp_Tablet_Pad_Group_V2_Dial,
-	Event_Zwp_Tablet_Pad_V2_Group,
-	Event_Zwp_Tablet_Pad_V2_Path,
-	Event_Zwp_Tablet_Pad_V2_Buttons,
-	Event_Zwp_Tablet_Pad_V2_Done,
-	Event_Zwp_Tablet_Pad_V2_Button,
-	Event_Zwp_Tablet_Pad_V2_Enter,
-	Event_Zwp_Tablet_Pad_V2_Leave,
-	Event_Zwp_Tablet_Pad_V2_Removed,
-	Event_Zwp_Tablet_Pad_Dial_V2_Delta,
-	Event_Zwp_Tablet_Pad_Dial_V2_Frame,
-	Event_Xdg_Wm_Base_Ping,
-	Event_Xdg_Surface_Configure,
-	Event_Xdg_Toplevel_Configure,
-	Event_Xdg_Toplevel_Close,
-	Event_Xdg_Toplevel_Configure_Bounds,
-	Event_Xdg_Toplevel_Wm_Capabilities,
-	Event_Xdg_Popup_Configure,
-	Event_Xdg_Popup_Popup_Done,
-	Event_Xdg_Popup_Repositioned,
-	Event_Wp_Color_Manager_V1_Supported_Intent,
-	Event_Wp_Color_Manager_V1_Supported_Feature,
-	Event_Wp_Color_Manager_V1_Supported_Tf_Named,
-	Event_Wp_Color_Manager_V1_Supported_Primaries_Named,
-	Event_Wp_Color_Manager_V1_Done,
-	Event_Wp_Color_Management_Output_V1_Image_Description_Changed,
-	Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed,
-	Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2,
-	Event_Wp_Image_Description_V1_Failed,
-	Event_Wp_Image_Description_V1_Ready,
-	Event_Wp_Image_Description_V1_Ready2,
-	Event_Wp_Image_Description_Info_V1_Done,
-	Event_Wp_Image_Description_Info_V1_Icc_File,
-	Event_Wp_Image_Description_Info_V1_Primaries,
-	Event_Wp_Image_Description_Info_V1_Primaries_Named,
-	Event_Wp_Image_Description_Info_V1_Tf_Power,
-	Event_Wp_Image_Description_Info_V1_Tf_Named,
-	Event_Wp_Image_Description_Info_V1_Luminances,
-	Event_Wp_Image_Description_Info_V1_Target_Primaries,
-	Event_Wp_Image_Description_Info_V1_Target_Luminance,
-	Event_Wp_Image_Description_Info_V1_Target_Max_Cll,
-	Event_Wp_Image_Description_Info_V1_Target_Max_Fall,
-	Event_Wp_Color_Representation_Manager_V1_Supported_Alpha_Mode,
-	Event_Wp_Color_Representation_Manager_V1_Supported_Coefficients_And_Ranges,
-	Event_Wp_Color_Representation_Manager_V1_Done,
-	Event_Wp_Drm_Lease_Device_V1_Drm_Fd,
-	Event_Wp_Drm_Lease_Device_V1_Connector,
-	Event_Wp_Drm_Lease_Device_V1_Done,
-	Event_Wp_Drm_Lease_Device_V1_Released,
-	Event_Wp_Drm_Lease_Connector_V1_Name,
-	Event_Wp_Drm_Lease_Connector_V1_Description,
-	Event_Wp_Drm_Lease_Connector_V1_Connector_Id,
-	Event_Wp_Drm_Lease_Connector_V1_Done,
-	Event_Wp_Drm_Lease_Connector_V1_Withdrawn,
-	Event_Wp_Drm_Lease_V1_Lease_Fd,
-	Event_Wp_Drm_Lease_V1_Finished,
-	Event_Ext_Background_Effect_Manager_V1_Capabilities,
-	Event_Ext_Data_Control_Device_V1_Data_Offer,
-	Event_Ext_Data_Control_Device_V1_Selection,
-	Event_Ext_Data_Control_Device_V1_Finished,
-	Event_Ext_Data_Control_Device_V1_Primary_Selection,
-	Event_Ext_Data_Control_Source_V1_Send,
-	Event_Ext_Data_Control_Source_V1_Cancelled,
-	Event_Ext_Data_Control_Offer_V1_Offer,
-	Event_Ext_Foreign_Toplevel_List_V1_Toplevel,
-	Event_Ext_Foreign_Toplevel_List_V1_Finished,
-	Event_Ext_Foreign_Toplevel_Handle_V1_Closed,
-	Event_Ext_Foreign_Toplevel_Handle_V1_Done,
-	Event_Ext_Foreign_Toplevel_Handle_V1_Title,
-	Event_Ext_Foreign_Toplevel_Handle_V1_App_Id,
-	Event_Ext_Foreign_Toplevel_Handle_V1_Identifier,
-	Event_Ext_Idle_Notification_V1_Idled,
-	Event_Ext_Idle_Notification_V1_Resumed,
-	Event_Ext_Image_Copy_Capture_Session_V1_Buffer_Size,
-	Event_Ext_Image_Copy_Capture_Session_V1_Shm_Format,
-	Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Device,
-	Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Format,
-	Event_Ext_Image_Copy_Capture_Session_V1_Done,
-	Event_Ext_Image_Copy_Capture_Session_V1_Stopped,
-	Event_Ext_Image_Copy_Capture_Frame_V1_Transform,
-	Event_Ext_Image_Copy_Capture_Frame_V1_Damage,
-	Event_Ext_Image_Copy_Capture_Frame_V1_Presentation_Time,
-	Event_Ext_Image_Copy_Capture_Frame_V1_Ready,
-	Event_Ext_Image_Copy_Capture_Frame_V1_Failed,
-	Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Enter,
-	Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Leave,
-	Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Position,
-	Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Hotspot,
-	Event_Ext_Session_Lock_V1_Locked,
-	Event_Ext_Session_Lock_V1_Finished,
-	Event_Ext_Session_Lock_Surface_V1_Configure,
-	Event_Ext_Transient_Seat_V1_Ready,
-	Event_Ext_Transient_Seat_V1_Denied,
-	Event_Ext_Workspace_Manager_V1_Workspace_Group,
-	Event_Ext_Workspace_Manager_V1_Workspace,
-	Event_Ext_Workspace_Manager_V1_Done,
-	Event_Ext_Workspace_Manager_V1_Finished,
-	Event_Ext_Workspace_Group_Handle_V1_Capabilities,
-	Event_Ext_Workspace_Group_Handle_V1_Output_Enter,
-	Event_Ext_Workspace_Group_Handle_V1_Output_Leave,
-	Event_Ext_Workspace_Group_Handle_V1_Workspace_Enter,
-	Event_Ext_Workspace_Group_Handle_V1_Workspace_Leave,
-	Event_Ext_Workspace_Group_Handle_V1_Removed,
-	Event_Ext_Workspace_Handle_V1_Id,
-	Event_Ext_Workspace_Handle_V1_Name,
-	Event_Ext_Workspace_Handle_V1_Coordinates,
-	Event_Ext_Workspace_Handle_V1_State,
-	Event_Ext_Workspace_Handle_V1_Capabilities,
-	Event_Ext_Workspace_Handle_V1_Removed,
-	Event_Wp_Fractional_Scale_V1_Preferred_Scale,
-	Event_Xdg_Activation_Token_V1_Done,
-	Event_Xdg_Toplevel_Icon_Manager_V1_Icon_Size,
-	Event_Xdg_Toplevel_Icon_Manager_V1_Done,
+	wl.Display_Error_Event,
+	wl.Display_Delete_Id_Event,
+	wl.Registry_Global_Event,
+	wl.Registry_Global_Remove_Event,
+	wl.Callback_Done_Event,
+	wl.Shm_Format_Event,
+	wl.Buffer_Release_Event,
+	wl.Data_Offer_Offer_Event,
+	wl.Data_Offer_Source_Actions_Event,
+	wl.Data_Offer_Action_Event,
+	wl.Data_Source_Target_Event,
+	wl.Data_Source_Send_Event,
+	wl.Data_Source_Cancelled_Event,
+	wl.Data_Source_Dnd_Drop_Performed_Event,
+	wl.Data_Source_Dnd_Finished_Event,
+	wl.Data_Source_Action_Event,
+	wl.Data_Device_Data_Offer_Event,
+	wl.Data_Device_Enter_Event,
+	wl.Data_Device_Leave_Event,
+	wl.Data_Device_Motion_Event,
+	wl.Data_Device_Drop_Event,
+	wl.Data_Device_Selection_Event,
+	wl.Shell_Surface_Ping_Event,
+	wl.Shell_Surface_Configure_Event,
+	wl.Shell_Surface_Popup_Done_Event,
+	wl.Surface_Enter_Event,
+	wl.Surface_Leave_Event,
+	wl.Surface_Preferred_Buffer_Scale_Event,
+	wl.Surface_Preferred_Buffer_Transform_Event,
+	wl.Seat_Capabilities_Event,
+	wl.Seat_Name_Event,
+	wl.Pointer_Enter_Event,
+	wl.Pointer_Leave_Event,
+	wl.Pointer_Motion_Event,
+	wl.Pointer_Button_Event,
+	wl.Pointer_Axis_Event,
+	wl.Pointer_Frame_Event,
+	wl.Pointer_Axis_Source_Event,
+	wl.Pointer_Axis_Stop_Event,
+	wl.Pointer_Axis_Discrete_Event,
+	wl.Pointer_Axis_Value120_Event,
+	wl.Pointer_Axis_Relative_Direction_Event,
+	wl.Keyboard_Keymap_Event,
+	wl.Keyboard_Enter_Event,
+	wl.Keyboard_Leave_Event,
+	wl.Keyboard_Key_Event,
+	wl.Keyboard_Modifiers_Event,
+	wl.Keyboard_Repeat_Info_Event,
+	wl.Touch_Down_Event,
+	wl.Touch_Up_Event,
+	wl.Touch_Motion_Event,
+	wl.Touch_Frame_Event,
+	wl.Touch_Cancel_Event,
+	wl.Touch_Shape_Event,
+	wl.Touch_Orientation_Event,
+	wl.Output_Geometry_Event,
+	wl.Output_Mode_Event,
+	wl.Output_Done_Event,
+	wl.Output_Scale_Event,
+	wl.Output_Name_Event,
+	wl.Output_Description_Event,
+	zwp.Linux_Dmabuf_V1_Format_Event,
+	zwp.Linux_Dmabuf_V1_Modifier_Event,
+	zwp.Linux_Buffer_Params_V1_Created_Event,
+	zwp.Linux_Buffer_Params_V1_Failed_Event,
+	zwp.Linux_Dmabuf_Feedback_V1_Done_Event,
+	zwp.Linux_Dmabuf_Feedback_V1_Format_Table_Event,
+	zwp.Linux_Dmabuf_Feedback_V1_Main_Device_Event,
+	zwp.Linux_Dmabuf_Feedback_V1_Tranche_Done_Event,
+	zwp.Linux_Dmabuf_Feedback_V1_Tranche_Target_Device_Event,
+	zwp.Linux_Dmabuf_Feedback_V1_Tranche_Formats_Event,
+	zwp.Linux_Dmabuf_Feedback_V1_Tranche_Flags_Event,
+	wp.Presentation_Clock_Id_Event,
+	wp.Presentation_Feedback_Sync_Output_Event,
+	wp.Presentation_Feedback_Presented_Event,
+	wp.Presentation_Feedback_Discarded_Event,
+	zwp.Tablet_Seat_V2_Tablet_Added_Event,
+	zwp.Tablet_Seat_V2_Tool_Added_Event,
+	zwp.Tablet_Seat_V2_Pad_Added_Event,
+	zwp.Tablet_Tool_V2_Type_Event,
+	zwp.Tablet_Tool_V2_Hardware_Serial_Event,
+	zwp.Tablet_Tool_V2_Hardware_Id_Wacom_Event,
+	zwp.Tablet_Tool_V2_Capability_Event,
+	zwp.Tablet_Tool_V2_Done_Event,
+	zwp.Tablet_Tool_V2_Removed_Event,
+	zwp.Tablet_Tool_V2_Proximity_In_Event,
+	zwp.Tablet_Tool_V2_Proximity_Out_Event,
+	zwp.Tablet_Tool_V2_Down_Event,
+	zwp.Tablet_Tool_V2_Up_Event,
+	zwp.Tablet_Tool_V2_Motion_Event,
+	zwp.Tablet_Tool_V2_Pressure_Event,
+	zwp.Tablet_Tool_V2_Distance_Event,
+	zwp.Tablet_Tool_V2_Tilt_Event,
+	zwp.Tablet_Tool_V2_Rotation_Event,
+	zwp.Tablet_Tool_V2_Slider_Event,
+	zwp.Tablet_Tool_V2_Wheel_Event,
+	zwp.Tablet_Tool_V2_Button_Event,
+	zwp.Tablet_Tool_V2_Frame_Event,
+	zwp.Tablet_V2_Name_Event,
+	zwp.Tablet_V2_Id_Event,
+	zwp.Tablet_V2_Path_Event,
+	zwp.Tablet_V2_Done_Event,
+	zwp.Tablet_V2_Removed_Event,
+	zwp.Tablet_V2_Bustype_Event,
+	zwp.Tablet_Pad_Ring_V2_Source_Event,
+	zwp.Tablet_Pad_Ring_V2_Angle_Event,
+	zwp.Tablet_Pad_Ring_V2_Stop_Event,
+	zwp.Tablet_Pad_Ring_V2_Frame_Event,
+	zwp.Tablet_Pad_Strip_V2_Source_Event,
+	zwp.Tablet_Pad_Strip_V2_Position_Event,
+	zwp.Tablet_Pad_Strip_V2_Stop_Event,
+	zwp.Tablet_Pad_Strip_V2_Frame_Event,
+	zwp.Tablet_Pad_Group_V2_Buttons_Event,
+	zwp.Tablet_Pad_Group_V2_Ring_Event,
+	zwp.Tablet_Pad_Group_V2_Strip_Event,
+	zwp.Tablet_Pad_Group_V2_Modes_Event,
+	zwp.Tablet_Pad_Group_V2_Done_Event,
+	zwp.Tablet_Pad_Group_V2_Mode_Switch_Event,
+	zwp.Tablet_Pad_Group_V2_Dial_Event,
+	zwp.Tablet_Pad_V2_Group_Event,
+	zwp.Tablet_Pad_V2_Path_Event,
+	zwp.Tablet_Pad_V2_Buttons_Event,
+	zwp.Tablet_Pad_V2_Done_Event,
+	zwp.Tablet_Pad_V2_Button_Event,
+	zwp.Tablet_Pad_V2_Enter_Event,
+	zwp.Tablet_Pad_V2_Leave_Event,
+	zwp.Tablet_Pad_V2_Removed_Event,
+	zwp.Tablet_Pad_Dial_V2_Delta_Event,
+	zwp.Tablet_Pad_Dial_V2_Frame_Event,
+	xdg.Wm_Base_Ping_Event,
+	xdg.Surface_Configure_Event,
+	xdg.Toplevel_Configure_Event,
+	xdg.Toplevel_Close_Event,
+	xdg.Toplevel_Configure_Bounds_Event,
+	xdg.Toplevel_Wm_Capabilities_Event,
+	xdg.Popup_Configure_Event,
+	xdg.Popup_Popup_Done_Event,
+	xdg.Popup_Repositioned_Event,
+	wp.Color_Manager_V1_Supported_Intent_Event,
+	wp.Color_Manager_V1_Supported_Feature_Event,
+	wp.Color_Manager_V1_Supported_Tf_Named_Event,
+	wp.Color_Manager_V1_Supported_Primaries_Named_Event,
+	wp.Color_Manager_V1_Done_Event,
+	wp.Color_Management_Output_V1_Image_Description_Changed_Event,
+	wp.Color_Management_Surface_Feedback_V1_Preferred_Changed_Event,
+	wp.Color_Management_Surface_Feedback_V1_Preferred_Changed2_Event,
+	wp.Image_Description_V1_Failed_Event,
+	wp.Image_Description_V1_Ready_Event,
+	wp.Image_Description_V1_Ready2_Event,
+	wp.Image_Description_Info_V1_Done_Event,
+	wp.Image_Description_Info_V1_Icc_File_Event,
+	wp.Image_Description_Info_V1_Primaries_Event,
+	wp.Image_Description_Info_V1_Primaries_Named_Event,
+	wp.Image_Description_Info_V1_Tf_Power_Event,
+	wp.Image_Description_Info_V1_Tf_Named_Event,
+	wp.Image_Description_Info_V1_Luminances_Event,
+	wp.Image_Description_Info_V1_Target_Primaries_Event,
+	wp.Image_Description_Info_V1_Target_Luminance_Event,
+	wp.Image_Description_Info_V1_Target_Max_Cll_Event,
+	wp.Image_Description_Info_V1_Target_Max_Fall_Event,
+	wp.Color_Representation_Manager_V1_Supported_Alpha_Mode_Event,
+	wp.Color_Representation_Manager_V1_Supported_Coefficients_And_Ranges_Event,
+	wp.Color_Representation_Manager_V1_Done_Event,
+	wp.Drm_Lease_Device_V1_Drm_Fd_Event,
+	wp.Drm_Lease_Device_V1_Connector_Event,
+	wp.Drm_Lease_Device_V1_Done_Event,
+	wp.Drm_Lease_Device_V1_Released_Event,
+	wp.Drm_Lease_Connector_V1_Name_Event,
+	wp.Drm_Lease_Connector_V1_Description_Event,
+	wp.Drm_Lease_Connector_V1_Connector_Id_Event,
+	wp.Drm_Lease_Connector_V1_Done_Event,
+	wp.Drm_Lease_Connector_V1_Withdrawn_Event,
+	wp.Drm_Lease_V1_Lease_Fd_Event,
+	wp.Drm_Lease_V1_Finished_Event,
+	ext.Background_Effect_Manager_V1_Capabilities_Event,
+	ext.Data_Control_Device_V1_Data_Offer_Event,
+	ext.Data_Control_Device_V1_Selection_Event,
+	ext.Data_Control_Device_V1_Finished_Event,
+	ext.Data_Control_Device_V1_Primary_Selection_Event,
+	ext.Data_Control_Source_V1_Send_Event,
+	ext.Data_Control_Source_V1_Cancelled_Event,
+	ext.Data_Control_Offer_V1_Offer_Event,
+	ext.Foreign_Toplevel_List_V1_Toplevel_Event,
+	ext.Foreign_Toplevel_List_V1_Finished_Event,
+	ext.Foreign_Toplevel_Handle_V1_Closed_Event,
+	ext.Foreign_Toplevel_Handle_V1_Done_Event,
+	ext.Foreign_Toplevel_Handle_V1_Title_Event,
+	ext.Foreign_Toplevel_Handle_V1_App_Id_Event,
+	ext.Foreign_Toplevel_Handle_V1_Identifier_Event,
+	ext.Idle_Notification_V1_Idled_Event,
+	ext.Idle_Notification_V1_Resumed_Event,
+	ext.Image_Copy_Capture_Session_V1_Buffer_Size_Event,
+	ext.Image_Copy_Capture_Session_V1_Shm_Format_Event,
+	ext.Image_Copy_Capture_Session_V1_Dmabuf_Device_Event,
+	ext.Image_Copy_Capture_Session_V1_Dmabuf_Format_Event,
+	ext.Image_Copy_Capture_Session_V1_Done_Event,
+	ext.Image_Copy_Capture_Session_V1_Stopped_Event,
+	ext.Image_Copy_Capture_Frame_V1_Transform_Event,
+	ext.Image_Copy_Capture_Frame_V1_Damage_Event,
+	ext.Image_Copy_Capture_Frame_V1_Presentation_Time_Event,
+	ext.Image_Copy_Capture_Frame_V1_Ready_Event,
+	ext.Image_Copy_Capture_Frame_V1_Failed_Event,
+	ext.Image_Copy_Capture_Cursor_Session_V1_Enter_Event,
+	ext.Image_Copy_Capture_Cursor_Session_V1_Leave_Event,
+	ext.Image_Copy_Capture_Cursor_Session_V1_Position_Event,
+	ext.Image_Copy_Capture_Cursor_Session_V1_Hotspot_Event,
+	ext.Session_Lock_V1_Locked_Event,
+	ext.Session_Lock_V1_Finished_Event,
+	ext.Session_Lock_Surface_V1_Configure_Event,
+	ext.Transient_Seat_V1_Ready_Event,
+	ext.Transient_Seat_V1_Denied_Event,
+	ext.Workspace_Manager_V1_Workspace_Group_Event,
+	ext.Workspace_Manager_V1_Workspace_Event,
+	ext.Workspace_Manager_V1_Done_Event,
+	ext.Workspace_Manager_V1_Finished_Event,
+	ext.Workspace_Group_Handle_V1_Capabilities_Event,
+	ext.Workspace_Group_Handle_V1_Output_Enter_Event,
+	ext.Workspace_Group_Handle_V1_Output_Leave_Event,
+	ext.Workspace_Group_Handle_V1_Workspace_Enter_Event,
+	ext.Workspace_Group_Handle_V1_Workspace_Leave_Event,
+	ext.Workspace_Group_Handle_V1_Removed_Event,
+	ext.Workspace_Handle_V1_Id_Event,
+	ext.Workspace_Handle_V1_Name_Event,
+	ext.Workspace_Handle_V1_Coordinates_Event,
+	ext.Workspace_Handle_V1_State_Event,
+	ext.Workspace_Handle_V1_Capabilities_Event,
+	ext.Workspace_Handle_V1_Removed_Event,
+	wp.Fractional_Scale_V1_Preferred_Scale_Event,
+	xdg.Activation_Token_V1_Done_Event,
+	xdg.Toplevel_Icon_Manager_V1_Icon_Size_Event,
+	xdg.Toplevel_Icon_Manager_V1_Done_Event,
 }
-
-Event_Display_Error :: struct {
-	object: Display,
-	object_id: Object,
-	code: u32,
-	message: string,
-}
-Event_Display_Delete_Id :: struct {
-	object: Display,
-	id: u32,
-}
-Event_Registry_Global :: struct {
-	object: Registry,
-	name: u32,
-	interface: string,
-	version: u32,
-}
-Event_Registry_Global_Remove :: struct {
-	object: Registry,
-	name: u32,
-}
-Event_Callback_Done :: struct {
-	object: Callback,
-	callback_data: u32,
-}
-Event_Shm_Format :: struct {
-	object: Shm,
-	format: Shm_Format,
-}
-Event_Buffer_Release :: struct {
-	object: Buffer,
-}
-Event_Data_Offer_Offer :: struct {
-	object: Data_Offer,
-	mime_type: string,
-}
-Event_Data_Offer_Source_Actions :: struct {
-	object: Data_Offer,
-	source_actions: Data_Device_Manager_Dnd_Action,
-}
-Event_Data_Offer_Action :: struct {
-	object: Data_Offer,
-	dnd_action: Data_Device_Manager_Dnd_Action,
-}
-Event_Data_Source_Target :: struct {
-	object: Data_Source,
-	mime_type: string,
-}
-Event_Data_Source_Send :: struct {
-	object: Data_Source,
-	mime_type: string,
-	fd: Fd,
-}
-Event_Data_Source_Cancelled :: struct {
-	object: Data_Source,
-}
-Event_Data_Source_Dnd_Drop_Performed :: struct {
-	object: Data_Source,
-}
-Event_Data_Source_Dnd_Finished :: struct {
-	object: Data_Source,
-}
-Event_Data_Source_Action :: struct {
-	object: Data_Source,
-	dnd_action: Data_Device_Manager_Dnd_Action,
-}
-Event_Data_Device_Data_Offer :: struct {
-	object: Data_Device,
-	id: Data_Offer,
-}
-Event_Data_Device_Enter :: struct {
-	object: Data_Device,
-	serial: u32,
-	surface: Surface,
-	x: f64,
-	y: f64,
-	id: Data_Offer,
-}
-Event_Data_Device_Leave :: struct {
-	object: Data_Device,
-}
-Event_Data_Device_Motion :: struct {
-	object: Data_Device,
-	time: u32,
-	x: f64,
-	y: f64,
-}
-Event_Data_Device_Drop :: struct {
-	object: Data_Device,
-}
-Event_Data_Device_Selection :: struct {
-	object: Data_Device,
-	id: Data_Offer,
-}
-Event_Shell_Surface_Ping :: struct {
-	object: Shell_Surface,
-	serial: u32,
-}
-Event_Shell_Surface_Configure :: struct {
-	object: Shell_Surface,
-	edges: Shell_Surface_Resize,
-	width: i32,
-	height: i32,
-}
-Event_Shell_Surface_Popup_Done :: struct {
-	object: Shell_Surface,
-}
-Event_Surface_Enter :: struct {
-	object: Surface,
-	output: Output,
-}
-Event_Surface_Leave :: struct {
-	object: Surface,
-	output: Output,
-}
-Event_Surface_Preferred_Buffer_Scale :: struct {
-	object: Surface,
-	factor: i32,
-}
-Event_Surface_Preferred_Buffer_Transform :: struct {
-	object: Surface,
-	transform: Output_Transform,
-}
-Event_Seat_Capabilities :: struct {
-	object: Seat,
-	capabilities: Seat_Capability,
-}
-Event_Seat_Name :: struct {
-	object: Seat,
-	name: string,
-}
-Event_Pointer_Enter :: struct {
-	object: Pointer,
-	serial: u32,
-	surface: Surface,
-	surface_x: f64,
-	surface_y: f64,
-}
-Event_Pointer_Leave :: struct {
-	object: Pointer,
-	serial: u32,
-	surface: Surface,
-}
-Event_Pointer_Motion :: struct {
-	object: Pointer,
-	time: u32,
-	surface_x: f64,
-	surface_y: f64,
-}
-Event_Pointer_Button :: struct {
-	object: Pointer,
-	serial: u32,
-	time: u32,
-	button: u32,
-	state: Pointer_Button_State,
-}
-Event_Pointer_Axis :: struct {
-	object: Pointer,
-	time: u32,
-	axis: Pointer_Axis,
-	value: f64,
-}
-Event_Pointer_Frame :: struct {
-	object: Pointer,
-}
-Event_Pointer_Axis_Source :: struct {
-	object: Pointer,
-	axis_source: Pointer_Axis_Source,
-}
-Event_Pointer_Axis_Stop :: struct {
-	object: Pointer,
-	time: u32,
-	axis: Pointer_Axis,
-}
-Event_Pointer_Axis_Discrete :: struct {
-	object: Pointer,
-	axis: Pointer_Axis,
-	discrete: i32,
-}
-Event_Pointer_Axis_Value120 :: struct {
-	object: Pointer,
-	axis: Pointer_Axis,
-	value120: i32,
-}
-Event_Pointer_Axis_Relative_Direction :: struct {
-	object: Pointer,
-	axis: Pointer_Axis,
-	direction: Pointer_Axis_Relative_Direction,
-}
-Event_Keyboard_Keymap :: struct {
-	object: Keyboard,
-	format: Keyboard_Keymap_Format,
-	fd: Fd,
-	size: u32,
-}
-Event_Keyboard_Enter :: struct {
-	object: Keyboard,
-	serial: u32,
-	surface: Surface,
-	keys: []byte,
-}
-Event_Keyboard_Leave :: struct {
-	object: Keyboard,
-	serial: u32,
-	surface: Surface,
-}
-Event_Keyboard_Key :: struct {
-	object: Keyboard,
-	serial: u32,
-	time: u32,
-	key: u32,
-	state: Keyboard_Key_State,
-}
-Event_Keyboard_Modifiers :: struct {
-	object: Keyboard,
-	serial: u32,
-	mods_depressed: u32,
-	mods_latched: u32,
-	mods_locked: u32,
-	group: u32,
-}
-Event_Keyboard_Repeat_Info :: struct {
-	object: Keyboard,
-	rate: i32,
-	delay: i32,
-}
-Event_Touch_Down :: struct {
-	object: Touch,
-	serial: u32,
-	time: u32,
-	surface: Surface,
-	id: i32,
-	x: f64,
-	y: f64,
-}
-Event_Touch_Up :: struct {
-	object: Touch,
-	serial: u32,
-	time: u32,
-	id: i32,
-}
-Event_Touch_Motion :: struct {
-	object: Touch,
-	time: u32,
-	id: i32,
-	x: f64,
-	y: f64,
-}
-Event_Touch_Frame :: struct {
-	object: Touch,
-}
-Event_Touch_Cancel :: struct {
-	object: Touch,
-}
-Event_Touch_Shape :: struct {
-	object: Touch,
-	id: i32,
-	major: f64,
-	minor: f64,
-}
-Event_Touch_Orientation :: struct {
-	object: Touch,
-	id: i32,
-	orientation: f64,
-}
-Event_Output_Geometry :: struct {
-	object: Output,
-	x: i32,
-	y: i32,
-	physical_width: i32,
-	physical_height: i32,
-	subpixel: Output_Subpixel,
-	make: string,
-	model: string,
-	transform: Output_Transform,
-}
-Event_Output_Mode :: struct {
-	object: Output,
-	flags: Output_Mode,
-	width: i32,
-	height: i32,
-	refresh: i32,
-}
-Event_Output_Done :: struct {
-	object: Output,
-}
-Event_Output_Scale :: struct {
-	object: Output,
-	factor: i32,
-}
-Event_Output_Name :: struct {
-	object: Output,
-	name: string,
-}
-Event_Output_Description :: struct {
-	object: Output,
-	description: string,
-}
-Event_Zwp_Linux_Dmabuf_V1_Format :: struct {
-	object: Zwp_Linux_Dmabuf_V1,
-	format: u32,
-}
-Event_Zwp_Linux_Dmabuf_V1_Modifier :: struct {
-	object: Zwp_Linux_Dmabuf_V1,
-	format: u32,
-	modifier_hi: u32,
-	modifier_lo: u32,
-}
-Event_Zwp_Linux_Buffer_Params_V1_Created :: struct {
-	object: Zwp_Linux_Buffer_Params_V1,
-	buffer: Buffer,
-}
-Event_Zwp_Linux_Buffer_Params_V1_Failed :: struct {
-	object: Zwp_Linux_Buffer_Params_V1,
-}
-Event_Zwp_Linux_Dmabuf_Feedback_V1_Done :: struct {
-	object: Zwp_Linux_Dmabuf_Feedback_V1,
-}
-Event_Zwp_Linux_Dmabuf_Feedback_V1_Format_Table :: struct {
-	object: Zwp_Linux_Dmabuf_Feedback_V1,
-	fd: Fd,
-	size: u32,
-}
-Event_Zwp_Linux_Dmabuf_Feedback_V1_Main_Device :: struct {
-	object: Zwp_Linux_Dmabuf_Feedback_V1,
-	device: []byte,
-}
-Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Done :: struct {
-	object: Zwp_Linux_Dmabuf_Feedback_V1,
-}
-Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Target_Device :: struct {
-	object: Zwp_Linux_Dmabuf_Feedback_V1,
-	device: []byte,
-}
-Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Formats :: struct {
-	object: Zwp_Linux_Dmabuf_Feedback_V1,
-	indices: []byte,
-}
-Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags :: struct {
-	object: Zwp_Linux_Dmabuf_Feedback_V1,
-	flags: Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags,
-}
-Event_Wp_Presentation_Clock_Id :: struct {
-	object: Wp_Presentation,
-	clk_id: u32,
-}
-Event_Wp_Presentation_Feedback_Sync_Output :: struct {
-	object: Wp_Presentation_Feedback,
-	output: Output,
-}
-Event_Wp_Presentation_Feedback_Presented :: struct {
-	object: Wp_Presentation_Feedback,
-	tv_sec_hi: u32,
-	tv_sec_lo: u32,
-	tv_nsec: u32,
-	refresh: u32,
-	seq_hi: u32,
-	seq_lo: u32,
-	flags: Wp_Presentation_Feedback_Kind,
-}
-Event_Wp_Presentation_Feedback_Discarded :: struct {
-	object: Wp_Presentation_Feedback,
-}
-Event_Zwp_Tablet_Seat_V2_Tablet_Added :: struct {
-	object: Zwp_Tablet_Seat_V2,
-	id: Zwp_Tablet_V2,
-}
-Event_Zwp_Tablet_Seat_V2_Tool_Added :: struct {
-	object: Zwp_Tablet_Seat_V2,
-	id: Zwp_Tablet_Tool_V2,
-}
-Event_Zwp_Tablet_Seat_V2_Pad_Added :: struct {
-	object: Zwp_Tablet_Seat_V2,
-	id: Zwp_Tablet_Pad_V2,
-}
-Event_Zwp_Tablet_Tool_V2_Type :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	tool_type: Zwp_Tablet_Tool_V2_Type,
-}
-Event_Zwp_Tablet_Tool_V2_Hardware_Serial :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	hardware_serial_hi: u32,
-	hardware_serial_lo: u32,
-}
-Event_Zwp_Tablet_Tool_V2_Hardware_Id_Wacom :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	hardware_id_hi: u32,
-	hardware_id_lo: u32,
-}
-Event_Zwp_Tablet_Tool_V2_Capability :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	capability: Zwp_Tablet_Tool_V2_Capability,
-}
-Event_Zwp_Tablet_Tool_V2_Done :: struct {
-	object: Zwp_Tablet_Tool_V2,
-}
-Event_Zwp_Tablet_Tool_V2_Removed :: struct {
-	object: Zwp_Tablet_Tool_V2,
-}
-Event_Zwp_Tablet_Tool_V2_Proximity_In :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	serial: u32,
-	tablet: Zwp_Tablet_V2,
-	surface: Surface,
-}
-Event_Zwp_Tablet_Tool_V2_Proximity_Out :: struct {
-	object: Zwp_Tablet_Tool_V2,
-}
-Event_Zwp_Tablet_Tool_V2_Down :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	serial: u32,
-}
-Event_Zwp_Tablet_Tool_V2_Up :: struct {
-	object: Zwp_Tablet_Tool_V2,
-}
-Event_Zwp_Tablet_Tool_V2_Motion :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	x: f64,
-	y: f64,
-}
-Event_Zwp_Tablet_Tool_V2_Pressure :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	pressure: u32,
-}
-Event_Zwp_Tablet_Tool_V2_Distance :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	distance: u32,
-}
-Event_Zwp_Tablet_Tool_V2_Tilt :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	tilt_x: f64,
-	tilt_y: f64,
-}
-Event_Zwp_Tablet_Tool_V2_Rotation :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	degrees: f64,
-}
-Event_Zwp_Tablet_Tool_V2_Slider :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	position: i32,
-}
-Event_Zwp_Tablet_Tool_V2_Wheel :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	degrees: f64,
-	clicks: i32,
-}
-Event_Zwp_Tablet_Tool_V2_Button :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	serial: u32,
-	button: u32,
-	state: Zwp_Tablet_Tool_V2_Button_State,
-}
-Event_Zwp_Tablet_Tool_V2_Frame :: struct {
-	object: Zwp_Tablet_Tool_V2,
-	time: u32,
-}
-Event_Zwp_Tablet_V2_Name :: struct {
-	object: Zwp_Tablet_V2,
-	name: string,
-}
-Event_Zwp_Tablet_V2_Id :: struct {
-	object: Zwp_Tablet_V2,
-	vid: u32,
-	pid: u32,
-}
-Event_Zwp_Tablet_V2_Path :: struct {
-	object: Zwp_Tablet_V2,
-	path: string,
-}
-Event_Zwp_Tablet_V2_Done :: struct {
-	object: Zwp_Tablet_V2,
-}
-Event_Zwp_Tablet_V2_Removed :: struct {
-	object: Zwp_Tablet_V2,
-}
-Event_Zwp_Tablet_V2_Bustype :: struct {
-	object: Zwp_Tablet_V2,
-	bustype: Zwp_Tablet_V2_Bustype,
-}
-Event_Zwp_Tablet_Pad_Ring_V2_Source :: struct {
-	object: Zwp_Tablet_Pad_Ring_V2,
-	source: Zwp_Tablet_Pad_Ring_V2_Source,
-}
-Event_Zwp_Tablet_Pad_Ring_V2_Angle :: struct {
-	object: Zwp_Tablet_Pad_Ring_V2,
-	degrees: f64,
-}
-Event_Zwp_Tablet_Pad_Ring_V2_Stop :: struct {
-	object: Zwp_Tablet_Pad_Ring_V2,
-}
-Event_Zwp_Tablet_Pad_Ring_V2_Frame :: struct {
-	object: Zwp_Tablet_Pad_Ring_V2,
-	time: u32,
-}
-Event_Zwp_Tablet_Pad_Strip_V2_Source :: struct {
-	object: Zwp_Tablet_Pad_Strip_V2,
-	source: Zwp_Tablet_Pad_Strip_V2_Source,
-}
-Event_Zwp_Tablet_Pad_Strip_V2_Position :: struct {
-	object: Zwp_Tablet_Pad_Strip_V2,
-	position: u32,
-}
-Event_Zwp_Tablet_Pad_Strip_V2_Stop :: struct {
-	object: Zwp_Tablet_Pad_Strip_V2,
-}
-Event_Zwp_Tablet_Pad_Strip_V2_Frame :: struct {
-	object: Zwp_Tablet_Pad_Strip_V2,
-	time: u32,
-}
-Event_Zwp_Tablet_Pad_Group_V2_Buttons :: struct {
-	object: Zwp_Tablet_Pad_Group_V2,
-	buttons: []byte,
-}
-Event_Zwp_Tablet_Pad_Group_V2_Ring :: struct {
-	object: Zwp_Tablet_Pad_Group_V2,
-	ring: Zwp_Tablet_Pad_Ring_V2,
-}
-Event_Zwp_Tablet_Pad_Group_V2_Strip :: struct {
-	object: Zwp_Tablet_Pad_Group_V2,
-	strip: Zwp_Tablet_Pad_Strip_V2,
-}
-Event_Zwp_Tablet_Pad_Group_V2_Modes :: struct {
-	object: Zwp_Tablet_Pad_Group_V2,
-	modes: u32,
-}
-Event_Zwp_Tablet_Pad_Group_V2_Done :: struct {
-	object: Zwp_Tablet_Pad_Group_V2,
-}
-Event_Zwp_Tablet_Pad_Group_V2_Mode_Switch :: struct {
-	object: Zwp_Tablet_Pad_Group_V2,
-	time: u32,
-	serial: u32,
-	mode: u32,
-}
-Event_Zwp_Tablet_Pad_Group_V2_Dial :: struct {
-	object: Zwp_Tablet_Pad_Group_V2,
-	dial: Zwp_Tablet_Pad_Dial_V2,
-}
-Event_Zwp_Tablet_Pad_V2_Group :: struct {
-	object: Zwp_Tablet_Pad_V2,
-	pad_group: Zwp_Tablet_Pad_Group_V2,
-}
-Event_Zwp_Tablet_Pad_V2_Path :: struct {
-	object: Zwp_Tablet_Pad_V2,
-	path: string,
-}
-Event_Zwp_Tablet_Pad_V2_Buttons :: struct {
-	object: Zwp_Tablet_Pad_V2,
-	buttons: u32,
-}
-Event_Zwp_Tablet_Pad_V2_Done :: struct {
-	object: Zwp_Tablet_Pad_V2,
-}
-Event_Zwp_Tablet_Pad_V2_Button :: struct {
-	object: Zwp_Tablet_Pad_V2,
-	time: u32,
-	button: u32,
-	state: Zwp_Tablet_Pad_V2_Button_State,
-}
-Event_Zwp_Tablet_Pad_V2_Enter :: struct {
-	object: Zwp_Tablet_Pad_V2,
-	serial: u32,
-	tablet: Zwp_Tablet_V2,
-	surface: Surface,
-}
-Event_Zwp_Tablet_Pad_V2_Leave :: struct {
-	object: Zwp_Tablet_Pad_V2,
-	serial: u32,
-	surface: Surface,
-}
-Event_Zwp_Tablet_Pad_V2_Removed :: struct {
-	object: Zwp_Tablet_Pad_V2,
-}
-Event_Zwp_Tablet_Pad_Dial_V2_Delta :: struct {
-	object: Zwp_Tablet_Pad_Dial_V2,
-	value120: i32,
-}
-Event_Zwp_Tablet_Pad_Dial_V2_Frame :: struct {
-	object: Zwp_Tablet_Pad_Dial_V2,
-	time: u32,
-}
-Event_Xdg_Wm_Base_Ping :: struct {
-	object: Xdg_Wm_Base,
-	serial: u32,
-}
-Event_Xdg_Surface_Configure :: struct {
-	object: Xdg_Surface,
-	serial: u32,
-}
-Event_Xdg_Toplevel_Configure :: struct {
-	object: Xdg_Toplevel,
-	width: i32,
-	height: i32,
-	states: []byte,
-}
-Event_Xdg_Toplevel_Close :: struct {
-	object: Xdg_Toplevel,
-}
-Event_Xdg_Toplevel_Configure_Bounds :: struct {
-	object: Xdg_Toplevel,
-	width: i32,
-	height: i32,
-}
-Event_Xdg_Toplevel_Wm_Capabilities :: struct {
-	object: Xdg_Toplevel,
-	capabilities: []byte,
-}
-Event_Xdg_Popup_Configure :: struct {
-	object: Xdg_Popup,
-	x: i32,
-	y: i32,
-	width: i32,
-	height: i32,
-}
-Event_Xdg_Popup_Popup_Done :: struct {
-	object: Xdg_Popup,
-}
-Event_Xdg_Popup_Repositioned :: struct {
-	object: Xdg_Popup,
-	token: u32,
-}
-Event_Wp_Color_Manager_V1_Supported_Intent :: struct {
-	object: Wp_Color_Manager_V1,
-	render_intent: Wp_Color_Manager_V1_Render_Intent,
-}
-Event_Wp_Color_Manager_V1_Supported_Feature :: struct {
-	object: Wp_Color_Manager_V1,
-	feature: Wp_Color_Manager_V1_Feature,
-}
-Event_Wp_Color_Manager_V1_Supported_Tf_Named :: struct {
-	object: Wp_Color_Manager_V1,
-	tf: Wp_Color_Manager_V1_Transfer_Function,
-}
-Event_Wp_Color_Manager_V1_Supported_Primaries_Named :: struct {
-	object: Wp_Color_Manager_V1,
-	primaries: Wp_Color_Manager_V1_Primaries,
-}
-Event_Wp_Color_Manager_V1_Done :: struct {
-	object: Wp_Color_Manager_V1,
-}
-Event_Wp_Color_Management_Output_V1_Image_Description_Changed :: struct {
-	object: Wp_Color_Management_Output_V1,
-}
-Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed :: struct {
-	object: Wp_Color_Management_Surface_Feedback_V1,
-	identity: u32,
-}
-Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2 :: struct {
-	object: Wp_Color_Management_Surface_Feedback_V1,
-	identity_hi: u32,
-	identity_lo: u32,
-}
-Event_Wp_Image_Description_V1_Failed :: struct {
-	object: Wp_Image_Description_V1,
-	cause: Wp_Image_Description_V1_Cause,
-	msg: string,
-}
-Event_Wp_Image_Description_V1_Ready :: struct {
-	object: Wp_Image_Description_V1,
-	identity: u32,
-}
-Event_Wp_Image_Description_V1_Ready2 :: struct {
-	object: Wp_Image_Description_V1,
-	identity_hi: u32,
-	identity_lo: u32,
-}
-Event_Wp_Image_Description_Info_V1_Done :: struct {
-	object: Wp_Image_Description_Info_V1,
-}
-Event_Wp_Image_Description_Info_V1_Icc_File :: struct {
-	object: Wp_Image_Description_Info_V1,
-	icc: Fd,
-	icc_size: u32,
-}
-Event_Wp_Image_Description_Info_V1_Primaries :: struct {
-	object: Wp_Image_Description_Info_V1,
-	r_x: i32,
-	r_y: i32,
-	g_x: i32,
-	g_y: i32,
-	b_x: i32,
-	b_y: i32,
-	w_x: i32,
-	w_y: i32,
-}
-Event_Wp_Image_Description_Info_V1_Primaries_Named :: struct {
-	object: Wp_Image_Description_Info_V1,
-	primaries: Wp_Color_Manager_V1_Primaries,
-}
-Event_Wp_Image_Description_Info_V1_Tf_Power :: struct {
-	object: Wp_Image_Description_Info_V1,
-	eexp: u32,
-}
-Event_Wp_Image_Description_Info_V1_Tf_Named :: struct {
-	object: Wp_Image_Description_Info_V1,
-	tf: Wp_Color_Manager_V1_Transfer_Function,
-}
-Event_Wp_Image_Description_Info_V1_Luminances :: struct {
-	object: Wp_Image_Description_Info_V1,
-	min_lum: u32,
-	max_lum: u32,
-	reference_lum: u32,
-}
-Event_Wp_Image_Description_Info_V1_Target_Primaries :: struct {
-	object: Wp_Image_Description_Info_V1,
-	r_x: i32,
-	r_y: i32,
-	g_x: i32,
-	g_y: i32,
-	b_x: i32,
-	b_y: i32,
-	w_x: i32,
-	w_y: i32,
-}
-Event_Wp_Image_Description_Info_V1_Target_Luminance :: struct {
-	object: Wp_Image_Description_Info_V1,
-	min_lum: u32,
-	max_lum: u32,
-}
-Event_Wp_Image_Description_Info_V1_Target_Max_Cll :: struct {
-	object: Wp_Image_Description_Info_V1,
-	max_cll: u32,
-}
-Event_Wp_Image_Description_Info_V1_Target_Max_Fall :: struct {
-	object: Wp_Image_Description_Info_V1,
-	max_fall: u32,
-}
-Event_Wp_Color_Representation_Manager_V1_Supported_Alpha_Mode :: struct {
-	object: Wp_Color_Representation_Manager_V1,
-	alpha_mode: Wp_Color_Representation_Surface_V1_Alpha_Mode,
-}
-Event_Wp_Color_Representation_Manager_V1_Supported_Coefficients_And_Ranges :: struct {
-	object: Wp_Color_Representation_Manager_V1,
-	coefficients: Wp_Color_Representation_Surface_V1_Coefficients,
-	range: Wp_Color_Representation_Surface_V1_Range,
-}
-Event_Wp_Color_Representation_Manager_V1_Done :: struct {
-	object: Wp_Color_Representation_Manager_V1,
-}
-Event_Wp_Drm_Lease_Device_V1_Drm_Fd :: struct {
-	object: Wp_Drm_Lease_Device_V1,
-	fd: Fd,
-}
-Event_Wp_Drm_Lease_Device_V1_Connector :: struct {
-	object: Wp_Drm_Lease_Device_V1,
-	id: Wp_Drm_Lease_Connector_V1,
-}
-Event_Wp_Drm_Lease_Device_V1_Done :: struct {
-	object: Wp_Drm_Lease_Device_V1,
-}
-Event_Wp_Drm_Lease_Device_V1_Released :: struct {
-	object: Wp_Drm_Lease_Device_V1,
-}
-Event_Wp_Drm_Lease_Connector_V1_Name :: struct {
-	object: Wp_Drm_Lease_Connector_V1,
-	name: string,
-}
-Event_Wp_Drm_Lease_Connector_V1_Description :: struct {
-	object: Wp_Drm_Lease_Connector_V1,
-	description: string,
-}
-Event_Wp_Drm_Lease_Connector_V1_Connector_Id :: struct {
-	object: Wp_Drm_Lease_Connector_V1,
-	connector_id: u32,
-}
-Event_Wp_Drm_Lease_Connector_V1_Done :: struct {
-	object: Wp_Drm_Lease_Connector_V1,
-}
-Event_Wp_Drm_Lease_Connector_V1_Withdrawn :: struct {
-	object: Wp_Drm_Lease_Connector_V1,
-}
-Event_Wp_Drm_Lease_V1_Lease_Fd :: struct {
-	object: Wp_Drm_Lease_V1,
-	leased_fd: Fd,
-}
-Event_Wp_Drm_Lease_V1_Finished :: struct {
-	object: Wp_Drm_Lease_V1,
-}
-Event_Ext_Background_Effect_Manager_V1_Capabilities :: struct {
-	object: Ext_Background_Effect_Manager_V1,
-	flags: Ext_Background_Effect_Manager_V1_Capability,
-}
-Event_Ext_Data_Control_Device_V1_Data_Offer :: struct {
-	object: Ext_Data_Control_Device_V1,
-	id: Ext_Data_Control_Offer_V1,
-}
-Event_Ext_Data_Control_Device_V1_Selection :: struct {
-	object: Ext_Data_Control_Device_V1,
-	id: Ext_Data_Control_Offer_V1,
-}
-Event_Ext_Data_Control_Device_V1_Finished :: struct {
-	object: Ext_Data_Control_Device_V1,
-}
-Event_Ext_Data_Control_Device_V1_Primary_Selection :: struct {
-	object: Ext_Data_Control_Device_V1,
-	id: Ext_Data_Control_Offer_V1,
-}
-Event_Ext_Data_Control_Source_V1_Send :: struct {
-	object: Ext_Data_Control_Source_V1,
-	mime_type: string,
-	fd: Fd,
-}
-Event_Ext_Data_Control_Source_V1_Cancelled :: struct {
-	object: Ext_Data_Control_Source_V1,
-}
-Event_Ext_Data_Control_Offer_V1_Offer :: struct {
-	object: Ext_Data_Control_Offer_V1,
-	mime_type: string,
-}
-Event_Ext_Foreign_Toplevel_List_V1_Toplevel :: struct {
-	object: Ext_Foreign_Toplevel_List_V1,
-	toplevel: Ext_Foreign_Toplevel_Handle_V1,
-}
-Event_Ext_Foreign_Toplevel_List_V1_Finished :: struct {
-	object: Ext_Foreign_Toplevel_List_V1,
-}
-Event_Ext_Foreign_Toplevel_Handle_V1_Closed :: struct {
-	object: Ext_Foreign_Toplevel_Handle_V1,
-}
-Event_Ext_Foreign_Toplevel_Handle_V1_Done :: struct {
-	object: Ext_Foreign_Toplevel_Handle_V1,
-}
-Event_Ext_Foreign_Toplevel_Handle_V1_Title :: struct {
-	object: Ext_Foreign_Toplevel_Handle_V1,
-	title: string,
-}
-Event_Ext_Foreign_Toplevel_Handle_V1_App_Id :: struct {
-	object: Ext_Foreign_Toplevel_Handle_V1,
-	app_id: string,
-}
-Event_Ext_Foreign_Toplevel_Handle_V1_Identifier :: struct {
-	object: Ext_Foreign_Toplevel_Handle_V1,
-	identifier: string,
-}
-Event_Ext_Idle_Notification_V1_Idled :: struct {
-	object: Ext_Idle_Notification_V1,
-}
-Event_Ext_Idle_Notification_V1_Resumed :: struct {
-	object: Ext_Idle_Notification_V1,
-}
-Event_Ext_Image_Copy_Capture_Session_V1_Buffer_Size :: struct {
-	object: Ext_Image_Copy_Capture_Session_V1,
-	width: u32,
-	height: u32,
-}
-Event_Ext_Image_Copy_Capture_Session_V1_Shm_Format :: struct {
-	object: Ext_Image_Copy_Capture_Session_V1,
-	format: Shm_Format,
-}
-Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Device :: struct {
-	object: Ext_Image_Copy_Capture_Session_V1,
-	device: []byte,
-}
-Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Format :: struct {
-	object: Ext_Image_Copy_Capture_Session_V1,
-	format: u32,
-	modifiers: []byte,
-}
-Event_Ext_Image_Copy_Capture_Session_V1_Done :: struct {
-	object: Ext_Image_Copy_Capture_Session_V1,
-}
-Event_Ext_Image_Copy_Capture_Session_V1_Stopped :: struct {
-	object: Ext_Image_Copy_Capture_Session_V1,
-}
-Event_Ext_Image_Copy_Capture_Frame_V1_Transform :: struct {
-	object: Ext_Image_Copy_Capture_Frame_V1,
-	transform: Output_Transform,
-}
-Event_Ext_Image_Copy_Capture_Frame_V1_Damage :: struct {
-	object: Ext_Image_Copy_Capture_Frame_V1,
-	x: i32,
-	y: i32,
-	width: i32,
-	height: i32,
-}
-Event_Ext_Image_Copy_Capture_Frame_V1_Presentation_Time :: struct {
-	object: Ext_Image_Copy_Capture_Frame_V1,
-	tv_sec_hi: u32,
-	tv_sec_lo: u32,
-	tv_nsec: u32,
-}
-Event_Ext_Image_Copy_Capture_Frame_V1_Ready :: struct {
-	object: Ext_Image_Copy_Capture_Frame_V1,
-}
-Event_Ext_Image_Copy_Capture_Frame_V1_Failed :: struct {
-	object: Ext_Image_Copy_Capture_Frame_V1,
-	reason: Ext_Image_Copy_Capture_Frame_V1_Failure_Reason,
-}
-Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Enter :: struct {
-	object: Ext_Image_Copy_Capture_Cursor_Session_V1,
-}
-Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Leave :: struct {
-	object: Ext_Image_Copy_Capture_Cursor_Session_V1,
-}
-Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Position :: struct {
-	object: Ext_Image_Copy_Capture_Cursor_Session_V1,
-	x: i32,
-	y: i32,
-}
-Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Hotspot :: struct {
-	object: Ext_Image_Copy_Capture_Cursor_Session_V1,
-	x: i32,
-	y: i32,
-}
-Event_Ext_Session_Lock_V1_Locked :: struct {
-	object: Ext_Session_Lock_V1,
-}
-Event_Ext_Session_Lock_V1_Finished :: struct {
-	object: Ext_Session_Lock_V1,
-}
-Event_Ext_Session_Lock_Surface_V1_Configure :: struct {
-	object: Ext_Session_Lock_Surface_V1,
-	serial: u32,
-	width: u32,
-	height: u32,
-}
-Event_Ext_Transient_Seat_V1_Ready :: struct {
-	object: Ext_Transient_Seat_V1,
-	global_name: u32,
-}
-Event_Ext_Transient_Seat_V1_Denied :: struct {
-	object: Ext_Transient_Seat_V1,
-}
-Event_Ext_Workspace_Manager_V1_Workspace_Group :: struct {
-	object: Ext_Workspace_Manager_V1,
-	workspace_group: Ext_Workspace_Group_Handle_V1,
-}
-Event_Ext_Workspace_Manager_V1_Workspace :: struct {
-	object: Ext_Workspace_Manager_V1,
-	workspace: Ext_Workspace_Handle_V1,
-}
-Event_Ext_Workspace_Manager_V1_Done :: struct {
-	object: Ext_Workspace_Manager_V1,
-}
-Event_Ext_Workspace_Manager_V1_Finished :: struct {
-	object: Ext_Workspace_Manager_V1,
-}
-Event_Ext_Workspace_Group_Handle_V1_Capabilities :: struct {
-	object: Ext_Workspace_Group_Handle_V1,
-	capabilities: Ext_Workspace_Group_Handle_V1_Group_Capabilities,
-}
-Event_Ext_Workspace_Group_Handle_V1_Output_Enter :: struct {
-	object: Ext_Workspace_Group_Handle_V1,
-	output: Output,
-}
-Event_Ext_Workspace_Group_Handle_V1_Output_Leave :: struct {
-	object: Ext_Workspace_Group_Handle_V1,
-	output: Output,
-}
-Event_Ext_Workspace_Group_Handle_V1_Workspace_Enter :: struct {
-	object: Ext_Workspace_Group_Handle_V1,
-	workspace: Ext_Workspace_Handle_V1,
-}
-Event_Ext_Workspace_Group_Handle_V1_Workspace_Leave :: struct {
-	object: Ext_Workspace_Group_Handle_V1,
-	workspace: Ext_Workspace_Handle_V1,
-}
-Event_Ext_Workspace_Group_Handle_V1_Removed :: struct {
-	object: Ext_Workspace_Group_Handle_V1,
-}
-Event_Ext_Workspace_Handle_V1_Id :: struct {
-	object: Ext_Workspace_Handle_V1,
-	id: string,
-}
-Event_Ext_Workspace_Handle_V1_Name :: struct {
-	object: Ext_Workspace_Handle_V1,
-	name: string,
-}
-Event_Ext_Workspace_Handle_V1_Coordinates :: struct {
-	object: Ext_Workspace_Handle_V1,
-	coordinates: []byte,
-}
-Event_Ext_Workspace_Handle_V1_State :: struct {
-	object: Ext_Workspace_Handle_V1,
-	state: Ext_Workspace_Handle_V1_State,
-}
-Event_Ext_Workspace_Handle_V1_Capabilities :: struct {
-	object: Ext_Workspace_Handle_V1,
-	capabilities: Ext_Workspace_Handle_V1_Workspace_Capabilities,
-}
-Event_Ext_Workspace_Handle_V1_Removed :: struct {
-	object: Ext_Workspace_Handle_V1,
-}
-Event_Wp_Fractional_Scale_V1_Preferred_Scale :: struct {
-	object: Wp_Fractional_Scale_V1,
-	scale: u32,
-}
-Event_Xdg_Activation_Token_V1_Done :: struct {
-	object: Xdg_Activation_Token_V1,
-	token: string,
-}
-Event_Xdg_Toplevel_Icon_Manager_V1_Icon_Size :: struct {
-	object: Xdg_Toplevel_Icon_Manager_V1,
-	size: i32,
-}
-Event_Xdg_Toplevel_Icon_Manager_V1_Done :: struct {
-	object: Xdg_Toplevel_Icon_Manager_V1,
-}
-
-parse_display_error :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Error, ok: bool) {
-	event.object = Display(object)
-	read(connection, &event.object_id) or_return
-	read(connection, &event.code) or_return
-	read(connection, &event.message) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_display@", object, ".error:", " object_id=", event.object_id, " code=", event.code, " message=", event.message)
-	ok = true
-	return
-}
-parse_display_delete_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Display_Delete_Id, ok: bool) {
-	event.object = Display(object)
-	read(connection, &event.id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_display@", object, ".delete_id:", " id=", event.id)
-	ok = true
-	return
-}
-parse_registry_global :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global, ok: bool) {
-	event.object = Registry(object)
-	read(connection, &event.name) or_return
-	read(connection, &event.interface) or_return
-	read(connection, &event.version) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_registry@", object, ".global:", " name=", event.name, " interface=", event.interface, " version=", event.version)
-	ok = true
-	return
-}
-parse_registry_global_remove :: proc(connection: ^Connection, object: u32) -> (event: Event_Registry_Global_Remove, ok: bool) {
-	event.object = Registry(object)
-	read(connection, &event.name) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_registry@", object, ".global_remove:", " name=", event.name)
-	ok = true
-	return
-}
-parse_callback_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Callback_Done, ok: bool) {
-	event.object = Callback(object)
-	read(connection, &event.callback_data) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_callback@", object, ".done:", " callback_data=", event.callback_data)
-	ok = true
-	return
-}
-parse_shm_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Shm_Format, ok: bool) {
-	event.object = Shm(object)
-	read(connection, &event.format) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_shm@", object, ".format:", " format=", event.format)
-	ok = true
-	return
-}
-parse_buffer_release :: proc(connection: ^Connection, object: u32) -> (event: Event_Buffer_Release, ok: bool) {
-	event.object = Buffer(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_buffer@", object, ".release:")
-	ok = true
-	return
-}
-parse_data_offer_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Offer, ok: bool) {
-	event.object = Data_Offer(object)
-	read(connection, &event.mime_type) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_offer@", object, ".offer:", " mime_type=", event.mime_type)
-	ok = true
-	return
-}
-parse_data_offer_source_actions :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Source_Actions, ok: bool) {
-	event.object = Data_Offer(object)
-	read(connection, &event.source_actions) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_offer@", object, ".source_actions:", " source_actions=", event.source_actions)
-	ok = true
-	return
-}
-parse_data_offer_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Offer_Action, ok: bool) {
-	event.object = Data_Offer(object)
-	read(connection, &event.dnd_action) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_offer@", object, ".action:", " dnd_action=", event.dnd_action)
-	ok = true
-	return
-}
-parse_data_source_target :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Target, ok: bool) {
-	event.object = Data_Source(object)
-	read(connection, &event.mime_type) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_source@", object, ".target:", " mime_type=", event.mime_type)
-	ok = true
-	return
-}
-parse_data_source_send :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Send, ok: bool) {
-	event.object = Data_Source(object)
-	read(connection, &event.mime_type) or_return
-	read_fd(connection, &event.fd) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_source@", object, ".send:", " mime_type=", event.mime_type, " fd=", event.fd)
-	ok = true
-	return
-}
-parse_data_source_cancelled :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Cancelled, ok: bool) {
-	event.object = Data_Source(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_source@", object, ".cancelled:")
-	ok = true
-	return
-}
-parse_data_source_dnd_drop_performed :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Drop_Performed, ok: bool) {
-	event.object = Data_Source(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_source@", object, ".dnd_drop_performed:")
-	ok = true
-	return
-}
-parse_data_source_dnd_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Dnd_Finished, ok: bool) {
-	event.object = Data_Source(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_source@", object, ".dnd_finished:")
-	ok = true
-	return
-}
-parse_data_source_action :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Source_Action, ok: bool) {
-	event.object = Data_Source(object)
-	read(connection, &event.dnd_action) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_source@", object, ".action:", " dnd_action=", event.dnd_action)
-	ok = true
-	return
-}
-parse_data_device_data_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Data_Offer, ok: bool) {
-	event.object = Data_Device(object)
-	read(connection, &event.id) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Data_Offer
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_device@", object, ".data_offer:", " id=", event.id)
-	ok = true
-	return
-}
-parse_data_device_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Enter, ok: bool) {
-	event.object = Data_Device(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.surface) or_return
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	read(connection, &event.id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_device@", object, ".enter:", " serial=", event.serial, " surface=", event.surface, " x=", event.x, " y=", event.y, " id=", event.id)
-	ok = true
-	return
-}
-parse_data_device_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Leave, ok: bool) {
-	event.object = Data_Device(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_device@", object, ".leave:")
-	ok = true
-	return
-}
-parse_data_device_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Motion, ok: bool) {
-	event.object = Data_Device(object)
-	read(connection, &event.time) or_return
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_device@", object, ".motion:", " time=", event.time, " x=", event.x, " y=", event.y)
-	ok = true
-	return
-}
-parse_data_device_drop :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Drop, ok: bool) {
-	event.object = Data_Device(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_device@", object, ".drop:")
-	ok = true
-	return
-}
-parse_data_device_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Data_Device_Selection, ok: bool) {
-	event.object = Data_Device(object)
-	read(connection, &event.id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_data_device@", object, ".selection:", " id=", event.id)
-	ok = true
-	return
-}
-parse_shell_surface_ping :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Ping, ok: bool) {
-	event.object = Shell_Surface(object)
-	read(connection, &event.serial) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_shell_surface@", object, ".ping:", " serial=", event.serial)
-	ok = true
-	return
-}
-parse_shell_surface_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Configure, ok: bool) {
-	event.object = Shell_Surface(object)
-	read(connection, &event.edges) or_return
-	read(connection, &event.width) or_return
-	read(connection, &event.height) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_shell_surface@", object, ".configure:", " edges=", event.edges, " width=", event.width, " height=", event.height)
-	ok = true
-	return
-}
-parse_shell_surface_popup_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Shell_Surface_Popup_Done, ok: bool) {
-	event.object = Shell_Surface(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_shell_surface@", object, ".popup_done:")
-	ok = true
-	return
-}
-parse_surface_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Enter, ok: bool) {
-	event.object = Surface(object)
-	read(connection, &event.output) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_surface@", object, ".enter:", " output=", event.output)
-	ok = true
-	return
-}
-parse_surface_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Leave, ok: bool) {
-	event.object = Surface(object)
-	read(connection, &event.output) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_surface@", object, ".leave:", " output=", event.output)
-	ok = true
-	return
-}
-parse_surface_preferred_buffer_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Scale, ok: bool) {
-	event.object = Surface(object)
-	read(connection, &event.factor) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_surface@", object, ".preferred_buffer_scale:", " factor=", event.factor)
-	ok = true
-	return
-}
-parse_surface_preferred_buffer_transform :: proc(connection: ^Connection, object: u32) -> (event: Event_Surface_Preferred_Buffer_Transform, ok: bool) {
-	event.object = Surface(object)
-	read(connection, &event.transform) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_surface@", object, ".preferred_buffer_transform:", " transform=", event.transform)
-	ok = true
-	return
-}
-parse_seat_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Capabilities, ok: bool) {
-	event.object = Seat(object)
-	read(connection, &event.capabilities) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_seat@", object, ".capabilities:", " capabilities=", event.capabilities)
-	ok = true
-	return
-}
-parse_seat_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Seat_Name, ok: bool) {
-	event.object = Seat(object)
-	read(connection, &event.name) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_seat@", object, ".name:", " name=", event.name)
-	ok = true
-	return
-}
-parse_pointer_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Enter, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.surface) or_return
-	read(connection, &event.surface_x) or_return
-	read(connection, &event.surface_y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".enter:", " serial=", event.serial, " surface=", event.surface, " surface_x=", event.surface_x, " surface_y=", event.surface_y)
-	ok = true
-	return
-}
-parse_pointer_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Leave, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.surface) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".leave:", " serial=", event.serial, " surface=", event.surface)
-	ok = true
-	return
-}
-parse_pointer_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Motion, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.time) or_return
-	read(connection, &event.surface_x) or_return
-	read(connection, &event.surface_y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".motion:", " time=", event.time, " surface_x=", event.surface_x, " surface_y=", event.surface_y)
-	ok = true
-	return
-}
-parse_pointer_button :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Button, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.time) or_return
-	read(connection, &event.button) or_return
-	read(connection, &event.state) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".button:", " serial=", event.serial, " time=", event.time, " button=", event.button, " state=", event.state)
-	ok = true
-	return
-}
-parse_pointer_axis :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.time) or_return
-	read(connection, &event.axis) or_return
-	read(connection, &event.value) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".axis:", " time=", event.time, " axis=", event.axis, " value=", event.value)
-	ok = true
-	return
-}
-parse_pointer_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Frame, ok: bool) {
-	event.object = Pointer(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".frame:")
-	ok = true
-	return
-}
-parse_pointer_axis_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Source, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.axis_source) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".axis_source:", " axis_source=", event.axis_source)
-	ok = true
-	return
-}
-parse_pointer_axis_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Stop, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.time) or_return
-	read(connection, &event.axis) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".axis_stop:", " time=", event.time, " axis=", event.axis)
-	ok = true
-	return
-}
-parse_pointer_axis_discrete :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Discrete, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.axis) or_return
-	read(connection, &event.discrete) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".axis_discrete:", " axis=", event.axis, " discrete=", event.discrete)
-	ok = true
-	return
-}
-parse_pointer_axis_value120 :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Value120, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.axis) or_return
-	read(connection, &event.value120) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".axis_value120:", " axis=", event.axis, " value120=", event.value120)
-	ok = true
-	return
-}
-parse_pointer_axis_relative_direction :: proc(connection: ^Connection, object: u32) -> (event: Event_Pointer_Axis_Relative_Direction, ok: bool) {
-	event.object = Pointer(object)
-	read(connection, &event.axis) or_return
-	read(connection, &event.direction) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_pointer@", object, ".axis_relative_direction:", " axis=", event.axis, " direction=", event.direction)
-	ok = true
-	return
-}
-parse_keyboard_keymap :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Keymap, ok: bool) {
-	event.object = Keyboard(object)
-	read(connection, &event.format) or_return
-	read_fd(connection, &event.fd) or_return
-	read(connection, &event.size) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_keyboard@", object, ".keymap:", " format=", event.format, " fd=", event.fd, " size=", event.size)
-	ok = true
-	return
-}
-parse_keyboard_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Enter, ok: bool) {
-	event.object = Keyboard(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.surface) or_return
-	read(connection, &event.keys) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_keyboard@", object, ".enter:", " serial=", event.serial, " surface=", event.surface, " keys=", event.keys)
-	ok = true
-	return
-}
-parse_keyboard_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Leave, ok: bool) {
-	event.object = Keyboard(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.surface) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_keyboard@", object, ".leave:", " serial=", event.serial, " surface=", event.surface)
-	ok = true
-	return
-}
-parse_keyboard_key :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Key, ok: bool) {
-	event.object = Keyboard(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.time) or_return
-	read(connection, &event.key) or_return
-	read(connection, &event.state) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_keyboard@", object, ".key:", " serial=", event.serial, " time=", event.time, " key=", event.key, " state=", event.state)
-	ok = true
-	return
-}
-parse_keyboard_modifiers :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Modifiers, ok: bool) {
-	event.object = Keyboard(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.mods_depressed) or_return
-	read(connection, &event.mods_latched) or_return
-	read(connection, &event.mods_locked) or_return
-	read(connection, &event.group) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_keyboard@", object, ".modifiers:", " serial=", event.serial, " mods_depressed=", event.mods_depressed, " mods_latched=", event.mods_latched, " mods_locked=", event.mods_locked, " group=", event.group)
-	ok = true
-	return
-}
-parse_keyboard_repeat_info :: proc(connection: ^Connection, object: u32) -> (event: Event_Keyboard_Repeat_Info, ok: bool) {
-	event.object = Keyboard(object)
-	read(connection, &event.rate) or_return
-	read(connection, &event.delay) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_keyboard@", object, ".repeat_info:", " rate=", event.rate, " delay=", event.delay)
-	ok = true
-	return
-}
-parse_touch_down :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Down, ok: bool) {
-	event.object = Touch(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.time) or_return
-	read(connection, &event.surface) or_return
-	read(connection, &event.id) or_return
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_touch@", object, ".down:", " serial=", event.serial, " time=", event.time, " surface=", event.surface, " id=", event.id, " x=", event.x, " y=", event.y)
-	ok = true
-	return
-}
-parse_touch_up :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Up, ok: bool) {
-	event.object = Touch(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.time) or_return
-	read(connection, &event.id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_touch@", object, ".up:", " serial=", event.serial, " time=", event.time, " id=", event.id)
-	ok = true
-	return
-}
-parse_touch_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Motion, ok: bool) {
-	event.object = Touch(object)
-	read(connection, &event.time) or_return
-	read(connection, &event.id) or_return
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_touch@", object, ".motion:", " time=", event.time, " id=", event.id, " x=", event.x, " y=", event.y)
-	ok = true
-	return
-}
-parse_touch_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Frame, ok: bool) {
-	event.object = Touch(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_touch@", object, ".frame:")
-	ok = true
-	return
-}
-parse_touch_cancel :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Cancel, ok: bool) {
-	event.object = Touch(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_touch@", object, ".cancel:")
-	ok = true
-	return
-}
-parse_touch_shape :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Shape, ok: bool) {
-	event.object = Touch(object)
-	read(connection, &event.id) or_return
-	read(connection, &event.major) or_return
-	read(connection, &event.minor) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_touch@", object, ".shape:", " id=", event.id, " major=", event.major, " minor=", event.minor)
-	ok = true
-	return
-}
-parse_touch_orientation :: proc(connection: ^Connection, object: u32) -> (event: Event_Touch_Orientation, ok: bool) {
-	event.object = Touch(object)
-	read(connection, &event.id) or_return
-	read(connection, &event.orientation) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_touch@", object, ".orientation:", " id=", event.id, " orientation=", event.orientation)
-	ok = true
-	return
-}
-parse_output_geometry :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Geometry, ok: bool) {
-	event.object = Output(object)
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	read(connection, &event.physical_width) or_return
-	read(connection, &event.physical_height) or_return
-	read(connection, &event.subpixel) or_return
-	read(connection, &event.make) or_return
-	read(connection, &event.model) or_return
-	read(connection, &event.transform) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_output@", object, ".geometry:", " x=", event.x, " y=", event.y, " physical_width=", event.physical_width, " physical_height=", event.physical_height, " subpixel=", event.subpixel, " make=", event.make, " model=", event.model, " transform=", event.transform)
-	ok = true
-	return
-}
-parse_output_mode :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Mode, ok: bool) {
-	event.object = Output(object)
-	read(connection, &event.flags) or_return
-	read(connection, &event.width) or_return
-	read(connection, &event.height) or_return
-	read(connection, &event.refresh) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_output@", object, ".mode:", " flags=", event.flags, " width=", event.width, " height=", event.height, " refresh=", event.refresh)
-	ok = true
-	return
-}
-parse_output_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Done, ok: bool) {
-	event.object = Output(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_output@", object, ".done:")
-	ok = true
-	return
-}
-parse_output_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Scale, ok: bool) {
-	event.object = Output(object)
-	read(connection, &event.factor) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_output@", object, ".scale:", " factor=", event.factor)
-	ok = true
-	return
-}
-parse_output_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Name, ok: bool) {
-	event.object = Output(object)
-	read(connection, &event.name) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_output@", object, ".name:", " name=", event.name)
-	ok = true
-	return
-}
-parse_output_description :: proc(connection: ^Connection, object: u32) -> (event: Event_Output_Description, ok: bool) {
-	event.object = Output(object)
-	read(connection, &event.description) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wl_output@", object, ".description:", " description=", event.description)
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_v1_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_V1_Format, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_V1(object)
-	read(connection, &event.format) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_v1@", object, ".format:", " format=", event.format)
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_v1_modifier :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_V1_Modifier, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_V1(object)
-	read(connection, &event.format) or_return
-	read(connection, &event.modifier_hi) or_return
-	read(connection, &event.modifier_lo) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_v1@", object, ".modifier:", " format=", event.format, " modifier_hi=", event.modifier_hi, " modifier_lo=", event.modifier_lo)
-	ok = true
-	return
-}
-parse_zwp_linux_buffer_params_v1_created :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Buffer_Params_V1_Created, ok: bool) {
-	event.object = Zwp_Linux_Buffer_Params_V1(object)
-	read(connection, &event.buffer) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.buffer) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.buffer) - SERVER_ID_START] = .Buffer
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_buffer_params_v1@", object, ".created:", " buffer=", event.buffer)
-	ok = true
-	return
-}
-parse_zwp_linux_buffer_params_v1_failed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Buffer_Params_V1_Failed, ok: bool) {
-	event.object = Zwp_Linux_Buffer_Params_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_buffer_params_v1@", object, ".failed:")
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_feedback_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Done, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_feedback_v1_format_table :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Format_Table, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
-	read_fd(connection, &event.fd) or_return
-	read(connection, &event.size) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".format_table:", " fd=", event.fd, " size=", event.size)
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_feedback_v1_main_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Main_Device, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
-	read(connection, &event.device) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".main_device:", " device=", event.device)
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_feedback_v1_tranche_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Done, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".tranche_done:")
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_feedback_v1_tranche_target_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Target_Device, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
-	read(connection, &event.device) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".tranche_target_device:", " device=", event.device)
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_feedback_v1_tranche_formats :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Formats, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
-	read(connection, &event.indices) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".tranche_formats:", " indices=", event.indices)
-	ok = true
-	return
-}
-parse_zwp_linux_dmabuf_feedback_v1_tranche_flags :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Linux_Dmabuf_Feedback_V1_Tranche_Flags, ok: bool) {
-	event.object = Zwp_Linux_Dmabuf_Feedback_V1(object)
-	read(connection, &event.flags) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_linux_dmabuf_feedback_v1@", object, ".tranche_flags:", " flags=", event.flags)
-	ok = true
-	return
-}
-parse_wp_presentation_clock_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Clock_Id, ok: bool) {
-	event.object = Wp_Presentation(object)
-	read(connection, &event.clk_id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_presentation@", object, ".clock_id:", " clk_id=", event.clk_id)
-	ok = true
-	return
-}
-parse_wp_presentation_feedback_sync_output :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Feedback_Sync_Output, ok: bool) {
-	event.object = Wp_Presentation_Feedback(object)
-	read(connection, &event.output) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_presentation_feedback@", object, ".sync_output:", " output=", event.output)
-	ok = true
-	return
-}
-parse_wp_presentation_feedback_presented :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Feedback_Presented, ok: bool) {
-	event.object = Wp_Presentation_Feedback(object)
-	read(connection, &event.tv_sec_hi) or_return
-	read(connection, &event.tv_sec_lo) or_return
-	read(connection, &event.tv_nsec) or_return
-	read(connection, &event.refresh) or_return
-	read(connection, &event.seq_hi) or_return
-	read(connection, &event.seq_lo) or_return
-	read(connection, &event.flags) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_presentation_feedback@", object, ".presented:", " tv_sec_hi=", event.tv_sec_hi, " tv_sec_lo=", event.tv_sec_lo, " tv_nsec=", event.tv_nsec, " refresh=", event.refresh, " seq_hi=", event.seq_hi, " seq_lo=", event.seq_lo, " flags=", event.flags)
-	ok = true
-	return
-}
-parse_wp_presentation_feedback_discarded :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Presentation_Feedback_Discarded, ok: bool) {
-	event.object = Wp_Presentation_Feedback(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_presentation_feedback@", object, ".discarded:")
-	ok = true
-	return
-}
-parse_zwp_tablet_seat_v2_tablet_added :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Seat_V2_Tablet_Added, ok: bool) {
-	event.object = Zwp_Tablet_Seat_V2(object)
-	read(connection, &event.id) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_V2
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_seat_v2@", object, ".tablet_added:", " id=", event.id)
-	ok = true
-	return
-}
-parse_zwp_tablet_seat_v2_tool_added :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Seat_V2_Tool_Added, ok: bool) {
-	event.object = Zwp_Tablet_Seat_V2(object)
-	read(connection, &event.id) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_Tool_V2
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_seat_v2@", object, ".tool_added:", " id=", event.id)
-	ok = true
-	return
-}
-parse_zwp_tablet_seat_v2_pad_added :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Seat_V2_Pad_Added, ok: bool) {
-	event.object = Zwp_Tablet_Seat_V2(object)
-	read(connection, &event.id) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Zwp_Tablet_Pad_V2
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_seat_v2@", object, ".pad_added:", " id=", event.id)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_type :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Type, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.tool_type) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".type:", " tool_type=", event.tool_type)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_hardware_serial :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Hardware_Serial, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.hardware_serial_hi) or_return
-	read(connection, &event.hardware_serial_lo) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".hardware_serial:", " hardware_serial_hi=", event.hardware_serial_hi, " hardware_serial_lo=", event.hardware_serial_lo)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_hardware_id_wacom :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Hardware_Id_Wacom, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.hardware_id_hi) or_return
-	read(connection, &event.hardware_id_lo) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".hardware_id_wacom:", " hardware_id_hi=", event.hardware_id_hi, " hardware_id_lo=", event.hardware_id_lo)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_capability :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Capability, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.capability) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".capability:", " capability=", event.capability)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Done, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".done:")
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Removed, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".removed:")
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_proximity_in :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Proximity_In, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.tablet) or_return
-	read(connection, &event.surface) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".proximity_in:", " serial=", event.serial, " tablet=", event.tablet, " surface=", event.surface)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_proximity_out :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Proximity_Out, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".proximity_out:")
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_down :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Down, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.serial) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".down:", " serial=", event.serial)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_up :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Up, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".up:")
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_motion :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Motion, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".motion:", " x=", event.x, " y=", event.y)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_pressure :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Pressure, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.pressure) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".pressure:", " pressure=", event.pressure)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_distance :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Distance, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.distance) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".distance:", " distance=", event.distance)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_tilt :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Tilt, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.tilt_x) or_return
-	read(connection, &event.tilt_y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".tilt:", " tilt_x=", event.tilt_x, " tilt_y=", event.tilt_y)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_rotation :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Rotation, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.degrees) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".rotation:", " degrees=", event.degrees)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_slider :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Slider, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.position) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".slider:", " position=", event.position)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_wheel :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Wheel, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.degrees) or_return
-	read(connection, &event.clicks) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".wheel:", " degrees=", event.degrees, " clicks=", event.clicks)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_button :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Button, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.button) or_return
-	read(connection, &event.state) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".button:", " serial=", event.serial, " button=", event.button, " state=", event.state)
-	ok = true
-	return
-}
-parse_zwp_tablet_tool_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Tool_V2_Frame, ok: bool) {
-	event.object = Zwp_Tablet_Tool_V2(object)
-	read(connection, &event.time) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_tool_v2@", object, ".frame:", " time=", event.time)
-	ok = true
-	return
-}
-parse_zwp_tablet_v2_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Name, ok: bool) {
-	event.object = Zwp_Tablet_V2(object)
-	read(connection, &event.name) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_v2@", object, ".name:", " name=", event.name)
-	ok = true
-	return
-}
-parse_zwp_tablet_v2_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Id, ok: bool) {
-	event.object = Zwp_Tablet_V2(object)
-	read(connection, &event.vid) or_return
-	read(connection, &event.pid) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_v2@", object, ".id:", " vid=", event.vid, " pid=", event.pid)
-	ok = true
-	return
-}
-parse_zwp_tablet_v2_path :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Path, ok: bool) {
-	event.object = Zwp_Tablet_V2(object)
-	read(connection, &event.path) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_v2@", object, ".path:", " path=", event.path)
-	ok = true
-	return
-}
-parse_zwp_tablet_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Done, ok: bool) {
-	event.object = Zwp_Tablet_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_v2@", object, ".done:")
-	ok = true
-	return
-}
-parse_zwp_tablet_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Removed, ok: bool) {
-	event.object = Zwp_Tablet_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_v2@", object, ".removed:")
-	ok = true
-	return
-}
-parse_zwp_tablet_v2_bustype :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_V2_Bustype, ok: bool) {
-	event.object = Zwp_Tablet_V2(object)
-	read(connection, &event.bustype) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_v2@", object, ".bustype:", " bustype=", event.bustype)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_ring_v2_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Source, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Ring_V2(object)
-	read(connection, &event.source) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_ring_v2@", object, ".source:", " source=", event.source)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_ring_v2_angle :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Angle, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Ring_V2(object)
-	read(connection, &event.degrees) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_ring_v2@", object, ".angle:", " degrees=", event.degrees)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_ring_v2_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Stop, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Ring_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_ring_v2@", object, ".stop:")
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_ring_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Ring_V2_Frame, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Ring_V2(object)
-	read(connection, &event.time) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_ring_v2@", object, ".frame:", " time=", event.time)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_strip_v2_source :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Source, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Strip_V2(object)
-	read(connection, &event.source) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_strip_v2@", object, ".source:", " source=", event.source)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_strip_v2_position :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Position, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Strip_V2(object)
-	read(connection, &event.position) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_strip_v2@", object, ".position:", " position=", event.position)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_strip_v2_stop :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Stop, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Strip_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_strip_v2@", object, ".stop:")
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_strip_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Strip_V2_Frame, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Strip_V2(object)
-	read(connection, &event.time) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_strip_v2@", object, ".frame:", " time=", event.time)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_group_v2_buttons :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Buttons, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Group_V2(object)
-	read(connection, &event.buttons) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".buttons:", " buttons=", event.buttons)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_group_v2_ring :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Ring, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Group_V2(object)
-	read(connection, &event.ring) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.ring) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.ring) - SERVER_ID_START] = .Zwp_Tablet_Pad_Ring_V2
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".ring:", " ring=", event.ring)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_group_v2_strip :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Strip, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Group_V2(object)
-	read(connection, &event.strip) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.strip) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.strip) - SERVER_ID_START] = .Zwp_Tablet_Pad_Strip_V2
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".strip:", " strip=", event.strip)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_group_v2_modes :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Modes, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Group_V2(object)
-	read(connection, &event.modes) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".modes:", " modes=", event.modes)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_group_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Done, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Group_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".done:")
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_group_v2_mode_switch :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Mode_Switch, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Group_V2(object)
-	read(connection, &event.time) or_return
-	read(connection, &event.serial) or_return
-	read(connection, &event.mode) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".mode_switch:", " time=", event.time, " serial=", event.serial, " mode=", event.mode)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_group_v2_dial :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Group_V2_Dial, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Group_V2(object)
-	read(connection, &event.dial) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.dial) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.dial) - SERVER_ID_START] = .Zwp_Tablet_Pad_Dial_V2
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_group_v2@", object, ".dial:", " dial=", event.dial)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_v2_group :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Group, ok: bool) {
-	event.object = Zwp_Tablet_Pad_V2(object)
-	read(connection, &event.pad_group) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.pad_group) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.pad_group) - SERVER_ID_START] = .Zwp_Tablet_Pad_Group_V2
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".group:", " pad_group=", event.pad_group)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_v2_path :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Path, ok: bool) {
-	event.object = Zwp_Tablet_Pad_V2(object)
-	read(connection, &event.path) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".path:", " path=", event.path)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_v2_buttons :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Buttons, ok: bool) {
-	event.object = Zwp_Tablet_Pad_V2(object)
-	read(connection, &event.buttons) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".buttons:", " buttons=", event.buttons)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_v2_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Done, ok: bool) {
-	event.object = Zwp_Tablet_Pad_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".done:")
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_v2_button :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Button, ok: bool) {
-	event.object = Zwp_Tablet_Pad_V2(object)
-	read(connection, &event.time) or_return
-	read(connection, &event.button) or_return
-	read(connection, &event.state) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".button:", " time=", event.time, " button=", event.button, " state=", event.state)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_v2_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Enter, ok: bool) {
-	event.object = Zwp_Tablet_Pad_V2(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.tablet) or_return
-	read(connection, &event.surface) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".enter:", " serial=", event.serial, " tablet=", event.tablet, " surface=", event.surface)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_v2_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Leave, ok: bool) {
-	event.object = Zwp_Tablet_Pad_V2(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.surface) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".leave:", " serial=", event.serial, " surface=", event.surface)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_v2_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_V2_Removed, ok: bool) {
-	event.object = Zwp_Tablet_Pad_V2(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_v2@", object, ".removed:")
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_dial_v2_delta :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Dial_V2_Delta, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Dial_V2(object)
-	read(connection, &event.value120) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_dial_v2@", object, ".delta:", " value120=", event.value120)
-	ok = true
-	return
-}
-parse_zwp_tablet_pad_dial_v2_frame :: proc(connection: ^Connection, object: u32) -> (event: Event_Zwp_Tablet_Pad_Dial_V2_Frame, ok: bool) {
-	event.object = Zwp_Tablet_Pad_Dial_V2(object)
-	read(connection, &event.time) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- zwp_tablet_pad_dial_v2@", object, ".frame:", " time=", event.time)
-	ok = true
-	return
-}
-parse_xdg_wm_base_ping :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Wm_Base_Ping, ok: bool) {
-	event.object = Xdg_Wm_Base(object)
-	read(connection, &event.serial) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_wm_base@", object, ".ping:", " serial=", event.serial)
-	ok = true
-	return
-}
-parse_xdg_surface_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Surface_Configure, ok: bool) {
-	event.object = Xdg_Surface(object)
-	read(connection, &event.serial) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_surface@", object, ".configure:", " serial=", event.serial)
-	ok = true
-	return
-}
-parse_xdg_toplevel_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Configure, ok: bool) {
-	event.object = Xdg_Toplevel(object)
-	read(connection, &event.width) or_return
-	read(connection, &event.height) or_return
-	read(connection, &event.states) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_toplevel@", object, ".configure:", " width=", event.width, " height=", event.height, " states=", event.states)
-	ok = true
-	return
-}
-parse_xdg_toplevel_close :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Close, ok: bool) {
-	event.object = Xdg_Toplevel(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_toplevel@", object, ".close:")
-	ok = true
-	return
-}
-parse_xdg_toplevel_configure_bounds :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Configure_Bounds, ok: bool) {
-	event.object = Xdg_Toplevel(object)
-	read(connection, &event.width) or_return
-	read(connection, &event.height) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_toplevel@", object, ".configure_bounds:", " width=", event.width, " height=", event.height)
-	ok = true
-	return
-}
-parse_xdg_toplevel_wm_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Wm_Capabilities, ok: bool) {
-	event.object = Xdg_Toplevel(object)
-	read(connection, &event.capabilities) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_toplevel@", object, ".wm_capabilities:", " capabilities=", event.capabilities)
-	ok = true
-	return
-}
-parse_xdg_popup_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Popup_Configure, ok: bool) {
-	event.object = Xdg_Popup(object)
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	read(connection, &event.width) or_return
-	read(connection, &event.height) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_popup@", object, ".configure:", " x=", event.x, " y=", event.y, " width=", event.width, " height=", event.height)
-	ok = true
-	return
-}
-parse_xdg_popup_popup_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Popup_Popup_Done, ok: bool) {
-	event.object = Xdg_Popup(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_popup@", object, ".popup_done:")
-	ok = true
-	return
-}
-parse_xdg_popup_repositioned :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Popup_Repositioned, ok: bool) {
-	event.object = Xdg_Popup(object)
-	read(connection, &event.token) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_popup@", object, ".repositioned:", " token=", event.token)
-	ok = true
-	return
-}
-parse_wp_color_manager_v1_supported_intent :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Intent, ok: bool) {
-	event.object = Wp_Color_Manager_V1(object)
-	read(connection, &event.render_intent) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_manager_v1@", object, ".supported_intent:", " render_intent=", event.render_intent)
-	ok = true
-	return
-}
-parse_wp_color_manager_v1_supported_feature :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Feature, ok: bool) {
-	event.object = Wp_Color_Manager_V1(object)
-	read(connection, &event.feature) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_manager_v1@", object, ".supported_feature:", " feature=", event.feature)
-	ok = true
-	return
-}
-parse_wp_color_manager_v1_supported_tf_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Tf_Named, ok: bool) {
-	event.object = Wp_Color_Manager_V1(object)
-	read(connection, &event.tf) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_manager_v1@", object, ".supported_tf_named:", " tf=", event.tf)
-	ok = true
-	return
-}
-parse_wp_color_manager_v1_supported_primaries_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Supported_Primaries_Named, ok: bool) {
-	event.object = Wp_Color_Manager_V1(object)
-	read(connection, &event.primaries) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_manager_v1@", object, ".supported_primaries_named:", " primaries=", event.primaries)
-	ok = true
-	return
-}
-parse_wp_color_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Manager_V1_Done, ok: bool) {
-	event.object = Wp_Color_Manager_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_manager_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_wp_color_management_output_v1_image_description_changed :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Management_Output_V1_Image_Description_Changed, ok: bool) {
-	event.object = Wp_Color_Management_Output_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_management_output_v1@", object, ".image_description_changed:")
-	ok = true
-	return
-}
-parse_wp_color_management_surface_feedback_v1_preferred_changed :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed, ok: bool) {
-	event.object = Wp_Color_Management_Surface_Feedback_V1(object)
-	read(connection, &event.identity) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_management_surface_feedback_v1@", object, ".preferred_changed:", " identity=", event.identity)
-	ok = true
-	return
-}
-parse_wp_color_management_surface_feedback_v1_preferred_changed2 :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Management_Surface_Feedback_V1_Preferred_Changed2, ok: bool) {
-	event.object = Wp_Color_Management_Surface_Feedback_V1(object)
-	read(connection, &event.identity_hi) or_return
-	read(connection, &event.identity_lo) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_management_surface_feedback_v1@", object, ".preferred_changed2:", " identity_hi=", event.identity_hi, " identity_lo=", event.identity_lo)
-	ok = true
-	return
-}
-parse_wp_image_description_v1_failed :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_V1_Failed, ok: bool) {
-	event.object = Wp_Image_Description_V1(object)
-	read(connection, &event.cause) or_return
-	read(connection, &event.msg) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_v1@", object, ".failed:", " cause=", event.cause, " msg=", event.msg)
-	ok = true
-	return
-}
-parse_wp_image_description_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_V1_Ready, ok: bool) {
-	event.object = Wp_Image_Description_V1(object)
-	read(connection, &event.identity) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_v1@", object, ".ready:", " identity=", event.identity)
-	ok = true
-	return
-}
-parse_wp_image_description_v1_ready2 :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_V1_Ready2, ok: bool) {
-	event.object = Wp_Image_Description_V1(object)
-	read(connection, &event.identity_hi) or_return
-	read(connection, &event.identity_lo) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_v1@", object, ".ready2:", " identity_hi=", event.identity_hi, " identity_lo=", event.identity_lo)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Done, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_icc_file :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Icc_File, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read_fd(connection, &event.icc) or_return
-	read(connection, &event.icc_size) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".icc_file:", " icc=", event.icc, " icc_size=", event.icc_size)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_primaries :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Primaries, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.r_x) or_return
-	read(connection, &event.r_y) or_return
-	read(connection, &event.g_x) or_return
-	read(connection, &event.g_y) or_return
-	read(connection, &event.b_x) or_return
-	read(connection, &event.b_y) or_return
-	read(connection, &event.w_x) or_return
-	read(connection, &event.w_y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".primaries:", " r_x=", event.r_x, " r_y=", event.r_y, " g_x=", event.g_x, " g_y=", event.g_y, " b_x=", event.b_x, " b_y=", event.b_y, " w_x=", event.w_x, " w_y=", event.w_y)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_primaries_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Primaries_Named, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.primaries) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".primaries_named:", " primaries=", event.primaries)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_tf_power :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Tf_Power, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.eexp) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".tf_power:", " eexp=", event.eexp)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_tf_named :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Tf_Named, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.tf) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".tf_named:", " tf=", event.tf)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_luminances :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Luminances, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.min_lum) or_return
-	read(connection, &event.max_lum) or_return
-	read(connection, &event.reference_lum) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".luminances:", " min_lum=", event.min_lum, " max_lum=", event.max_lum, " reference_lum=", event.reference_lum)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_target_primaries :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Primaries, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.r_x) or_return
-	read(connection, &event.r_y) or_return
-	read(connection, &event.g_x) or_return
-	read(connection, &event.g_y) or_return
-	read(connection, &event.b_x) or_return
-	read(connection, &event.b_y) or_return
-	read(connection, &event.w_x) or_return
-	read(connection, &event.w_y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".target_primaries:", " r_x=", event.r_x, " r_y=", event.r_y, " g_x=", event.g_x, " g_y=", event.g_y, " b_x=", event.b_x, " b_y=", event.b_y, " w_x=", event.w_x, " w_y=", event.w_y)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_target_luminance :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Luminance, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.min_lum) or_return
-	read(connection, &event.max_lum) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".target_luminance:", " min_lum=", event.min_lum, " max_lum=", event.max_lum)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_target_max_cll :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Max_Cll, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.max_cll) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".target_max_cll:", " max_cll=", event.max_cll)
-	ok = true
-	return
-}
-parse_wp_image_description_info_v1_target_max_fall :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Image_Description_Info_V1_Target_Max_Fall, ok: bool) {
-	event.object = Wp_Image_Description_Info_V1(object)
-	read(connection, &event.max_fall) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_image_description_info_v1@", object, ".target_max_fall:", " max_fall=", event.max_fall)
-	ok = true
-	return
-}
-parse_wp_color_representation_manager_v1_supported_alpha_mode :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Representation_Manager_V1_Supported_Alpha_Mode, ok: bool) {
-	event.object = Wp_Color_Representation_Manager_V1(object)
-	read(connection, &event.alpha_mode) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_representation_manager_v1@", object, ".supported_alpha_mode:", " alpha_mode=", event.alpha_mode)
-	ok = true
-	return
-}
-parse_wp_color_representation_manager_v1_supported_coefficients_and_ranges :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Representation_Manager_V1_Supported_Coefficients_And_Ranges, ok: bool) {
-	event.object = Wp_Color_Representation_Manager_V1(object)
-	read(connection, &event.coefficients) or_return
-	read(connection, &event.range) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_representation_manager_v1@", object, ".supported_coefficients_and_ranges:", " coefficients=", event.coefficients, " range=", event.range)
-	ok = true
-	return
-}
-parse_wp_color_representation_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Color_Representation_Manager_V1_Done, ok: bool) {
-	event.object = Wp_Color_Representation_Manager_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_color_representation_manager_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_wp_drm_lease_device_v1_drm_fd :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Drm_Fd, ok: bool) {
-	event.object = Wp_Drm_Lease_Device_V1(object)
-	read_fd(connection, &event.fd) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".drm_fd:", " fd=", event.fd)
-	ok = true
-	return
-}
-parse_wp_drm_lease_device_v1_connector :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Connector, ok: bool) {
-	event.object = Wp_Drm_Lease_Device_V1(object)
-	read(connection, &event.id) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Wp_Drm_Lease_Connector_V1
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".connector:", " id=", event.id)
-	ok = true
-	return
-}
-parse_wp_drm_lease_device_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Done, ok: bool) {
-	event.object = Wp_Drm_Lease_Device_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_wp_drm_lease_device_v1_released :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Device_V1_Released, ok: bool) {
-	event.object = Wp_Drm_Lease_Device_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_device_v1@", object, ".released:")
-	ok = true
-	return
-}
-parse_wp_drm_lease_connector_v1_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Name, ok: bool) {
-	event.object = Wp_Drm_Lease_Connector_V1(object)
-	read(connection, &event.name) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".name:", " name=", event.name)
-	ok = true
-	return
-}
-parse_wp_drm_lease_connector_v1_description :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Description, ok: bool) {
-	event.object = Wp_Drm_Lease_Connector_V1(object)
-	read(connection, &event.description) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".description:", " description=", event.description)
-	ok = true
-	return
-}
-parse_wp_drm_lease_connector_v1_connector_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Connector_Id, ok: bool) {
-	event.object = Wp_Drm_Lease_Connector_V1(object)
-	read(connection, &event.connector_id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".connector_id:", " connector_id=", event.connector_id)
-	ok = true
-	return
-}
-parse_wp_drm_lease_connector_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Done, ok: bool) {
-	event.object = Wp_Drm_Lease_Connector_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_wp_drm_lease_connector_v1_withdrawn :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_Connector_V1_Withdrawn, ok: bool) {
-	event.object = Wp_Drm_Lease_Connector_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_connector_v1@", object, ".withdrawn:")
-	ok = true
-	return
-}
-parse_wp_drm_lease_v1_lease_fd :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_V1_Lease_Fd, ok: bool) {
-	event.object = Wp_Drm_Lease_V1(object)
-	read_fd(connection, &event.leased_fd) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_v1@", object, ".lease_fd:", " leased_fd=", event.leased_fd)
-	ok = true
-	return
-}
-parse_wp_drm_lease_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Drm_Lease_V1_Finished, ok: bool) {
-	event.object = Wp_Drm_Lease_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_drm_lease_v1@", object, ".finished:")
-	ok = true
-	return
-}
-parse_ext_background_effect_manager_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Background_Effect_Manager_V1_Capabilities, ok: bool) {
-	event.object = Ext_Background_Effect_Manager_V1(object)
-	read(connection, &event.flags) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_background_effect_manager_v1@", object, ".capabilities:", " flags=", event.flags)
-	ok = true
-	return
-}
-parse_ext_data_control_device_v1_data_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Data_Offer, ok: bool) {
-	event.object = Ext_Data_Control_Device_V1(object)
-	read(connection, &event.id) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.id) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.id) - SERVER_ID_START] = .Ext_Data_Control_Offer_V1
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_data_control_device_v1@", object, ".data_offer:", " id=", event.id)
-	ok = true
-	return
-}
-parse_ext_data_control_device_v1_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Selection, ok: bool) {
-	event.object = Ext_Data_Control_Device_V1(object)
-	read(connection, &event.id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_data_control_device_v1@", object, ".selection:", " id=", event.id)
-	ok = true
-	return
-}
-parse_ext_data_control_device_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Finished, ok: bool) {
-	event.object = Ext_Data_Control_Device_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_data_control_device_v1@", object, ".finished:")
-	ok = true
-	return
-}
-parse_ext_data_control_device_v1_primary_selection :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Device_V1_Primary_Selection, ok: bool) {
-	event.object = Ext_Data_Control_Device_V1(object)
-	read(connection, &event.id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_data_control_device_v1@", object, ".primary_selection:", " id=", event.id)
-	ok = true
-	return
-}
-parse_ext_data_control_source_v1_send :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Source_V1_Send, ok: bool) {
-	event.object = Ext_Data_Control_Source_V1(object)
-	read(connection, &event.mime_type) or_return
-	read_fd(connection, &event.fd) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_data_control_source_v1@", object, ".send:", " mime_type=", event.mime_type, " fd=", event.fd)
-	ok = true
-	return
-}
-parse_ext_data_control_source_v1_cancelled :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Source_V1_Cancelled, ok: bool) {
-	event.object = Ext_Data_Control_Source_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_data_control_source_v1@", object, ".cancelled:")
-	ok = true
-	return
-}
-parse_ext_data_control_offer_v1_offer :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Data_Control_Offer_V1_Offer, ok: bool) {
-	event.object = Ext_Data_Control_Offer_V1(object)
-	read(connection, &event.mime_type) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_data_control_offer_v1@", object, ".offer:", " mime_type=", event.mime_type)
-	ok = true
-	return
-}
-parse_ext_foreign_toplevel_list_v1_toplevel :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_List_V1_Toplevel, ok: bool) {
-	event.object = Ext_Foreign_Toplevel_List_V1(object)
-	read(connection, &event.toplevel) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.toplevel) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.toplevel) - SERVER_ID_START] = .Ext_Foreign_Toplevel_Handle_V1
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_foreign_toplevel_list_v1@", object, ".toplevel:", " toplevel=", event.toplevel)
-	ok = true
-	return
-}
-parse_ext_foreign_toplevel_list_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_List_V1_Finished, ok: bool) {
-	event.object = Ext_Foreign_Toplevel_List_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_foreign_toplevel_list_v1@", object, ".finished:")
-	ok = true
-	return
-}
-parse_ext_foreign_toplevel_handle_v1_closed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Closed, ok: bool) {
-	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".closed:")
-	ok = true
-	return
-}
-parse_ext_foreign_toplevel_handle_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Done, ok: bool) {
-	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_ext_foreign_toplevel_handle_v1_title :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Title, ok: bool) {
-	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
-	read(connection, &event.title) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".title:", " title=", event.title)
-	ok = true
-	return
-}
-parse_ext_foreign_toplevel_handle_v1_app_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_App_Id, ok: bool) {
-	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
-	read(connection, &event.app_id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".app_id:", " app_id=", event.app_id)
-	ok = true
-	return
-}
-parse_ext_foreign_toplevel_handle_v1_identifier :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Foreign_Toplevel_Handle_V1_Identifier, ok: bool) {
-	event.object = Ext_Foreign_Toplevel_Handle_V1(object)
-	read(connection, &event.identifier) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_foreign_toplevel_handle_v1@", object, ".identifier:", " identifier=", event.identifier)
-	ok = true
-	return
-}
-parse_ext_idle_notification_v1_idled :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Idle_Notification_V1_Idled, ok: bool) {
-	event.object = Ext_Idle_Notification_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_idle_notification_v1@", object, ".idled:")
-	ok = true
-	return
-}
-parse_ext_idle_notification_v1_resumed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Idle_Notification_V1_Resumed, ok: bool) {
-	event.object = Ext_Idle_Notification_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_idle_notification_v1@", object, ".resumed:")
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_session_v1_buffer_size :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Buffer_Size, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Session_V1(object)
-	read(connection, &event.width) or_return
-	read(connection, &event.height) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".buffer_size:", " width=", event.width, " height=", event.height)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_session_v1_shm_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Shm_Format, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Session_V1(object)
-	read(connection, &event.format) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".shm_format:", " format=", event.format)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_session_v1_dmabuf_device :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Device, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Session_V1(object)
-	read(connection, &event.device) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".dmabuf_device:", " device=", event.device)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_session_v1_dmabuf_format :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Dmabuf_Format, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Session_V1(object)
-	read(connection, &event.format) or_return
-	read(connection, &event.modifiers) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".dmabuf_format:", " format=", event.format, " modifiers=", event.modifiers)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_session_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Done, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Session_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_session_v1_stopped :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Session_V1_Stopped, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Session_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_session_v1@", object, ".stopped:")
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_frame_v1_transform :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Transform, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
-	read(connection, &event.transform) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".transform:", " transform=", event.transform)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_frame_v1_damage :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Damage, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	read(connection, &event.width) or_return
-	read(connection, &event.height) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".damage:", " x=", event.x, " y=", event.y, " width=", event.width, " height=", event.height)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_frame_v1_presentation_time :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Presentation_Time, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
-	read(connection, &event.tv_sec_hi) or_return
-	read(connection, &event.tv_sec_lo) or_return
-	read(connection, &event.tv_nsec) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".presentation_time:", " tv_sec_hi=", event.tv_sec_hi, " tv_sec_lo=", event.tv_sec_lo, " tv_nsec=", event.tv_nsec)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_frame_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Ready, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".ready:")
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_frame_v1_failed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Frame_V1_Failed, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Frame_V1(object)
-	read(connection, &event.reason) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_frame_v1@", object, ".failed:", " reason=", event.reason)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_cursor_session_v1_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Enter, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_cursor_session_v1@", object, ".enter:")
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_cursor_session_v1_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Leave, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_cursor_session_v1@", object, ".leave:")
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_cursor_session_v1_position :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Position, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_cursor_session_v1@", object, ".position:", " x=", event.x, " y=", event.y)
-	ok = true
-	return
-}
-parse_ext_image_copy_capture_cursor_session_v1_hotspot :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Image_Copy_Capture_Cursor_Session_V1_Hotspot, ok: bool) {
-	event.object = Ext_Image_Copy_Capture_Cursor_Session_V1(object)
-	read(connection, &event.x) or_return
-	read(connection, &event.y) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_image_copy_capture_cursor_session_v1@", object, ".hotspot:", " x=", event.x, " y=", event.y)
-	ok = true
-	return
-}
-parse_ext_session_lock_v1_locked :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Session_Lock_V1_Locked, ok: bool) {
-	event.object = Ext_Session_Lock_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_session_lock_v1@", object, ".locked:")
-	ok = true
-	return
-}
-parse_ext_session_lock_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Session_Lock_V1_Finished, ok: bool) {
-	event.object = Ext_Session_Lock_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_session_lock_v1@", object, ".finished:")
-	ok = true
-	return
-}
-parse_ext_session_lock_surface_v1_configure :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Session_Lock_Surface_V1_Configure, ok: bool) {
-	event.object = Ext_Session_Lock_Surface_V1(object)
-	read(connection, &event.serial) or_return
-	read(connection, &event.width) or_return
-	read(connection, &event.height) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_session_lock_surface_v1@", object, ".configure:", " serial=", event.serial, " width=", event.width, " height=", event.height)
-	ok = true
-	return
-}
-parse_ext_transient_seat_v1_ready :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Transient_Seat_V1_Ready, ok: bool) {
-	event.object = Ext_Transient_Seat_V1(object)
-	read(connection, &event.global_name) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_transient_seat_v1@", object, ".ready:", " global_name=", event.global_name)
-	ok = true
-	return
-}
-parse_ext_transient_seat_v1_denied :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Transient_Seat_V1_Denied, ok: bool) {
-	event.object = Ext_Transient_Seat_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_transient_seat_v1@", object, ".denied:")
-	ok = true
-	return
-}
-parse_ext_workspace_manager_v1_workspace_group :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Workspace_Group, ok: bool) {
-	event.object = Ext_Workspace_Manager_V1(object)
-	read(connection, &event.workspace_group) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.workspace_group) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.workspace_group) - SERVER_ID_START] = .Ext_Workspace_Group_Handle_V1
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_manager_v1@", object, ".workspace_group:", " workspace_group=", event.workspace_group)
-	ok = true
-	return
-}
-parse_ext_workspace_manager_v1_workspace :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Workspace, ok: bool) {
-	event.object = Ext_Workspace_Manager_V1(object)
-	read(connection, &event.workspace) or_return
-	resize(&connection.server_object_types, max(len(connection.server_object_types), int(event.workspace) - SERVER_ID_START + 1))
-	connection.server_object_types[u32(event.workspace) - SERVER_ID_START] = .Ext_Workspace_Handle_V1
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_manager_v1@", object, ".workspace:", " workspace=", event.workspace)
-	ok = true
-	return
-}
-parse_ext_workspace_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Done, ok: bool) {
-	event.object = Ext_Workspace_Manager_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_manager_v1@", object, ".done:")
-	ok = true
-	return
-}
-parse_ext_workspace_manager_v1_finished :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Manager_V1_Finished, ok: bool) {
-	event.object = Ext_Workspace_Manager_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_manager_v1@", object, ".finished:")
-	ok = true
-	return
-}
-parse_ext_workspace_group_handle_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Capabilities, ok: bool) {
-	event.object = Ext_Workspace_Group_Handle_V1(object)
-	read(connection, &event.capabilities) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".capabilities:", " capabilities=", event.capabilities)
-	ok = true
-	return
-}
-parse_ext_workspace_group_handle_v1_output_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Output_Enter, ok: bool) {
-	event.object = Ext_Workspace_Group_Handle_V1(object)
-	read(connection, &event.output) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".output_enter:", " output=", event.output)
-	ok = true
-	return
-}
-parse_ext_workspace_group_handle_v1_output_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Output_Leave, ok: bool) {
-	event.object = Ext_Workspace_Group_Handle_V1(object)
-	read(connection, &event.output) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".output_leave:", " output=", event.output)
-	ok = true
-	return
-}
-parse_ext_workspace_group_handle_v1_workspace_enter :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Workspace_Enter, ok: bool) {
-	event.object = Ext_Workspace_Group_Handle_V1(object)
-	read(connection, &event.workspace) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".workspace_enter:", " workspace=", event.workspace)
-	ok = true
-	return
-}
-parse_ext_workspace_group_handle_v1_workspace_leave :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Workspace_Leave, ok: bool) {
-	event.object = Ext_Workspace_Group_Handle_V1(object)
-	read(connection, &event.workspace) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".workspace_leave:", " workspace=", event.workspace)
-	ok = true
-	return
-}
-parse_ext_workspace_group_handle_v1_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Group_Handle_V1_Removed, ok: bool) {
-	event.object = Ext_Workspace_Group_Handle_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_group_handle_v1@", object, ".removed:")
-	ok = true
-	return
-}
-parse_ext_workspace_handle_v1_id :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Id, ok: bool) {
-	event.object = Ext_Workspace_Handle_V1(object)
-	read(connection, &event.id) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_handle_v1@", object, ".id:", " id=", event.id)
-	ok = true
-	return
-}
-parse_ext_workspace_handle_v1_name :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Name, ok: bool) {
-	event.object = Ext_Workspace_Handle_V1(object)
-	read(connection, &event.name) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_handle_v1@", object, ".name:", " name=", event.name)
-	ok = true
-	return
-}
-parse_ext_workspace_handle_v1_coordinates :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Coordinates, ok: bool) {
-	event.object = Ext_Workspace_Handle_V1(object)
-	read(connection, &event.coordinates) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_handle_v1@", object, ".coordinates:", " coordinates=", event.coordinates)
-	ok = true
-	return
-}
-parse_ext_workspace_handle_v1_state :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_State, ok: bool) {
-	event.object = Ext_Workspace_Handle_V1(object)
-	read(connection, &event.state) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_handle_v1@", object, ".state:", " state=", event.state)
-	ok = true
-	return
-}
-parse_ext_workspace_handle_v1_capabilities :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Capabilities, ok: bool) {
-	event.object = Ext_Workspace_Handle_V1(object)
-	read(connection, &event.capabilities) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_handle_v1@", object, ".capabilities:", " capabilities=", event.capabilities)
-	ok = true
-	return
-}
-parse_ext_workspace_handle_v1_removed :: proc(connection: ^Connection, object: u32) -> (event: Event_Ext_Workspace_Handle_V1_Removed, ok: bool) {
-	event.object = Ext_Workspace_Handle_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- ext_workspace_handle_v1@", object, ".removed:")
-	ok = true
-	return
-}
-parse_wp_fractional_scale_v1_preferred_scale :: proc(connection: ^Connection, object: u32) -> (event: Event_Wp_Fractional_Scale_V1_Preferred_Scale, ok: bool) {
-	event.object = Wp_Fractional_Scale_V1(object)
-	read(connection, &event.scale) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- wp_fractional_scale_v1@", object, ".preferred_scale:", " scale=", event.scale)
-	ok = true
-	return
-}
-parse_xdg_activation_token_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Activation_Token_V1_Done, ok: bool) {
-	event.object = Xdg_Activation_Token_V1(object)
-	read(connection, &event.token) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_activation_token_v1@", object, ".done:", " token=", event.token)
-	ok = true
-	return
-}
-parse_xdg_toplevel_icon_manager_v1_icon_size :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Icon_Manager_V1_Icon_Size, ok: bool) {
-	event.object = Xdg_Toplevel_Icon_Manager_V1(object)
-	read(connection, &event.size) or_return
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_toplevel_icon_manager_v1@", object, ".icon_size:", " size=", event.size)
-	ok = true
-	return
-}
-parse_xdg_toplevel_icon_manager_v1_done :: proc(connection: ^Connection, object: u32) -> (event: Event_Xdg_Toplevel_Icon_Manager_V1_Done, ok: bool) {
-	event.object = Xdg_Toplevel_Icon_Manager_V1(object)
-	if connection.log_fn != nil do _debug_log(connection, "<- xdg_toplevel_icon_manager_v1@", object, ".done:")
-	ok = true
-	return
-}
-
 parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Type, opcode: u32) -> (event: Event, ok: bool) {
-	switch (object_type) {
-	case .Display:
+	switch object_type {
+	case .Wl_Display:
 		switch opcode {
 		case 0:
-			return parse_display_error(connection, object)
+			return wl.parse_display_error(connection, object)
 		case 1:
-			return parse_display_delete_id(connection, object)
+			return wl.parse_display_delete_id(connection, object)
 		case:
 			return
 		}
-	case .Registry:
+	case .Wl_Registry:
 		switch opcode {
 		case 0:
-			return parse_registry_global(connection, object)
+			return wl.parse_registry_global(connection, object)
 		case 1:
-			return parse_registry_global_remove(connection, object)
+			return wl.parse_registry_global_remove(connection, object)
 		case:
 			return
 		}
-	case .Callback:
+	case .Wl_Callback:
 		switch opcode {
 		case 0:
-			return parse_callback_done(connection, object)
+			return wl.parse_callback_done(connection, object)
 		case:
 			return
 		}
-	case .Compositor:
+	case .Wl_Compositor:
 		switch opcode {
 		case:
 			return
 		}
-	case .Shm_Pool:
+	case .Wl_Shm_Pool:
 		switch opcode {
 		case:
 			return
 		}
-	case .Shm:
-		switch opcode {
-		case 0:
-			return parse_shm_format(connection, object)
-		case:
-			return
-		}
-	case .Buffer:
+	case .Wl_Shm:
 		switch opcode {
 		case 0:
-			return parse_buffer_release(connection, object)
+			return wl.parse_shm_format(connection, object)
 		case:
 			return
 		}
-	case .Data_Offer:
+	case .Wl_Buffer:
 		switch opcode {
 		case 0:
-			return parse_data_offer_offer(connection, object)
+			return wl.parse_buffer_release(connection, object)
+		case:
+			return
+		}
+	case .Wl_Data_Offer:
+		switch opcode {
+		case 0:
+			return wl.parse_data_offer_offer(connection, object)
 		case 1:
-			return parse_data_offer_source_actions(connection, object)
+			return wl.parse_data_offer_source_actions(connection, object)
 		case 2:
-			return parse_data_offer_action(connection, object)
+			return wl.parse_data_offer_action(connection, object)
 		case:
 			return
 		}
-	case .Data_Source:
+	case .Wl_Data_Source:
 		switch opcode {
 		case 0:
-			return parse_data_source_target(connection, object)
+			return wl.parse_data_source_target(connection, object)
 		case 1:
-			return parse_data_source_send(connection, object)
+			return wl.parse_data_source_send(connection, object)
 		case 2:
-			return parse_data_source_cancelled(connection, object)
+			return wl.parse_data_source_cancelled(connection, object)
 		case 3:
-			return parse_data_source_dnd_drop_performed(connection, object)
+			return wl.parse_data_source_dnd_drop_performed(connection, object)
 		case 4:
-			return parse_data_source_dnd_finished(connection, object)
+			return wl.parse_data_source_dnd_finished(connection, object)
 		case 5:
-			return parse_data_source_action(connection, object)
+			return wl.parse_data_source_action(connection, object)
 		case:
 			return
 		}
-	case .Data_Device:
+	case .Wl_Data_Device:
 		switch opcode {
 		case 0:
-			return parse_data_device_data_offer(connection, object)
+			return wl.parse_data_device_data_offer(connection, object)
 		case 1:
-			return parse_data_device_enter(connection, object)
+			return wl.parse_data_device_enter(connection, object)
 		case 2:
-			return parse_data_device_leave(connection, object)
+			return wl.parse_data_device_leave(connection, object)
 		case 3:
-			return parse_data_device_motion(connection, object)
+			return wl.parse_data_device_motion(connection, object)
 		case 4:
-			return parse_data_device_drop(connection, object)
+			return wl.parse_data_device_drop(connection, object)
 		case 5:
-			return parse_data_device_selection(connection, object)
+			return wl.parse_data_device_selection(connection, object)
 		case:
 			return
 		}
-	case .Data_Device_Manager:
+	case .Wl_Data_Device_Manager:
 		switch opcode {
 		case:
 			return
 		}
-	case .Shell:
+	case .Wl_Shell:
 		switch opcode {
 		case:
 			return
 		}
-	case .Shell_Surface:
-		switch opcode {
-		case 0:
-			return parse_shell_surface_ping(connection, object)
-		case 1:
-			return parse_shell_surface_configure(connection, object)
-		case 2:
-			return parse_shell_surface_popup_done(connection, object)
-		case:
-			return
-		}
-	case .Surface:
+	case .Wl_Shell_Surface:
 		switch opcode {
 		case 0:
-			return parse_surface_enter(connection, object)
+			return wl.parse_shell_surface_ping(connection, object)
 		case 1:
-			return parse_surface_leave(connection, object)
+			return wl.parse_shell_surface_configure(connection, object)
 		case 2:
-			return parse_surface_preferred_buffer_scale(connection, object)
+			return wl.parse_shell_surface_popup_done(connection, object)
+		case:
+			return
+		}
+	case .Wl_Surface:
+		switch opcode {
+		case 0:
+			return wl.parse_surface_enter(connection, object)
+		case 1:
+			return wl.parse_surface_leave(connection, object)
+		case 2:
+			return wl.parse_surface_preferred_buffer_scale(connection, object)
 		case 3:
-			return parse_surface_preferred_buffer_transform(connection, object)
+			return wl.parse_surface_preferred_buffer_transform(connection, object)
 		case:
 			return
 		}
-	case .Seat:
+	case .Wl_Seat:
 		switch opcode {
 		case 0:
-			return parse_seat_capabilities(connection, object)
+			return wl.parse_seat_capabilities(connection, object)
 		case 1:
-			return parse_seat_name(connection, object)
+			return wl.parse_seat_name(connection, object)
 		case:
 			return
 		}
-	case .Pointer:
+	case .Wl_Pointer:
 		switch opcode {
 		case 0:
-			return parse_pointer_enter(connection, object)
+			return wl.parse_pointer_enter(connection, object)
 		case 1:
-			return parse_pointer_leave(connection, object)
+			return wl.parse_pointer_leave(connection, object)
 		case 2:
-			return parse_pointer_motion(connection, object)
+			return wl.parse_pointer_motion(connection, object)
 		case 3:
-			return parse_pointer_button(connection, object)
+			return wl.parse_pointer_button(connection, object)
 		case 4:
-			return parse_pointer_axis(connection, object)
+			return wl.parse_pointer_axis(connection, object)
 		case 5:
-			return parse_pointer_frame(connection, object)
+			return wl.parse_pointer_frame(connection, object)
 		case 6:
-			return parse_pointer_axis_source(connection, object)
+			return wl.parse_pointer_axis_source(connection, object)
 		case 7:
-			return parse_pointer_axis_stop(connection, object)
+			return wl.parse_pointer_axis_stop(connection, object)
 		case 8:
-			return parse_pointer_axis_discrete(connection, object)
+			return wl.parse_pointer_axis_discrete(connection, object)
 		case 9:
-			return parse_pointer_axis_value120(connection, object)
+			return wl.parse_pointer_axis_value120(connection, object)
 		case 10:
-			return parse_pointer_axis_relative_direction(connection, object)
+			return wl.parse_pointer_axis_relative_direction(connection, object)
 		case:
 			return
 		}
-	case .Keyboard:
+	case .Wl_Keyboard:
 		switch opcode {
 		case 0:
-			return parse_keyboard_keymap(connection, object)
+			return wl.parse_keyboard_keymap(connection, object)
 		case 1:
-			return parse_keyboard_enter(connection, object)
+			return wl.parse_keyboard_enter(connection, object)
 		case 2:
-			return parse_keyboard_leave(connection, object)
+			return wl.parse_keyboard_leave(connection, object)
 		case 3:
-			return parse_keyboard_key(connection, object)
+			return wl.parse_keyboard_key(connection, object)
 		case 4:
-			return parse_keyboard_modifiers(connection, object)
+			return wl.parse_keyboard_modifiers(connection, object)
 		case 5:
-			return parse_keyboard_repeat_info(connection, object)
+			return wl.parse_keyboard_repeat_info(connection, object)
 		case:
 			return
 		}
-	case .Touch:
+	case .Wl_Touch:
 		switch opcode {
 		case 0:
-			return parse_touch_down(connection, object)
+			return wl.parse_touch_down(connection, object)
 		case 1:
-			return parse_touch_up(connection, object)
+			return wl.parse_touch_up(connection, object)
 		case 2:
-			return parse_touch_motion(connection, object)
+			return wl.parse_touch_motion(connection, object)
 		case 3:
-			return parse_touch_frame(connection, object)
+			return wl.parse_touch_frame(connection, object)
 		case 4:
-			return parse_touch_cancel(connection, object)
+			return wl.parse_touch_cancel(connection, object)
 		case 5:
-			return parse_touch_shape(connection, object)
+			return wl.parse_touch_shape(connection, object)
 		case 6:
-			return parse_touch_orientation(connection, object)
+			return wl.parse_touch_orientation(connection, object)
 		case:
 			return
 		}
-	case .Output:
+	case .Wl_Output:
 		switch opcode {
 		case 0:
-			return parse_output_geometry(connection, object)
+			return wl.parse_output_geometry(connection, object)
 		case 1:
-			return parse_output_mode(connection, object)
+			return wl.parse_output_mode(connection, object)
 		case 2:
-			return parse_output_done(connection, object)
+			return wl.parse_output_done(connection, object)
 		case 3:
-			return parse_output_scale(connection, object)
+			return wl.parse_output_scale(connection, object)
 		case 4:
-			return parse_output_name(connection, object)
+			return wl.parse_output_name(connection, object)
 		case 5:
-			return parse_output_description(connection, object)
+			return wl.parse_output_description(connection, object)
 		case:
 			return
 		}
-	case .Region:
+	case .Wl_Region:
 		switch opcode {
 		case:
 			return
 		}
-	case .Subcompositor:
+	case .Wl_Subcompositor:
 		switch opcode {
 		case:
 			return
 		}
-	case .Subsurface:
+	case .Wl_Subsurface:
 		switch opcode {
 		case:
 			return
 		}
-	case .Fixes:
+	case .Wl_Fixes:
 		switch opcode {
 		case:
 			return
@@ -8223,55 +482,55 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Zwp_Linux_Dmabuf_V1:
 		switch opcode {
 		case 0:
-			return parse_zwp_linux_dmabuf_v1_format(connection, object)
+			return zwp.parse_linux_dmabuf_v1_format(connection, object)
 		case 1:
-			return parse_zwp_linux_dmabuf_v1_modifier(connection, object)
+			return zwp.parse_linux_dmabuf_v1_modifier(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Linux_Buffer_Params_V1:
 		switch opcode {
 		case 0:
-			return parse_zwp_linux_buffer_params_v1_created(connection, object)
+			return zwp.parse_linux_buffer_params_v1_created(connection, object)
 		case 1:
-			return parse_zwp_linux_buffer_params_v1_failed(connection, object)
+			return zwp.parse_linux_buffer_params_v1_failed(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Linux_Dmabuf_Feedback_V1:
 		switch opcode {
 		case 0:
-			return parse_zwp_linux_dmabuf_feedback_v1_done(connection, object)
+			return zwp.parse_linux_dmabuf_feedback_v1_done(connection, object)
 		case 1:
-			return parse_zwp_linux_dmabuf_feedback_v1_format_table(connection, object)
+			return zwp.parse_linux_dmabuf_feedback_v1_format_table(connection, object)
 		case 2:
-			return parse_zwp_linux_dmabuf_feedback_v1_main_device(connection, object)
+			return zwp.parse_linux_dmabuf_feedback_v1_main_device(connection, object)
 		case 3:
-			return parse_zwp_linux_dmabuf_feedback_v1_tranche_done(connection, object)
+			return zwp.parse_linux_dmabuf_feedback_v1_tranche_done(connection, object)
 		case 4:
-			return parse_zwp_linux_dmabuf_feedback_v1_tranche_target_device(connection, object)
+			return zwp.parse_linux_dmabuf_feedback_v1_tranche_target_device(connection, object)
 		case 5:
-			return parse_zwp_linux_dmabuf_feedback_v1_tranche_formats(connection, object)
+			return zwp.parse_linux_dmabuf_feedback_v1_tranche_formats(connection, object)
 		case 6:
-			return parse_zwp_linux_dmabuf_feedback_v1_tranche_flags(connection, object)
+			return zwp.parse_linux_dmabuf_feedback_v1_tranche_flags(connection, object)
 		case:
 			return
 		}
 	case .Wp_Presentation:
 		switch opcode {
 		case 0:
-			return parse_wp_presentation_clock_id(connection, object)
+			return wp.parse_presentation_clock_id(connection, object)
 		case:
 			return
 		}
 	case .Wp_Presentation_Feedback:
 		switch opcode {
 		case 0:
-			return parse_wp_presentation_feedback_sync_output(connection, object)
+			return wp.parse_presentation_feedback_sync_output(connection, object)
 		case 1:
-			return parse_wp_presentation_feedback_presented(connection, object)
+			return wp.parse_presentation_feedback_presented(connection, object)
 		case 2:
-			return parse_wp_presentation_feedback_discarded(connection, object)
+			return wp.parse_presentation_feedback_discarded(connection, object)
 		case:
 			return
 		}
@@ -8283,146 +542,146 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Zwp_Tablet_Seat_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_seat_v2_tablet_added(connection, object)
+			return zwp.parse_tablet_seat_v2_tablet_added(connection, object)
 		case 1:
-			return parse_zwp_tablet_seat_v2_tool_added(connection, object)
+			return zwp.parse_tablet_seat_v2_tool_added(connection, object)
 		case 2:
-			return parse_zwp_tablet_seat_v2_pad_added(connection, object)
+			return zwp.parse_tablet_seat_v2_pad_added(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Tool_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_tool_v2_type(connection, object)
+			return zwp.parse_tablet_tool_v2_type(connection, object)
 		case 1:
-			return parse_zwp_tablet_tool_v2_hardware_serial(connection, object)
+			return zwp.parse_tablet_tool_v2_hardware_serial(connection, object)
 		case 2:
-			return parse_zwp_tablet_tool_v2_hardware_id_wacom(connection, object)
+			return zwp.parse_tablet_tool_v2_hardware_id_wacom(connection, object)
 		case 3:
-			return parse_zwp_tablet_tool_v2_capability(connection, object)
+			return zwp.parse_tablet_tool_v2_capability(connection, object)
 		case 4:
-			return parse_zwp_tablet_tool_v2_done(connection, object)
+			return zwp.parse_tablet_tool_v2_done(connection, object)
 		case 5:
-			return parse_zwp_tablet_tool_v2_removed(connection, object)
+			return zwp.parse_tablet_tool_v2_removed(connection, object)
 		case 6:
-			return parse_zwp_tablet_tool_v2_proximity_in(connection, object)
+			return zwp.parse_tablet_tool_v2_proximity_in(connection, object)
 		case 7:
-			return parse_zwp_tablet_tool_v2_proximity_out(connection, object)
+			return zwp.parse_tablet_tool_v2_proximity_out(connection, object)
 		case 8:
-			return parse_zwp_tablet_tool_v2_down(connection, object)
+			return zwp.parse_tablet_tool_v2_down(connection, object)
 		case 9:
-			return parse_zwp_tablet_tool_v2_up(connection, object)
+			return zwp.parse_tablet_tool_v2_up(connection, object)
 		case 10:
-			return parse_zwp_tablet_tool_v2_motion(connection, object)
+			return zwp.parse_tablet_tool_v2_motion(connection, object)
 		case 11:
-			return parse_zwp_tablet_tool_v2_pressure(connection, object)
+			return zwp.parse_tablet_tool_v2_pressure(connection, object)
 		case 12:
-			return parse_zwp_tablet_tool_v2_distance(connection, object)
+			return zwp.parse_tablet_tool_v2_distance(connection, object)
 		case 13:
-			return parse_zwp_tablet_tool_v2_tilt(connection, object)
+			return zwp.parse_tablet_tool_v2_tilt(connection, object)
 		case 14:
-			return parse_zwp_tablet_tool_v2_rotation(connection, object)
+			return zwp.parse_tablet_tool_v2_rotation(connection, object)
 		case 15:
-			return parse_zwp_tablet_tool_v2_slider(connection, object)
+			return zwp.parse_tablet_tool_v2_slider(connection, object)
 		case 16:
-			return parse_zwp_tablet_tool_v2_wheel(connection, object)
+			return zwp.parse_tablet_tool_v2_wheel(connection, object)
 		case 17:
-			return parse_zwp_tablet_tool_v2_button(connection, object)
+			return zwp.parse_tablet_tool_v2_button(connection, object)
 		case 18:
-			return parse_zwp_tablet_tool_v2_frame(connection, object)
+			return zwp.parse_tablet_tool_v2_frame(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_v2_name(connection, object)
+			return zwp.parse_tablet_v2_name(connection, object)
 		case 1:
-			return parse_zwp_tablet_v2_id(connection, object)
+			return zwp.parse_tablet_v2_id(connection, object)
 		case 2:
-			return parse_zwp_tablet_v2_path(connection, object)
+			return zwp.parse_tablet_v2_path(connection, object)
 		case 3:
-			return parse_zwp_tablet_v2_done(connection, object)
+			return zwp.parse_tablet_v2_done(connection, object)
 		case 4:
-			return parse_zwp_tablet_v2_removed(connection, object)
+			return zwp.parse_tablet_v2_removed(connection, object)
 		case 5:
-			return parse_zwp_tablet_v2_bustype(connection, object)
+			return zwp.parse_tablet_v2_bustype(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_Ring_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_ring_v2_source(connection, object)
+			return zwp.parse_tablet_pad_ring_v2_source(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_ring_v2_angle(connection, object)
+			return zwp.parse_tablet_pad_ring_v2_angle(connection, object)
 		case 2:
-			return parse_zwp_tablet_pad_ring_v2_stop(connection, object)
+			return zwp.parse_tablet_pad_ring_v2_stop(connection, object)
 		case 3:
-			return parse_zwp_tablet_pad_ring_v2_frame(connection, object)
+			return zwp.parse_tablet_pad_ring_v2_frame(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_Strip_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_strip_v2_source(connection, object)
+			return zwp.parse_tablet_pad_strip_v2_source(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_strip_v2_position(connection, object)
+			return zwp.parse_tablet_pad_strip_v2_position(connection, object)
 		case 2:
-			return parse_zwp_tablet_pad_strip_v2_stop(connection, object)
+			return zwp.parse_tablet_pad_strip_v2_stop(connection, object)
 		case 3:
-			return parse_zwp_tablet_pad_strip_v2_frame(connection, object)
+			return zwp.parse_tablet_pad_strip_v2_frame(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_Group_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_group_v2_buttons(connection, object)
+			return zwp.parse_tablet_pad_group_v2_buttons(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_group_v2_ring(connection, object)
+			return zwp.parse_tablet_pad_group_v2_ring(connection, object)
 		case 2:
-			return parse_zwp_tablet_pad_group_v2_strip(connection, object)
+			return zwp.parse_tablet_pad_group_v2_strip(connection, object)
 		case 3:
-			return parse_zwp_tablet_pad_group_v2_modes(connection, object)
+			return zwp.parse_tablet_pad_group_v2_modes(connection, object)
 		case 4:
-			return parse_zwp_tablet_pad_group_v2_done(connection, object)
+			return zwp.parse_tablet_pad_group_v2_done(connection, object)
 		case 5:
-			return parse_zwp_tablet_pad_group_v2_mode_switch(connection, object)
+			return zwp.parse_tablet_pad_group_v2_mode_switch(connection, object)
 		case 6:
-			return parse_zwp_tablet_pad_group_v2_dial(connection, object)
+			return zwp.parse_tablet_pad_group_v2_dial(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_v2_group(connection, object)
+			return zwp.parse_tablet_pad_v2_group(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_v2_path(connection, object)
+			return zwp.parse_tablet_pad_v2_path(connection, object)
 		case 2:
-			return parse_zwp_tablet_pad_v2_buttons(connection, object)
+			return zwp.parse_tablet_pad_v2_buttons(connection, object)
 		case 3:
-			return parse_zwp_tablet_pad_v2_done(connection, object)
+			return zwp.parse_tablet_pad_v2_done(connection, object)
 		case 4:
-			return parse_zwp_tablet_pad_v2_button(connection, object)
+			return zwp.parse_tablet_pad_v2_button(connection, object)
 		case 5:
-			return parse_zwp_tablet_pad_v2_enter(connection, object)
+			return zwp.parse_tablet_pad_v2_enter(connection, object)
 		case 6:
-			return parse_zwp_tablet_pad_v2_leave(connection, object)
+			return zwp.parse_tablet_pad_v2_leave(connection, object)
 		case 7:
-			return parse_zwp_tablet_pad_v2_removed(connection, object)
+			return zwp.parse_tablet_pad_v2_removed(connection, object)
 		case:
 			return
 		}
 	case .Zwp_Tablet_Pad_Dial_V2:
 		switch opcode {
 		case 0:
-			return parse_zwp_tablet_pad_dial_v2_delta(connection, object)
+			return zwp.parse_tablet_pad_dial_v2_delta(connection, object)
 		case 1:
-			return parse_zwp_tablet_pad_dial_v2_frame(connection, object)
+			return zwp.parse_tablet_pad_dial_v2_frame(connection, object)
 		case:
 			return
 		}
@@ -8439,7 +698,7 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Xdg_Wm_Base:
 		switch opcode {
 		case 0:
-			return parse_xdg_wm_base_ping(connection, object)
+			return xdg.parse_wm_base_ping(connection, object)
 		case:
 			return
 		}
@@ -8451,31 +710,31 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Xdg_Surface:
 		switch opcode {
 		case 0:
-			return parse_xdg_surface_configure(connection, object)
+			return xdg.parse_surface_configure(connection, object)
 		case:
 			return
 		}
 	case .Xdg_Toplevel:
 		switch opcode {
 		case 0:
-			return parse_xdg_toplevel_configure(connection, object)
+			return xdg.parse_toplevel_configure(connection, object)
 		case 1:
-			return parse_xdg_toplevel_close(connection, object)
+			return xdg.parse_toplevel_close(connection, object)
 		case 2:
-			return parse_xdg_toplevel_configure_bounds(connection, object)
+			return xdg.parse_toplevel_configure_bounds(connection, object)
 		case 3:
-			return parse_xdg_toplevel_wm_capabilities(connection, object)
+			return xdg.parse_toplevel_wm_capabilities(connection, object)
 		case:
 			return
 		}
 	case .Xdg_Popup:
 		switch opcode {
 		case 0:
-			return parse_xdg_popup_configure(connection, object)
+			return xdg.parse_popup_configure(connection, object)
 		case 1:
-			return parse_xdg_popup_popup_done(connection, object)
+			return xdg.parse_popup_popup_done(connection, object)
 		case 2:
-			return parse_xdg_popup_repositioned(connection, object)
+			return xdg.parse_popup_repositioned(connection, object)
 		case:
 			return
 		}
@@ -8492,22 +751,22 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Wp_Color_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_color_manager_v1_supported_intent(connection, object)
+			return wp.parse_color_manager_v1_supported_intent(connection, object)
 		case 1:
-			return parse_wp_color_manager_v1_supported_feature(connection, object)
+			return wp.parse_color_manager_v1_supported_feature(connection, object)
 		case 2:
-			return parse_wp_color_manager_v1_supported_tf_named(connection, object)
+			return wp.parse_color_manager_v1_supported_tf_named(connection, object)
 		case 3:
-			return parse_wp_color_manager_v1_supported_primaries_named(connection, object)
+			return wp.parse_color_manager_v1_supported_primaries_named(connection, object)
 		case 4:
-			return parse_wp_color_manager_v1_done(connection, object)
+			return wp.parse_color_manager_v1_done(connection, object)
 		case:
 			return
 		}
 	case .Wp_Color_Management_Output_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_color_management_output_v1_image_description_changed(connection, object)
+			return wp.parse_color_management_output_v1_image_description_changed(connection, object)
 		case:
 			return
 		}
@@ -8519,9 +778,9 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Wp_Color_Management_Surface_Feedback_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_color_management_surface_feedback_v1_preferred_changed(connection, object)
+			return wp.parse_color_management_surface_feedback_v1_preferred_changed(connection, object)
 		case 1:
-			return parse_wp_color_management_surface_feedback_v1_preferred_changed2(connection, object)
+			return wp.parse_color_management_surface_feedback_v1_preferred_changed2(connection, object)
 		case:
 			return
 		}
@@ -8538,38 +797,38 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Wp_Image_Description_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_image_description_v1_failed(connection, object)
+			return wp.parse_image_description_v1_failed(connection, object)
 		case 1:
-			return parse_wp_image_description_v1_ready(connection, object)
+			return wp.parse_image_description_v1_ready(connection, object)
 		case 2:
-			return parse_wp_image_description_v1_ready2(connection, object)
+			return wp.parse_image_description_v1_ready2(connection, object)
 		case:
 			return
 		}
 	case .Wp_Image_Description_Info_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_image_description_info_v1_done(connection, object)
+			return wp.parse_image_description_info_v1_done(connection, object)
 		case 1:
-			return parse_wp_image_description_info_v1_icc_file(connection, object)
+			return wp.parse_image_description_info_v1_icc_file(connection, object)
 		case 2:
-			return parse_wp_image_description_info_v1_primaries(connection, object)
+			return wp.parse_image_description_info_v1_primaries(connection, object)
 		case 3:
-			return parse_wp_image_description_info_v1_primaries_named(connection, object)
+			return wp.parse_image_description_info_v1_primaries_named(connection, object)
 		case 4:
-			return parse_wp_image_description_info_v1_tf_power(connection, object)
+			return wp.parse_image_description_info_v1_tf_power(connection, object)
 		case 5:
-			return parse_wp_image_description_info_v1_tf_named(connection, object)
+			return wp.parse_image_description_info_v1_tf_named(connection, object)
 		case 6:
-			return parse_wp_image_description_info_v1_luminances(connection, object)
+			return wp.parse_image_description_info_v1_luminances(connection, object)
 		case 7:
-			return parse_wp_image_description_info_v1_target_primaries(connection, object)
+			return wp.parse_image_description_info_v1_target_primaries(connection, object)
 		case 8:
-			return parse_wp_image_description_info_v1_target_luminance(connection, object)
+			return wp.parse_image_description_info_v1_target_luminance(connection, object)
 		case 9:
-			return parse_wp_image_description_info_v1_target_max_cll(connection, object)
+			return wp.parse_image_description_info_v1_target_max_cll(connection, object)
 		case 10:
-			return parse_wp_image_description_info_v1_target_max_fall(connection, object)
+			return wp.parse_image_description_info_v1_target_max_fall(connection, object)
 		case:
 			return
 		}
@@ -8581,11 +840,11 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Wp_Color_Representation_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_color_representation_manager_v1_supported_alpha_mode(connection, object)
+			return wp.parse_color_representation_manager_v1_supported_alpha_mode(connection, object)
 		case 1:
-			return parse_wp_color_representation_manager_v1_supported_coefficients_and_ranges(connection, object)
+			return wp.parse_color_representation_manager_v1_supported_coefficients_and_ranges(connection, object)
 		case 2:
-			return parse_wp_color_representation_manager_v1_done(connection, object)
+			return wp.parse_color_representation_manager_v1_done(connection, object)
 		case:
 			return
 		}
@@ -8627,28 +886,28 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Wp_Drm_Lease_Device_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_drm_lease_device_v1_drm_fd(connection, object)
+			return wp.parse_drm_lease_device_v1_drm_fd(connection, object)
 		case 1:
-			return parse_wp_drm_lease_device_v1_connector(connection, object)
+			return wp.parse_drm_lease_device_v1_connector(connection, object)
 		case 2:
-			return parse_wp_drm_lease_device_v1_done(connection, object)
+			return wp.parse_drm_lease_device_v1_done(connection, object)
 		case 3:
-			return parse_wp_drm_lease_device_v1_released(connection, object)
+			return wp.parse_drm_lease_device_v1_released(connection, object)
 		case:
 			return
 		}
 	case .Wp_Drm_Lease_Connector_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_drm_lease_connector_v1_name(connection, object)
+			return wp.parse_drm_lease_connector_v1_name(connection, object)
 		case 1:
-			return parse_wp_drm_lease_connector_v1_description(connection, object)
+			return wp.parse_drm_lease_connector_v1_description(connection, object)
 		case 2:
-			return parse_wp_drm_lease_connector_v1_connector_id(connection, object)
+			return wp.parse_drm_lease_connector_v1_connector_id(connection, object)
 		case 3:
-			return parse_wp_drm_lease_connector_v1_done(connection, object)
+			return wp.parse_drm_lease_connector_v1_done(connection, object)
 		case 4:
-			return parse_wp_drm_lease_connector_v1_withdrawn(connection, object)
+			return wp.parse_drm_lease_connector_v1_withdrawn(connection, object)
 		case:
 			return
 		}
@@ -8660,16 +919,16 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Wp_Drm_Lease_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_drm_lease_v1_lease_fd(connection, object)
+			return wp.parse_drm_lease_v1_lease_fd(connection, object)
 		case 1:
-			return parse_wp_drm_lease_v1_finished(connection, object)
+			return wp.parse_drm_lease_v1_finished(connection, object)
 		case:
 			return
 		}
 	case .Ext_Background_Effect_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_background_effect_manager_v1_capabilities(connection, object)
+			return ext.parse_background_effect_manager_v1_capabilities(connection, object)
 		case:
 			return
 		}
@@ -8686,53 +945,53 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Ext_Data_Control_Device_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_data_control_device_v1_data_offer(connection, object)
+			return ext.parse_data_control_device_v1_data_offer(connection, object)
 		case 1:
-			return parse_ext_data_control_device_v1_selection(connection, object)
+			return ext.parse_data_control_device_v1_selection(connection, object)
 		case 2:
-			return parse_ext_data_control_device_v1_finished(connection, object)
+			return ext.parse_data_control_device_v1_finished(connection, object)
 		case 3:
-			return parse_ext_data_control_device_v1_primary_selection(connection, object)
+			return ext.parse_data_control_device_v1_primary_selection(connection, object)
 		case:
 			return
 		}
 	case .Ext_Data_Control_Source_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_data_control_source_v1_send(connection, object)
+			return ext.parse_data_control_source_v1_send(connection, object)
 		case 1:
-			return parse_ext_data_control_source_v1_cancelled(connection, object)
+			return ext.parse_data_control_source_v1_cancelled(connection, object)
 		case:
 			return
 		}
 	case .Ext_Data_Control_Offer_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_data_control_offer_v1_offer(connection, object)
+			return ext.parse_data_control_offer_v1_offer(connection, object)
 		case:
 			return
 		}
 	case .Ext_Foreign_Toplevel_List_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_foreign_toplevel_list_v1_toplevel(connection, object)
+			return ext.parse_foreign_toplevel_list_v1_toplevel(connection, object)
 		case 1:
-			return parse_ext_foreign_toplevel_list_v1_finished(connection, object)
+			return ext.parse_foreign_toplevel_list_v1_finished(connection, object)
 		case:
 			return
 		}
 	case .Ext_Foreign_Toplevel_Handle_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_foreign_toplevel_handle_v1_closed(connection, object)
+			return ext.parse_foreign_toplevel_handle_v1_closed(connection, object)
 		case 1:
-			return parse_ext_foreign_toplevel_handle_v1_done(connection, object)
+			return ext.parse_foreign_toplevel_handle_v1_done(connection, object)
 		case 2:
-			return parse_ext_foreign_toplevel_handle_v1_title(connection, object)
+			return ext.parse_foreign_toplevel_handle_v1_title(connection, object)
 		case 3:
-			return parse_ext_foreign_toplevel_handle_v1_app_id(connection, object)
+			return ext.parse_foreign_toplevel_handle_v1_app_id(connection, object)
 		case 4:
-			return parse_ext_foreign_toplevel_handle_v1_identifier(connection, object)
+			return ext.parse_foreign_toplevel_handle_v1_identifier(connection, object)
 		case:
 			return
 		}
@@ -8744,9 +1003,9 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Ext_Idle_Notification_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_idle_notification_v1_idled(connection, object)
+			return ext.parse_idle_notification_v1_idled(connection, object)
 		case 1:
-			return parse_ext_idle_notification_v1_resumed(connection, object)
+			return ext.parse_idle_notification_v1_resumed(connection, object)
 		case:
 			return
 		}
@@ -8773,45 +1032,45 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Ext_Image_Copy_Capture_Session_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_image_copy_capture_session_v1_buffer_size(connection, object)
+			return ext.parse_image_copy_capture_session_v1_buffer_size(connection, object)
 		case 1:
-			return parse_ext_image_copy_capture_session_v1_shm_format(connection, object)
+			return ext.parse_image_copy_capture_session_v1_shm_format(connection, object)
 		case 2:
-			return parse_ext_image_copy_capture_session_v1_dmabuf_device(connection, object)
+			return ext.parse_image_copy_capture_session_v1_dmabuf_device(connection, object)
 		case 3:
-			return parse_ext_image_copy_capture_session_v1_dmabuf_format(connection, object)
+			return ext.parse_image_copy_capture_session_v1_dmabuf_format(connection, object)
 		case 4:
-			return parse_ext_image_copy_capture_session_v1_done(connection, object)
+			return ext.parse_image_copy_capture_session_v1_done(connection, object)
 		case 5:
-			return parse_ext_image_copy_capture_session_v1_stopped(connection, object)
+			return ext.parse_image_copy_capture_session_v1_stopped(connection, object)
 		case:
 			return
 		}
 	case .Ext_Image_Copy_Capture_Frame_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_image_copy_capture_frame_v1_transform(connection, object)
+			return ext.parse_image_copy_capture_frame_v1_transform(connection, object)
 		case 1:
-			return parse_ext_image_copy_capture_frame_v1_damage(connection, object)
+			return ext.parse_image_copy_capture_frame_v1_damage(connection, object)
 		case 2:
-			return parse_ext_image_copy_capture_frame_v1_presentation_time(connection, object)
+			return ext.parse_image_copy_capture_frame_v1_presentation_time(connection, object)
 		case 3:
-			return parse_ext_image_copy_capture_frame_v1_ready(connection, object)
+			return ext.parse_image_copy_capture_frame_v1_ready(connection, object)
 		case 4:
-			return parse_ext_image_copy_capture_frame_v1_failed(connection, object)
+			return ext.parse_image_copy_capture_frame_v1_failed(connection, object)
 		case:
 			return
 		}
 	case .Ext_Image_Copy_Capture_Cursor_Session_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_image_copy_capture_cursor_session_v1_enter(connection, object)
+			return ext.parse_image_copy_capture_cursor_session_v1_enter(connection, object)
 		case 1:
-			return parse_ext_image_copy_capture_cursor_session_v1_leave(connection, object)
+			return ext.parse_image_copy_capture_cursor_session_v1_leave(connection, object)
 		case 2:
-			return parse_ext_image_copy_capture_cursor_session_v1_position(connection, object)
+			return ext.parse_image_copy_capture_cursor_session_v1_position(connection, object)
 		case 3:
-			return parse_ext_image_copy_capture_cursor_session_v1_hotspot(connection, object)
+			return ext.parse_image_copy_capture_cursor_session_v1_hotspot(connection, object)
 		case:
 			return
 		}
@@ -8823,16 +1082,16 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Ext_Session_Lock_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_session_lock_v1_locked(connection, object)
+			return ext.parse_session_lock_v1_locked(connection, object)
 		case 1:
-			return parse_ext_session_lock_v1_finished(connection, object)
+			return ext.parse_session_lock_v1_finished(connection, object)
 		case:
 			return
 		}
 	case .Ext_Session_Lock_Surface_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_session_lock_surface_v1_configure(connection, object)
+			return ext.parse_session_lock_surface_v1_configure(connection, object)
 		case:
 			return
 		}
@@ -8844,56 +1103,56 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Ext_Transient_Seat_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_transient_seat_v1_ready(connection, object)
+			return ext.parse_transient_seat_v1_ready(connection, object)
 		case 1:
-			return parse_ext_transient_seat_v1_denied(connection, object)
+			return ext.parse_transient_seat_v1_denied(connection, object)
 		case:
 			return
 		}
 	case .Ext_Workspace_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_workspace_manager_v1_workspace_group(connection, object)
+			return ext.parse_workspace_manager_v1_workspace_group(connection, object)
 		case 1:
-			return parse_ext_workspace_manager_v1_workspace(connection, object)
+			return ext.parse_workspace_manager_v1_workspace(connection, object)
 		case 2:
-			return parse_ext_workspace_manager_v1_done(connection, object)
+			return ext.parse_workspace_manager_v1_done(connection, object)
 		case 3:
-			return parse_ext_workspace_manager_v1_finished(connection, object)
+			return ext.parse_workspace_manager_v1_finished(connection, object)
 		case:
 			return
 		}
 	case .Ext_Workspace_Group_Handle_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_workspace_group_handle_v1_capabilities(connection, object)
+			return ext.parse_workspace_group_handle_v1_capabilities(connection, object)
 		case 1:
-			return parse_ext_workspace_group_handle_v1_output_enter(connection, object)
+			return ext.parse_workspace_group_handle_v1_output_enter(connection, object)
 		case 2:
-			return parse_ext_workspace_group_handle_v1_output_leave(connection, object)
+			return ext.parse_workspace_group_handle_v1_output_leave(connection, object)
 		case 3:
-			return parse_ext_workspace_group_handle_v1_workspace_enter(connection, object)
+			return ext.parse_workspace_group_handle_v1_workspace_enter(connection, object)
 		case 4:
-			return parse_ext_workspace_group_handle_v1_workspace_leave(connection, object)
+			return ext.parse_workspace_group_handle_v1_workspace_leave(connection, object)
 		case 5:
-			return parse_ext_workspace_group_handle_v1_removed(connection, object)
+			return ext.parse_workspace_group_handle_v1_removed(connection, object)
 		case:
 			return
 		}
 	case .Ext_Workspace_Handle_V1:
 		switch opcode {
 		case 0:
-			return parse_ext_workspace_handle_v1_id(connection, object)
+			return ext.parse_workspace_handle_v1_id(connection, object)
 		case 1:
-			return parse_ext_workspace_handle_v1_name(connection, object)
+			return ext.parse_workspace_handle_v1_name(connection, object)
 		case 2:
-			return parse_ext_workspace_handle_v1_coordinates(connection, object)
+			return ext.parse_workspace_handle_v1_coordinates(connection, object)
 		case 3:
-			return parse_ext_workspace_handle_v1_state(connection, object)
+			return ext.parse_workspace_handle_v1_state(connection, object)
 		case 4:
-			return parse_ext_workspace_handle_v1_capabilities(connection, object)
+			return ext.parse_workspace_handle_v1_capabilities(connection, object)
 		case 5:
-			return parse_ext_workspace_handle_v1_removed(connection, object)
+			return ext.parse_workspace_handle_v1_removed(connection, object)
 		case:
 			return
 		}
@@ -8915,7 +1174,7 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Wp_Fractional_Scale_V1:
 		switch opcode {
 		case 0:
-			return parse_wp_fractional_scale_v1_preferred_scale(connection, object)
+			return wp.parse_fractional_scale_v1_preferred_scale(connection, object)
 		case:
 			return
 		}
@@ -8972,7 +1231,7 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Xdg_Activation_Token_V1:
 		switch opcode {
 		case 0:
-			return parse_xdg_activation_token_v1_done(connection, object)
+			return xdg.parse_activation_token_v1_done(connection, object)
 		case:
 			return
 		}
@@ -9004,9 +1263,9 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 	case .Xdg_Toplevel_Icon_Manager_V1:
 		switch opcode {
 		case 0:
-			return parse_xdg_toplevel_icon_manager_v1_icon_size(connection, object)
+			return xdg.parse_toplevel_icon_manager_v1_icon_size(connection, object)
 		case 1:
-			return parse_xdg_toplevel_icon_manager_v1_done(connection, object)
+			return xdg.parse_toplevel_icon_manager_v1_done(connection, object)
 		case:
 			return
 		}
@@ -9030,604 +1289,367 @@ parse_event :: proc(connection: ^Connection, object: u32, object_type: Object_Ty
 		case:
 			return
 		}
+
 	case:
 		return
 	}
 }
 
-Object_Type :: enum {
-	Display,
-	Registry,
-	Callback,
-	Compositor,
-	Shm_Pool,
-	Shm,
-	Buffer,
-	Data_Offer,
-	Data_Source,
-	Data_Device,
-	Data_Device_Manager,
-	Shell,
-	Shell_Surface,
-	Surface,
-	Seat,
-	Pointer,
-	Keyboard,
-	Touch,
-	Output,
-	Region,
-	Subcompositor,
-	Subsurface,
-	Fixes,
-	Zwp_Linux_Dmabuf_V1,
-	Zwp_Linux_Buffer_Params_V1,
-	Zwp_Linux_Dmabuf_Feedback_V1,
-	Wp_Presentation,
-	Wp_Presentation_Feedback,
-	Zwp_Tablet_Manager_V2,
-	Zwp_Tablet_Seat_V2,
-	Zwp_Tablet_Tool_V2,
-	Zwp_Tablet_V2,
-	Zwp_Tablet_Pad_Ring_V2,
-	Zwp_Tablet_Pad_Strip_V2,
-	Zwp_Tablet_Pad_Group_V2,
-	Zwp_Tablet_Pad_V2,
-	Zwp_Tablet_Pad_Dial_V2,
-	Wp_Viewporter,
-	Wp_Viewport,
-	Xdg_Wm_Base,
-	Xdg_Positioner,
-	Xdg_Surface,
-	Xdg_Toplevel,
-	Xdg_Popup,
-	Wp_Alpha_Modifier_V1,
-	Wp_Alpha_Modifier_Surface_V1,
-	Wp_Color_Manager_V1,
-	Wp_Color_Management_Output_V1,
-	Wp_Color_Management_Surface_V1,
-	Wp_Color_Management_Surface_Feedback_V1,
-	Wp_Image_Description_Creator_Icc_V1,
-	Wp_Image_Description_Creator_Params_V1,
-	Wp_Image_Description_V1,
-	Wp_Image_Description_Info_V1,
-	Wp_Image_Description_Reference_V1,
-	Wp_Color_Representation_Manager_V1,
-	Wp_Color_Representation_Surface_V1,
-	Wp_Commit_Timing_Manager_V1,
-	Wp_Commit_Timer_V1,
-	Wp_Content_Type_Manager_V1,
-	Wp_Content_Type_V1,
-	Wp_Cursor_Shape_Manager_V1,
-	Wp_Cursor_Shape_Device_V1,
-	Wp_Drm_Lease_Device_V1,
-	Wp_Drm_Lease_Connector_V1,
-	Wp_Drm_Lease_Request_V1,
-	Wp_Drm_Lease_V1,
-	Ext_Background_Effect_Manager_V1,
-	Ext_Background_Effect_Surface_V1,
-	Ext_Data_Control_Manager_V1,
-	Ext_Data_Control_Device_V1,
-	Ext_Data_Control_Source_V1,
-	Ext_Data_Control_Offer_V1,
-	Ext_Foreign_Toplevel_List_V1,
-	Ext_Foreign_Toplevel_Handle_V1,
-	Ext_Idle_Notifier_V1,
-	Ext_Idle_Notification_V1,
-	Ext_Image_Capture_Source_V1,
-	Ext_Output_Image_Capture_Source_Manager_V1,
-	Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1,
-	Ext_Image_Copy_Capture_Manager_V1,
-	Ext_Image_Copy_Capture_Session_V1,
-	Ext_Image_Copy_Capture_Frame_V1,
-	Ext_Image_Copy_Capture_Cursor_Session_V1,
-	Ext_Session_Lock_Manager_V1,
-	Ext_Session_Lock_V1,
-	Ext_Session_Lock_Surface_V1,
-	Ext_Transient_Seat_Manager_V1,
-	Ext_Transient_Seat_V1,
-	Ext_Workspace_Manager_V1,
-	Ext_Workspace_Group_Handle_V1,
-	Ext_Workspace_Handle_V1,
-	Wp_Fifo_Manager_V1,
-	Wp_Fifo_V1,
-	Wp_Fractional_Scale_Manager_V1,
-	Wp_Fractional_Scale_V1,
-	Wp_Linux_Drm_Syncobj_Manager_V1,
-	Wp_Linux_Drm_Syncobj_Timeline_V1,
-	Wp_Linux_Drm_Syncobj_Surface_V1,
-	Wp_Pointer_Warp_V1,
-	Wp_Security_Context_Manager_V1,
-	Wp_Security_Context_V1,
-	Wp_Single_Pixel_Buffer_Manager_V1,
-	Wp_Tearing_Control_Manager_V1,
-	Wp_Tearing_Control_V1,
-	Xdg_Activation_V1,
-	Xdg_Activation_Token_V1,
-	Xdg_Wm_Dialog_V1,
-	Xdg_Dialog_V1,
-	Xdg_System_Bell_V1,
-	Xdg_Toplevel_Drag_Manager_V1,
-	Xdg_Toplevel_Drag_V1,
-	Xdg_Toplevel_Icon_Manager_V1,
-	Xdg_Toplevel_Icon_V1,
-	Xdg_Toplevel_Tag_Manager_V1,
-	Xwayland_Shell_V1,
-	Xwayland_Surface_V1,
-}
-
-Display :: distinct u32
-Registry :: distinct u32
-Callback :: distinct u32
-Compositor :: distinct u32
-Shm_Pool :: distinct u32
-Shm :: distinct u32
-Buffer :: distinct u32
-Data_Offer :: distinct u32
-Data_Source :: distinct u32
-Data_Device :: distinct u32
-Data_Device_Manager :: distinct u32
-Shell :: distinct u32
-Shell_Surface :: distinct u32
-Surface :: distinct u32
-Seat :: distinct u32
-Pointer :: distinct u32
-Keyboard :: distinct u32
-Touch :: distinct u32
-Output :: distinct u32
-Region :: distinct u32
-Subcompositor :: distinct u32
-Subsurface :: distinct u32
-Fixes :: distinct u32
-Zwp_Linux_Dmabuf_V1 :: distinct u32
-Zwp_Linux_Buffer_Params_V1 :: distinct u32
-Zwp_Linux_Dmabuf_Feedback_V1 :: distinct u32
-Wp_Presentation :: distinct u32
-Wp_Presentation_Feedback :: distinct u32
-Zwp_Tablet_Manager_V2 :: distinct u32
-Zwp_Tablet_Seat_V2 :: distinct u32
-Zwp_Tablet_Tool_V2 :: distinct u32
-Zwp_Tablet_V2 :: distinct u32
-Zwp_Tablet_Pad_Ring_V2 :: distinct u32
-Zwp_Tablet_Pad_Strip_V2 :: distinct u32
-Zwp_Tablet_Pad_Group_V2 :: distinct u32
-Zwp_Tablet_Pad_V2 :: distinct u32
-Zwp_Tablet_Pad_Dial_V2 :: distinct u32
-Wp_Viewporter :: distinct u32
-Wp_Viewport :: distinct u32
-Xdg_Wm_Base :: distinct u32
-Xdg_Positioner :: distinct u32
-Xdg_Surface :: distinct u32
-Xdg_Toplevel :: distinct u32
-Xdg_Popup :: distinct u32
-Wp_Alpha_Modifier_V1 :: distinct u32
-Wp_Alpha_Modifier_Surface_V1 :: distinct u32
-Wp_Color_Manager_V1 :: distinct u32
-Wp_Color_Management_Output_V1 :: distinct u32
-Wp_Color_Management_Surface_V1 :: distinct u32
-Wp_Color_Management_Surface_Feedback_V1 :: distinct u32
-Wp_Image_Description_Creator_Icc_V1 :: distinct u32
-Wp_Image_Description_Creator_Params_V1 :: distinct u32
-Wp_Image_Description_V1 :: distinct u32
-Wp_Image_Description_Info_V1 :: distinct u32
-Wp_Image_Description_Reference_V1 :: distinct u32
-Wp_Color_Representation_Manager_V1 :: distinct u32
-Wp_Color_Representation_Surface_V1 :: distinct u32
-Wp_Commit_Timing_Manager_V1 :: distinct u32
-Wp_Commit_Timer_V1 :: distinct u32
-Wp_Content_Type_Manager_V1 :: distinct u32
-Wp_Content_Type_V1 :: distinct u32
-Wp_Cursor_Shape_Manager_V1 :: distinct u32
-Wp_Cursor_Shape_Device_V1 :: distinct u32
-Wp_Drm_Lease_Device_V1 :: distinct u32
-Wp_Drm_Lease_Connector_V1 :: distinct u32
-Wp_Drm_Lease_Request_V1 :: distinct u32
-Wp_Drm_Lease_V1 :: distinct u32
-Ext_Background_Effect_Manager_V1 :: distinct u32
-Ext_Background_Effect_Surface_V1 :: distinct u32
-Ext_Data_Control_Manager_V1 :: distinct u32
-Ext_Data_Control_Device_V1 :: distinct u32
-Ext_Data_Control_Source_V1 :: distinct u32
-Ext_Data_Control_Offer_V1 :: distinct u32
-Ext_Foreign_Toplevel_List_V1 :: distinct u32
-Ext_Foreign_Toplevel_Handle_V1 :: distinct u32
-Ext_Idle_Notifier_V1 :: distinct u32
-Ext_Idle_Notification_V1 :: distinct u32
-Ext_Image_Capture_Source_V1 :: distinct u32
-Ext_Output_Image_Capture_Source_Manager_V1 :: distinct u32
-Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1 :: distinct u32
-Ext_Image_Copy_Capture_Manager_V1 :: distinct u32
-Ext_Image_Copy_Capture_Session_V1 :: distinct u32
-Ext_Image_Copy_Capture_Frame_V1 :: distinct u32
-Ext_Image_Copy_Capture_Cursor_Session_V1 :: distinct u32
-Ext_Session_Lock_Manager_V1 :: distinct u32
-Ext_Session_Lock_V1 :: distinct u32
-Ext_Session_Lock_Surface_V1 :: distinct u32
-Ext_Transient_Seat_Manager_V1 :: distinct u32
-Ext_Transient_Seat_V1 :: distinct u32
-Ext_Workspace_Manager_V1 :: distinct u32
-Ext_Workspace_Group_Handle_V1 :: distinct u32
-Ext_Workspace_Handle_V1 :: distinct u32
-Wp_Fifo_Manager_V1 :: distinct u32
-Wp_Fifo_V1 :: distinct u32
-Wp_Fractional_Scale_Manager_V1 :: distinct u32
-Wp_Fractional_Scale_V1 :: distinct u32
-Wp_Linux_Drm_Syncobj_Manager_V1 :: distinct u32
-Wp_Linux_Drm_Syncobj_Timeline_V1 :: distinct u32
-Wp_Linux_Drm_Syncobj_Surface_V1 :: distinct u32
-Wp_Pointer_Warp_V1 :: distinct u32
-Wp_Security_Context_Manager_V1 :: distinct u32
-Wp_Security_Context_V1 :: distinct u32
-Wp_Single_Pixel_Buffer_Manager_V1 :: distinct u32
-Wp_Tearing_Control_Manager_V1 :: distinct u32
-Wp_Tearing_Control_V1 :: distinct u32
-Xdg_Activation_V1 :: distinct u32
-Xdg_Activation_Token_V1 :: distinct u32
-Xdg_Wm_Dialog_V1 :: distinct u32
-Xdg_Dialog_V1 :: distinct u32
-Xdg_System_Bell_V1 :: distinct u32
-Xdg_Toplevel_Drag_Manager_V1 :: distinct u32
-Xdg_Toplevel_Drag_V1 :: distinct u32
-Xdg_Toplevel_Icon_Manager_V1 :: distinct u32
-Xdg_Toplevel_Icon_V1 :: distinct u32
-Xdg_Toplevel_Tag_Manager_V1 :: distinct u32
-Xwayland_Shell_V1 :: distinct u32
-Xwayland_Surface_V1 :: distinct u32
-
-resolve_type :: proc($T: typeid, interface: string, location := #caller_location) -> (type: Object_Type) {
-	switch typeid_of(T) {
-	case Display:
+resolve_type :: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type) {
+	switch t {
+	case wl.Display:
 		assert(interface == "wl_display")
-		return .Display
-	case Registry:
+		return .Wl_Display
+	case wl.Registry:
 		assert(interface == "wl_registry")
-		return .Registry
-	case Callback:
+		return .Wl_Registry
+	case wl.Callback:
 		assert(interface == "wl_callback")
-		return .Callback
-	case Compositor:
+		return .Wl_Callback
+	case wl.Compositor:
 		assert(interface == "wl_compositor")
-		return .Compositor
-	case Shm_Pool:
+		return .Wl_Compositor
+	case wl.Shm_Pool:
 		assert(interface == "wl_shm_pool")
-		return .Shm_Pool
-	case Shm:
+		return .Wl_Shm_Pool
+	case wl.Shm:
 		assert(interface == "wl_shm")
-		return .Shm
-	case Buffer:
+		return .Wl_Shm
+	case wl.Buffer:
 		assert(interface == "wl_buffer")
-		return .Buffer
-	case Data_Offer:
+		return .Wl_Buffer
+	case wl.Data_Offer:
 		assert(interface == "wl_data_offer")
-		return .Data_Offer
-	case Data_Source:
+		return .Wl_Data_Offer
+	case wl.Data_Source:
 		assert(interface == "wl_data_source")
-		return .Data_Source
-	case Data_Device:
+		return .Wl_Data_Source
+	case wl.Data_Device:
 		assert(interface == "wl_data_device")
-		return .Data_Device
-	case Data_Device_Manager:
+		return .Wl_Data_Device
+	case wl.Data_Device_Manager:
 		assert(interface == "wl_data_device_manager")
-		return .Data_Device_Manager
-	case Shell:
+		return .Wl_Data_Device_Manager
+	case wl.Shell:
 		assert(interface == "wl_shell")
-		return .Shell
-	case Shell_Surface:
+		return .Wl_Shell
+	case wl.Shell_Surface:
 		assert(interface == "wl_shell_surface")
-		return .Shell_Surface
-	case Surface:
+		return .Wl_Shell_Surface
+	case wl.Surface:
 		assert(interface == "wl_surface")
-		return .Surface
-	case Seat:
+		return .Wl_Surface
+	case wl.Seat:
 		assert(interface == "wl_seat")
-		return .Seat
-	case Pointer:
+		return .Wl_Seat
+	case wl.Pointer:
 		assert(interface == "wl_pointer")
-		return .Pointer
-	case Keyboard:
+		return .Wl_Pointer
+	case wl.Keyboard:
 		assert(interface == "wl_keyboard")
-		return .Keyboard
-	case Touch:
+		return .Wl_Keyboard
+	case wl.Touch:
 		assert(interface == "wl_touch")
-		return .Touch
-	case Output:
+		return .Wl_Touch
+	case wl.Output:
 		assert(interface == "wl_output")
-		return .Output
-	case Region:
+		return .Wl_Output
+	case wl.Region:
 		assert(interface == "wl_region")
-		return .Region
-	case Subcompositor:
+		return .Wl_Region
+	case wl.Subcompositor:
 		assert(interface == "wl_subcompositor")
-		return .Subcompositor
-	case Subsurface:
+		return .Wl_Subcompositor
+	case wl.Subsurface:
 		assert(interface == "wl_subsurface")
-		return .Subsurface
-	case Fixes:
+		return .Wl_Subsurface
+	case wl.Fixes:
 		assert(interface == "wl_fixes")
-		return .Fixes
-	case Zwp_Linux_Dmabuf_V1:
+		return .Wl_Fixes
+	case zwp.Linux_Dmabuf_V1:
 		assert(interface == "zwp_linux_dmabuf_v1")
 		return .Zwp_Linux_Dmabuf_V1
-	case Zwp_Linux_Buffer_Params_V1:
+	case zwp.Linux_Buffer_Params_V1:
 		assert(interface == "zwp_linux_buffer_params_v1")
 		return .Zwp_Linux_Buffer_Params_V1
-	case Zwp_Linux_Dmabuf_Feedback_V1:
+	case zwp.Linux_Dmabuf_Feedback_V1:
 		assert(interface == "zwp_linux_dmabuf_feedback_v1")
 		return .Zwp_Linux_Dmabuf_Feedback_V1
-	case Wp_Presentation:
+	case wp.Presentation:
 		assert(interface == "wp_presentation")
 		return .Wp_Presentation
-	case Wp_Presentation_Feedback:
+	case wp.Presentation_Feedback:
 		assert(interface == "wp_presentation_feedback")
 		return .Wp_Presentation_Feedback
-	case Zwp_Tablet_Manager_V2:
+	case zwp.Tablet_Manager_V2:
 		assert(interface == "zwp_tablet_manager_v2")
 		return .Zwp_Tablet_Manager_V2
-	case Zwp_Tablet_Seat_V2:
+	case zwp.Tablet_Seat_V2:
 		assert(interface == "zwp_tablet_seat_v2")
 		return .Zwp_Tablet_Seat_V2
-	case Zwp_Tablet_Tool_V2:
+	case zwp.Tablet_Tool_V2:
 		assert(interface == "zwp_tablet_tool_v2")
 		return .Zwp_Tablet_Tool_V2
-	case Zwp_Tablet_V2:
+	case zwp.Tablet_V2:
 		assert(interface == "zwp_tablet_v2")
 		return .Zwp_Tablet_V2
-	case Zwp_Tablet_Pad_Ring_V2:
+	case zwp.Tablet_Pad_Ring_V2:
 		assert(interface == "zwp_tablet_pad_ring_v2")
 		return .Zwp_Tablet_Pad_Ring_V2
-	case Zwp_Tablet_Pad_Strip_V2:
+	case zwp.Tablet_Pad_Strip_V2:
 		assert(interface == "zwp_tablet_pad_strip_v2")
 		return .Zwp_Tablet_Pad_Strip_V2
-	case Zwp_Tablet_Pad_Group_V2:
+	case zwp.Tablet_Pad_Group_V2:
 		assert(interface == "zwp_tablet_pad_group_v2")
 		return .Zwp_Tablet_Pad_Group_V2
-	case Zwp_Tablet_Pad_V2:
+	case zwp.Tablet_Pad_V2:
 		assert(interface == "zwp_tablet_pad_v2")
 		return .Zwp_Tablet_Pad_V2
-	case Zwp_Tablet_Pad_Dial_V2:
+	case zwp.Tablet_Pad_Dial_V2:
 		assert(interface == "zwp_tablet_pad_dial_v2")
 		return .Zwp_Tablet_Pad_Dial_V2
-	case Wp_Viewporter:
+	case wp.Viewporter:
 		assert(interface == "wp_viewporter")
 		return .Wp_Viewporter
-	case Wp_Viewport:
+	case wp.Viewport:
 		assert(interface == "wp_viewport")
 		return .Wp_Viewport
-	case Xdg_Wm_Base:
+	case xdg.Wm_Base:
 		assert(interface == "xdg_wm_base")
 		return .Xdg_Wm_Base
-	case Xdg_Positioner:
+	case xdg.Positioner:
 		assert(interface == "xdg_positioner")
 		return .Xdg_Positioner
-	case Xdg_Surface:
+	case xdg.Surface:
 		assert(interface == "xdg_surface")
 		return .Xdg_Surface
-	case Xdg_Toplevel:
+	case xdg.Toplevel:
 		assert(interface == "xdg_toplevel")
 		return .Xdg_Toplevel
-	case Xdg_Popup:
+	case xdg.Popup:
 		assert(interface == "xdg_popup")
 		return .Xdg_Popup
-	case Wp_Alpha_Modifier_V1:
+	case wp.Alpha_Modifier_V1:
 		assert(interface == "wp_alpha_modifier_v1")
 		return .Wp_Alpha_Modifier_V1
-	case Wp_Alpha_Modifier_Surface_V1:
+	case wp.Alpha_Modifier_Surface_V1:
 		assert(interface == "wp_alpha_modifier_surface_v1")
 		return .Wp_Alpha_Modifier_Surface_V1
-	case Wp_Color_Manager_V1:
+	case wp.Color_Manager_V1:
 		assert(interface == "wp_color_manager_v1")
 		return .Wp_Color_Manager_V1
-	case Wp_Color_Management_Output_V1:
+	case wp.Color_Management_Output_V1:
 		assert(interface == "wp_color_management_output_v1")
 		return .Wp_Color_Management_Output_V1
-	case Wp_Color_Management_Surface_V1:
+	case wp.Color_Management_Surface_V1:
 		assert(interface == "wp_color_management_surface_v1")
 		return .Wp_Color_Management_Surface_V1
-	case Wp_Color_Management_Surface_Feedback_V1:
+	case wp.Color_Management_Surface_Feedback_V1:
 		assert(interface == "wp_color_management_surface_feedback_v1")
 		return .Wp_Color_Management_Surface_Feedback_V1
-	case Wp_Image_Description_Creator_Icc_V1:
+	case wp.Image_Description_Creator_Icc_V1:
 		assert(interface == "wp_image_description_creator_icc_v1")
 		return .Wp_Image_Description_Creator_Icc_V1
-	case Wp_Image_Description_Creator_Params_V1:
+	case wp.Image_Description_Creator_Params_V1:
 		assert(interface == "wp_image_description_creator_params_v1")
 		return .Wp_Image_Description_Creator_Params_V1
-	case Wp_Image_Description_V1:
+	case wp.Image_Description_V1:
 		assert(interface == "wp_image_description_v1")
 		return .Wp_Image_Description_V1
-	case Wp_Image_Description_Info_V1:
+	case wp.Image_Description_Info_V1:
 		assert(interface == "wp_image_description_info_v1")
 		return .Wp_Image_Description_Info_V1
-	case Wp_Image_Description_Reference_V1:
+	case wp.Image_Description_Reference_V1:
 		assert(interface == "wp_image_description_reference_v1")
 		return .Wp_Image_Description_Reference_V1
-	case Wp_Color_Representation_Manager_V1:
+	case wp.Color_Representation_Manager_V1:
 		assert(interface == "wp_color_representation_manager_v1")
 		return .Wp_Color_Representation_Manager_V1
-	case Wp_Color_Representation_Surface_V1:
+	case wp.Color_Representation_Surface_V1:
 		assert(interface == "wp_color_representation_surface_v1")
 		return .Wp_Color_Representation_Surface_V1
-	case Wp_Commit_Timing_Manager_V1:
+	case wp.Commit_Timing_Manager_V1:
 		assert(interface == "wp_commit_timing_manager_v1")
 		return .Wp_Commit_Timing_Manager_V1
-	case Wp_Commit_Timer_V1:
+	case wp.Commit_Timer_V1:
 		assert(interface == "wp_commit_timer_v1")
 		return .Wp_Commit_Timer_V1
-	case Wp_Content_Type_Manager_V1:
+	case wp.Content_Type_Manager_V1:
 		assert(interface == "wp_content_type_manager_v1")
 		return .Wp_Content_Type_Manager_V1
-	case Wp_Content_Type_V1:
+	case wp.Content_Type_V1:
 		assert(interface == "wp_content_type_v1")
 		return .Wp_Content_Type_V1
-	case Wp_Cursor_Shape_Manager_V1:
+	case wp.Cursor_Shape_Manager_V1:
 		assert(interface == "wp_cursor_shape_manager_v1")
 		return .Wp_Cursor_Shape_Manager_V1
-	case Wp_Cursor_Shape_Device_V1:
+	case wp.Cursor_Shape_Device_V1:
 		assert(interface == "wp_cursor_shape_device_v1")
 		return .Wp_Cursor_Shape_Device_V1
-	case Wp_Drm_Lease_Device_V1:
+	case wp.Drm_Lease_Device_V1:
 		assert(interface == "wp_drm_lease_device_v1")
 		return .Wp_Drm_Lease_Device_V1
-	case Wp_Drm_Lease_Connector_V1:
+	case wp.Drm_Lease_Connector_V1:
 		assert(interface == "wp_drm_lease_connector_v1")
 		return .Wp_Drm_Lease_Connector_V1
-	case Wp_Drm_Lease_Request_V1:
+	case wp.Drm_Lease_Request_V1:
 		assert(interface == "wp_drm_lease_request_v1")
 		return .Wp_Drm_Lease_Request_V1
-	case Wp_Drm_Lease_V1:
+	case wp.Drm_Lease_V1:
 		assert(interface == "wp_drm_lease_v1")
 		return .Wp_Drm_Lease_V1
-	case Ext_Background_Effect_Manager_V1:
+	case ext.Background_Effect_Manager_V1:
 		assert(interface == "ext_background_effect_manager_v1")
 		return .Ext_Background_Effect_Manager_V1
-	case Ext_Background_Effect_Surface_V1:
+	case ext.Background_Effect_Surface_V1:
 		assert(interface == "ext_background_effect_surface_v1")
 		return .Ext_Background_Effect_Surface_V1
-	case Ext_Data_Control_Manager_V1:
+	case ext.Data_Control_Manager_V1:
 		assert(interface == "ext_data_control_manager_v1")
 		return .Ext_Data_Control_Manager_V1
-	case Ext_Data_Control_Device_V1:
+	case ext.Data_Control_Device_V1:
 		assert(interface == "ext_data_control_device_v1")
 		return .Ext_Data_Control_Device_V1
-	case Ext_Data_Control_Source_V1:
+	case ext.Data_Control_Source_V1:
 		assert(interface == "ext_data_control_source_v1")
 		return .Ext_Data_Control_Source_V1
-	case Ext_Data_Control_Offer_V1:
+	case ext.Data_Control_Offer_V1:
 		assert(interface == "ext_data_control_offer_v1")
 		return .Ext_Data_Control_Offer_V1
-	case Ext_Foreign_Toplevel_List_V1:
+	case ext.Foreign_Toplevel_List_V1:
 		assert(interface == "ext_foreign_toplevel_list_v1")
 		return .Ext_Foreign_Toplevel_List_V1
-	case Ext_Foreign_Toplevel_Handle_V1:
+	case ext.Foreign_Toplevel_Handle_V1:
 		assert(interface == "ext_foreign_toplevel_handle_v1")
 		return .Ext_Foreign_Toplevel_Handle_V1
-	case Ext_Idle_Notifier_V1:
+	case ext.Idle_Notifier_V1:
 		assert(interface == "ext_idle_notifier_v1")
 		return .Ext_Idle_Notifier_V1
-	case Ext_Idle_Notification_V1:
+	case ext.Idle_Notification_V1:
 		assert(interface == "ext_idle_notification_v1")
 		return .Ext_Idle_Notification_V1
-	case Ext_Image_Capture_Source_V1:
+	case ext.Image_Capture_Source_V1:
 		assert(interface == "ext_image_capture_source_v1")
 		return .Ext_Image_Capture_Source_V1
-	case Ext_Output_Image_Capture_Source_Manager_V1:
+	case ext.Output_Image_Capture_Source_Manager_V1:
 		assert(interface == "ext_output_image_capture_source_manager_v1")
 		return .Ext_Output_Image_Capture_Source_Manager_V1
-	case Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1:
+	case ext.Foreign_Toplevel_Image_Capture_Source_Manager_V1:
 		assert(interface == "ext_foreign_toplevel_image_capture_source_manager_v1")
 		return .Ext_Foreign_Toplevel_Image_Capture_Source_Manager_V1
-	case Ext_Image_Copy_Capture_Manager_V1:
+	case ext.Image_Copy_Capture_Manager_V1:
 		assert(interface == "ext_image_copy_capture_manager_v1")
 		return .Ext_Image_Copy_Capture_Manager_V1
-	case Ext_Image_Copy_Capture_Session_V1:
+	case ext.Image_Copy_Capture_Session_V1:
 		assert(interface == "ext_image_copy_capture_session_v1")
 		return .Ext_Image_Copy_Capture_Session_V1
-	case Ext_Image_Copy_Capture_Frame_V1:
+	case ext.Image_Copy_Capture_Frame_V1:
 		assert(interface == "ext_image_copy_capture_frame_v1")
 		return .Ext_Image_Copy_Capture_Frame_V1
-	case Ext_Image_Copy_Capture_Cursor_Session_V1:
+	case ext.Image_Copy_Capture_Cursor_Session_V1:
 		assert(interface == "ext_image_copy_capture_cursor_session_v1")
 		return .Ext_Image_Copy_Capture_Cursor_Session_V1
-	case Ext_Session_Lock_Manager_V1:
+	case ext.Session_Lock_Manager_V1:
 		assert(interface == "ext_session_lock_manager_v1")
 		return .Ext_Session_Lock_Manager_V1
-	case Ext_Session_Lock_V1:
+	case ext.Session_Lock_V1:
 		assert(interface == "ext_session_lock_v1")
 		return .Ext_Session_Lock_V1
-	case Ext_Session_Lock_Surface_V1:
+	case ext.Session_Lock_Surface_V1:
 		assert(interface == "ext_session_lock_surface_v1")
 		return .Ext_Session_Lock_Surface_V1
-	case Ext_Transient_Seat_Manager_V1:
+	case ext.Transient_Seat_Manager_V1:
 		assert(interface == "ext_transient_seat_manager_v1")
 		return .Ext_Transient_Seat_Manager_V1
-	case Ext_Transient_Seat_V1:
+	case ext.Transient_Seat_V1:
 		assert(interface == "ext_transient_seat_v1")
 		return .Ext_Transient_Seat_V1
-	case Ext_Workspace_Manager_V1:
+	case ext.Workspace_Manager_V1:
 		assert(interface == "ext_workspace_manager_v1")
 		return .Ext_Workspace_Manager_V1
-	case Ext_Workspace_Group_Handle_V1:
+	case ext.Workspace_Group_Handle_V1:
 		assert(interface == "ext_workspace_group_handle_v1")
 		return .Ext_Workspace_Group_Handle_V1
-	case Ext_Workspace_Handle_V1:
+	case ext.Workspace_Handle_V1:
 		assert(interface == "ext_workspace_handle_v1")
 		return .Ext_Workspace_Handle_V1
-	case Wp_Fifo_Manager_V1:
+	case wp.Fifo_Manager_V1:
 		assert(interface == "wp_fifo_manager_v1")
 		return .Wp_Fifo_Manager_V1
-	case Wp_Fifo_V1:
+	case wp.Fifo_V1:
 		assert(interface == "wp_fifo_v1")
 		return .Wp_Fifo_V1
-	case Wp_Fractional_Scale_Manager_V1:
+	case wp.Fractional_Scale_Manager_V1:
 		assert(interface == "wp_fractional_scale_manager_v1")
 		return .Wp_Fractional_Scale_Manager_V1
-	case Wp_Fractional_Scale_V1:
+	case wp.Fractional_Scale_V1:
 		assert(interface == "wp_fractional_scale_v1")
 		return .Wp_Fractional_Scale_V1
-	case Wp_Linux_Drm_Syncobj_Manager_V1:
+	case wp.Linux_Drm_Syncobj_Manager_V1:
 		assert(interface == "wp_linux_drm_syncobj_manager_v1")
 		return .Wp_Linux_Drm_Syncobj_Manager_V1
-	case Wp_Linux_Drm_Syncobj_Timeline_V1:
+	case wp.Linux_Drm_Syncobj_Timeline_V1:
 		assert(interface == "wp_linux_drm_syncobj_timeline_v1")
 		return .Wp_Linux_Drm_Syncobj_Timeline_V1
-	case Wp_Linux_Drm_Syncobj_Surface_V1:
+	case wp.Linux_Drm_Syncobj_Surface_V1:
 		assert(interface == "wp_linux_drm_syncobj_surface_v1")
 		return .Wp_Linux_Drm_Syncobj_Surface_V1
-	case Wp_Pointer_Warp_V1:
+	case wp.Pointer_Warp_V1:
 		assert(interface == "wp_pointer_warp_v1")
 		return .Wp_Pointer_Warp_V1
-	case Wp_Security_Context_Manager_V1:
+	case wp.Security_Context_Manager_V1:
 		assert(interface == "wp_security_context_manager_v1")
 		return .Wp_Security_Context_Manager_V1
-	case Wp_Security_Context_V1:
+	case wp.Security_Context_V1:
 		assert(interface == "wp_security_context_v1")
 		return .Wp_Security_Context_V1
-	case Wp_Single_Pixel_Buffer_Manager_V1:
+	case wp.Single_Pixel_Buffer_Manager_V1:
 		assert(interface == "wp_single_pixel_buffer_manager_v1")
 		return .Wp_Single_Pixel_Buffer_Manager_V1
-	case Wp_Tearing_Control_Manager_V1:
+	case wp.Tearing_Control_Manager_V1:
 		assert(interface == "wp_tearing_control_manager_v1")
 		return .Wp_Tearing_Control_Manager_V1
-	case Wp_Tearing_Control_V1:
+	case wp.Tearing_Control_V1:
 		assert(interface == "wp_tearing_control_v1")
 		return .Wp_Tearing_Control_V1
-	case Xdg_Activation_V1:
+	case xdg.Activation_V1:
 		assert(interface == "xdg_activation_v1")
 		return .Xdg_Activation_V1
-	case Xdg_Activation_Token_V1:
+	case xdg.Activation_Token_V1:
 		assert(interface == "xdg_activation_token_v1")
 		return .Xdg_Activation_Token_V1
-	case Xdg_Wm_Dialog_V1:
+	case xdg.Wm_Dialog_V1:
 		assert(interface == "xdg_wm_dialog_v1")
 		return .Xdg_Wm_Dialog_V1
-	case Xdg_Dialog_V1:
+	case xdg.Dialog_V1:
 		assert(interface == "xdg_dialog_v1")
 		return .Xdg_Dialog_V1
-	case Xdg_System_Bell_V1:
+	case xdg.System_Bell_V1:
 		assert(interface == "xdg_system_bell_v1")
 		return .Xdg_System_Bell_V1
-	case Xdg_Toplevel_Drag_Manager_V1:
+	case xdg.Toplevel_Drag_Manager_V1:
 		assert(interface == "xdg_toplevel_drag_manager_v1")
 		return .Xdg_Toplevel_Drag_Manager_V1
-	case Xdg_Toplevel_Drag_V1:
+	case xdg.Toplevel_Drag_V1:
 		assert(interface == "xdg_toplevel_drag_v1")
 		return .Xdg_Toplevel_Drag_V1
-	case Xdg_Toplevel_Icon_Manager_V1:
+	case xdg.Toplevel_Icon_Manager_V1:
 		assert(interface == "xdg_toplevel_icon_manager_v1")
 		return .Xdg_Toplevel_Icon_Manager_V1
-	case Xdg_Toplevel_Icon_V1:
+	case xdg.Toplevel_Icon_V1:
 		assert(interface == "xdg_toplevel_icon_v1")
 		return .Xdg_Toplevel_Icon_V1
-	case Xdg_Toplevel_Tag_Manager_V1:
+	case xdg.Toplevel_Tag_Manager_V1:
 		assert(interface == "xdg_toplevel_tag_manager_v1")
 		return .Xdg_Toplevel_Tag_Manager_V1
-	case Xwayland_Shell_V1:
+	case xwayland.Shell_V1:
 		assert(interface == "xwayland_shell_v1")
 		return .Xwayland_Shell_V1
-	case Xwayland_Surface_V1:
+	case xwayland.Surface_V1:
 		assert(interface == "xwayland_surface_v1")
 		return .Xwayland_Surface_V1
+
 	case:
 		panic("Invalid type", location)
 	}
 }
-
