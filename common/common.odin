@@ -64,8 +64,8 @@ read_int :: proc(connection: ^Connection, data: ^$T) -> bool where intrinsics.ty
 
 read_f64 :: proc(connection: ^Connection, data: ^f64) -> bool {
 	value: bit_field u32 {
-		integer: i32 | 24,
 		decimal: i32 | 8,
+		integer: i32 | 24,
 	}
 	intrinsics.mem_copy(&value, &connection.buffer_in[connection.start_in], size_of(value))
 	connection.start_in += 4
