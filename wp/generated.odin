@@ -4,8 +4,8 @@ import "base:intrinsics"
 
 import "../common"
 
-import "../zwp"
 import "../wl"
+import "../zwp"
 
 Connection           :: common.Connection
 Fd                   :: common.Fd
@@ -23,6 +23,47 @@ read_fd              :: common.read_fd
 
 resolve_type: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type)
 
+
+PRESENTATION_INTERFACE :: "wp_presentation"
+PRESENTATION_FEEDBACK_INTERFACE :: "wp_presentation_feedback"
+VIEWPORTER_INTERFACE :: "wp_viewporter"
+VIEWPORT_INTERFACE :: "wp_viewport"
+ALPHA_MODIFIER_V1_INTERFACE :: "wp_alpha_modifier_v1"
+ALPHA_MODIFIER_SURFACE_V1_INTERFACE :: "wp_alpha_modifier_surface_v1"
+COLOR_MANAGER_V1_INTERFACE :: "wp_color_manager_v1"
+COLOR_MANAGEMENT_OUTPUT_V1_INTERFACE :: "wp_color_management_output_v1"
+COLOR_MANAGEMENT_SURFACE_V1_INTERFACE :: "wp_color_management_surface_v1"
+COLOR_MANAGEMENT_SURFACE_FEEDBACK_V1_INTERFACE :: "wp_color_management_surface_feedback_v1"
+IMAGE_DESCRIPTION_CREATOR_ICC_V1_INTERFACE :: "wp_image_description_creator_icc_v1"
+IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_INTERFACE :: "wp_image_description_creator_params_v1"
+IMAGE_DESCRIPTION_V1_INTERFACE :: "wp_image_description_v1"
+IMAGE_DESCRIPTION_INFO_V1_INTERFACE :: "wp_image_description_info_v1"
+IMAGE_DESCRIPTION_REFERENCE_V1_INTERFACE :: "wp_image_description_reference_v1"
+COLOR_REPRESENTATION_MANAGER_V1_INTERFACE :: "wp_color_representation_manager_v1"
+COLOR_REPRESENTATION_SURFACE_V1_INTERFACE :: "wp_color_representation_surface_v1"
+COMMIT_TIMING_MANAGER_V1_INTERFACE :: "wp_commit_timing_manager_v1"
+COMMIT_TIMER_V1_INTERFACE :: "wp_commit_timer_v1"
+CONTENT_TYPE_MANAGER_V1_INTERFACE :: "wp_content_type_manager_v1"
+CONTENT_TYPE_V1_INTERFACE :: "wp_content_type_v1"
+CURSOR_SHAPE_MANAGER_V1_INTERFACE :: "wp_cursor_shape_manager_v1"
+CURSOR_SHAPE_DEVICE_V1_INTERFACE :: "wp_cursor_shape_device_v1"
+DRM_LEASE_DEVICE_V1_INTERFACE :: "wp_drm_lease_device_v1"
+DRM_LEASE_CONNECTOR_V1_INTERFACE :: "wp_drm_lease_connector_v1"
+DRM_LEASE_REQUEST_V1_INTERFACE :: "wp_drm_lease_request_v1"
+DRM_LEASE_V1_INTERFACE :: "wp_drm_lease_v1"
+FIFO_MANAGER_V1_INTERFACE :: "wp_fifo_manager_v1"
+FIFO_V1_INTERFACE :: "wp_fifo_v1"
+FRACTIONAL_SCALE_MANAGER_V1_INTERFACE :: "wp_fractional_scale_manager_v1"
+FRACTIONAL_SCALE_V1_INTERFACE :: "wp_fractional_scale_v1"
+LINUX_DRM_SYNCOBJ_MANAGER_V1_INTERFACE :: "wp_linux_drm_syncobj_manager_v1"
+LINUX_DRM_SYNCOBJ_TIMELINE_V1_INTERFACE :: "wp_linux_drm_syncobj_timeline_v1"
+LINUX_DRM_SYNCOBJ_SURFACE_V1_INTERFACE :: "wp_linux_drm_syncobj_surface_v1"
+POINTER_WARP_V1_INTERFACE :: "wp_pointer_warp_v1"
+SECURITY_CONTEXT_MANAGER_V1_INTERFACE :: "wp_security_context_manager_v1"
+SECURITY_CONTEXT_V1_INTERFACE :: "wp_security_context_v1"
+SINGLE_PIXEL_BUFFER_MANAGER_V1_INTERFACE :: "wp_single_pixel_buffer_manager_v1"
+TEARING_CONTROL_MANAGER_V1_INTERFACE :: "wp_tearing_control_manager_v1"
+TEARING_CONTROL_V1_INTERFACE :: "wp_tearing_control_v1"
 
 Presentation_Error :: enum u32 {
 	// invalid value in tv_nsec

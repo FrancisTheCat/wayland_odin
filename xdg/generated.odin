@@ -23,6 +23,22 @@ read_fd              :: common.read_fd
 resolve_type: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type)
 
 
+WM_BASE_INTERFACE :: "xdg_wm_base"
+POSITIONER_INTERFACE :: "xdg_positioner"
+SURFACE_INTERFACE :: "xdg_surface"
+TOPLEVEL_INTERFACE :: "xdg_toplevel"
+POPUP_INTERFACE :: "xdg_popup"
+ACTIVATION_V1_INTERFACE :: "xdg_activation_v1"
+ACTIVATION_TOKEN_V1_INTERFACE :: "xdg_activation_token_v1"
+WM_DIALOG_V1_INTERFACE :: "xdg_wm_dialog_v1"
+DIALOG_V1_INTERFACE :: "xdg_dialog_v1"
+SYSTEM_BELL_V1_INTERFACE :: "xdg_system_bell_v1"
+TOPLEVEL_DRAG_MANAGER_V1_INTERFACE :: "xdg_toplevel_drag_manager_v1"
+TOPLEVEL_DRAG_V1_INTERFACE :: "xdg_toplevel_drag_v1"
+TOPLEVEL_ICON_MANAGER_V1_INTERFACE :: "xdg_toplevel_icon_manager_v1"
+TOPLEVEL_ICON_V1_INTERFACE :: "xdg_toplevel_icon_v1"
+TOPLEVEL_TAG_MANAGER_V1_INTERFACE :: "xdg_toplevel_tag_manager_v1"
+
 Wm_Base_Error :: enum u32 {
 	// given wl_surface has another role
 	Role = 0,

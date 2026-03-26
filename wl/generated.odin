@@ -22,6 +22,30 @@ read_fd              :: common.read_fd
 resolve_type: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type)
 
 
+DISPLAY_INTERFACE :: "wl_display"
+REGISTRY_INTERFACE :: "wl_registry"
+CALLBACK_INTERFACE :: "wl_callback"
+COMPOSITOR_INTERFACE :: "wl_compositor"
+SHM_POOL_INTERFACE :: "wl_shm_pool"
+SHM_INTERFACE :: "wl_shm"
+BUFFER_INTERFACE :: "wl_buffer"
+DATA_OFFER_INTERFACE :: "wl_data_offer"
+DATA_SOURCE_INTERFACE :: "wl_data_source"
+DATA_DEVICE_INTERFACE :: "wl_data_device"
+DATA_DEVICE_MANAGER_INTERFACE :: "wl_data_device_manager"
+SHELL_INTERFACE :: "wl_shell"
+SHELL_SURFACE_INTERFACE :: "wl_shell_surface"
+SURFACE_INTERFACE :: "wl_surface"
+SEAT_INTERFACE :: "wl_seat"
+POINTER_INTERFACE :: "wl_pointer"
+KEYBOARD_INTERFACE :: "wl_keyboard"
+TOUCH_INTERFACE :: "wl_touch"
+OUTPUT_INTERFACE :: "wl_output"
+REGION_INTERFACE :: "wl_region"
+SUBCOMPOSITOR_INTERFACE :: "wl_subcompositor"
+SUBSURFACE_INTERFACE :: "wl_subsurface"
+FIXES_INTERFACE :: "wl_fixes"
+
 Display_Error :: enum u32 {
 	// server couldn't find object
 	Invalid_Object = 0,

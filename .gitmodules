@@ -4,3 +4,6 @@
 [submodule "wayland-protocols"]
 	path = wayland-protocols
 	url = https://gitlab.freedesktop.org/wayland/wayland-protocols
+[submodule "wayland_odin"]
+	path = wayland_odin
+	url = https://github.com/francisthecat/wayland_odin

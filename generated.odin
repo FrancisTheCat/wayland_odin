@@ -3,9 +3,9 @@ package wayland
 import "ext"
 import "wl"
 import "wp"
-import "zwp"
 import "xdg"
 import "xwayland"
+import "zwp"
 
 Event :: union {
 	wl.Display_Error_Event,

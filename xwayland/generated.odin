@@ -23,6 +23,9 @@ read_fd              :: common.read_fd
 resolve_type: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type)
 
 
+SHELL_V1_INTERFACE :: "xwayland_shell_v1"
+SURFACE_V1_INTERFACE :: "xwayland_surface_v1"
+
 Shell_V1_Error :: enum u32 {
 	// given wl_surface has another role
 	Role = 0,

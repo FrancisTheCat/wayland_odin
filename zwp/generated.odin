@@ -23,6 +23,19 @@ read_fd              :: common.read_fd
 resolve_type: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type)
 
 
+LINUX_DMABUF_V1_INTERFACE :: "zwp_linux_dmabuf_v1"
+LINUX_BUFFER_PARAMS_V1_INTERFACE :: "zwp_linux_buffer_params_v1"
+LINUX_DMABUF_FEEDBACK_V1_INTERFACE :: "zwp_linux_dmabuf_feedback_v1"
+TABLET_MANAGER_V2_INTERFACE :: "zwp_tablet_manager_v2"
+TABLET_SEAT_V2_INTERFACE :: "zwp_tablet_seat_v2"
+TABLET_TOOL_V2_INTERFACE :: "zwp_tablet_tool_v2"
+TABLET_V2_INTERFACE :: "zwp_tablet_v2"
+TABLET_PAD_RING_V2_INTERFACE :: "zwp_tablet_pad_ring_v2"
+TABLET_PAD_STRIP_V2_INTERFACE :: "zwp_tablet_pad_strip_v2"
+TABLET_PAD_GROUP_V2_INTERFACE :: "zwp_tablet_pad_group_v2"
+TABLET_PAD_V2_INTERFACE :: "zwp_tablet_pad_v2"
+TABLET_PAD_DIAL_V2_INTERFACE :: "zwp_tablet_pad_dial_v2"
+
 Linux_Buffer_Params_V1_Error :: enum u32 {
 	// the dmabuf_batch object has already been used to create a wl_buffer
 	Already_Used = 0,

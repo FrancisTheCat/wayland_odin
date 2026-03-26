@@ -73,25 +73,25 @@ main :: proc() {
 			#partial switch e in event {
 			case wl.Registry_Global_Event:
 				switch e.interface {
-				case "wl_shm":
+				case wl.SHM_INTERFACE:
 					shm       = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Shm)
 					pool      = wl.shm_create_pool(&connection, shm, wl.Fd(framebuffer_fd), WIDTH * HEIGHT * size_of([4]byte))
 					wl_buffer = wl.shm_pool_create_buffer(&connection, pool, 0, WIDTH, HEIGHT, WIDTH * size_of([4]byte), .Argb8888)
 					fmt.println("shm:", shm)
 					fmt.println("pool:", pool)
 					fmt.println("wl_buffer:", wl_buffer)
-				case "xdg_wm_base":
+				case xdg.WM_BASE_INTERFACE:
 					xdg_wm_base = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, xdg.Wm_Base)
 					fmt.println("xdg_wm_base:", xdg_wm_base)
-				case "wp_cursor_shape_manager_v1":
+				case wp.CURSOR_SHAPE_MANAGER_V1_INTERFACE:
 					cursor_shape_manager = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wp.Cursor_Shape_Manager_V1)
 					fmt.println("cursor_shape_manager:", cursor_shape_manager)
-				case "wl_seat":
+				case wl.SEAT_INTERFACE:
 					seat = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Seat)
 					fmt.println("seat:", seat)
 					pointer = wl.seat_get_pointer(&connection, seat)
 					fmt.println("pointer:", pointer)
-				case "wl_compositor":
+				case wl.COMPOSITOR_INTERFACE:
 					compositor = wl.registry_bind(&connection, registry, e.name, e.interface, e.version, wl.Compositor)
 					fmt.println("compositor:", compositor)
 				}

@@ -2,6 +2,7 @@ package generator
 
 import "core:encoding/xml"
 import "core:fmt"
+import "core:slice"
 import "core:strings"
 import "core:strconv"
 import "core:io"
@@ -19,6 +20,7 @@ main :: proc() {
 		parser_builder:      ^strings.Builder,
 		enums_builder:        strings.Builder,
 		objects_builder:      strings.Builder,
+		interfaces_builder:   strings.Builder,
 		object_enum_builder: ^strings.Builder,
 		resolution_builder:  ^strings.Builder,
 		object_name:          string,
@@ -437,6 +439,8 @@ main :: proc() {
 					ctx = &ctx_map[namespace]
 				}
 
+				fmt.sbprintfln(&ctx.interfaces_builder, `%v_INTERFACE :: "%v"`, strings.to_upper(name), raw_name)
+
 				ctx.raw_object_name  = raw_name
 				ctx.object_name      = strings.trim_prefix(name, ctx.namespace)
 				ctx.object_type_name = strings.to_ada_case(name)
@@ -469,7 +473,9 @@ import "base:intrinsics"
 import "../common"
 `, namespace)
 
-		for import_ in ctx.imports {
+		imports, _ := slice.map_keys(ctx.imports)
+		slice.sort(imports)
+		for import_ in imports {
 			fmt.wprintfln(output_writer, "import \"../%v\"", import_)
 		}
 
@@ -492,6 +498,7 @@ resolve_type: proc(t: typeid, interface: string, location := #caller_location) -
 
 `)
 
+		fmt.wprintln(output_writer, strings.to_string(ctx.interfaces_builder))
 		fmt.wprintln(output_writer, strings.to_string(ctx.enums_builder))
 		fmt.wprintln(output_writer, strings.to_string(ctx.requests_builder))
 		fmt.wprintln(output_writer, strings.to_string(ctx.event_types_builder))
@@ -521,7 +528,10 @@ resolve_type: proc(t: typeid, interface: string, location := #caller_location) -
 	)
 
 	fmt.wprintln(output_writer, "package wayland\n")
-	for namespace, _ in ctx_map {
+
+	namespaces, _ := slice.map_keys(ctx_map)
+	slice.sort(namespaces)
+	for namespace in namespaces {
 		fmt.wprintfln(output_writer, "import \"%v\"", namespace)
 	}
 	fmt.wprintln(output_writer, "\nEvent :: union {")

@@ -23,6 +23,32 @@ read_fd              :: common.read_fd
 resolve_type: proc(t: typeid, interface: string, location := #caller_location) -> (type: Object_Type)
 
 
+BACKGROUND_EFFECT_MANAGER_V1_INTERFACE :: "ext_background_effect_manager_v1"
+BACKGROUND_EFFECT_SURFACE_V1_INTERFACE :: "ext_background_effect_surface_v1"
+DATA_CONTROL_MANAGER_V1_INTERFACE :: "ext_data_control_manager_v1"
+DATA_CONTROL_DEVICE_V1_INTERFACE :: "ext_data_control_device_v1"
+DATA_CONTROL_SOURCE_V1_INTERFACE :: "ext_data_control_source_v1"
+DATA_CONTROL_OFFER_V1_INTERFACE :: "ext_data_control_offer_v1"
+FOREIGN_TOPLEVEL_LIST_V1_INTERFACE :: "ext_foreign_toplevel_list_v1"
+FOREIGN_TOPLEVEL_HANDLE_V1_INTERFACE :: "ext_foreign_toplevel_handle_v1"
+IDLE_NOTIFIER_V1_INTERFACE :: "ext_idle_notifier_v1"
+IDLE_NOTIFICATION_V1_INTERFACE :: "ext_idle_notification_v1"
+IMAGE_CAPTURE_SOURCE_V1_INTERFACE :: "ext_image_capture_source_v1"
+OUTPUT_IMAGE_CAPTURE_SOURCE_MANAGER_V1_INTERFACE :: "ext_output_image_capture_source_manager_v1"
+FOREIGN_TOPLEVEL_IMAGE_CAPTURE_SOURCE_MANAGER_V1_INTERFACE :: "ext_foreign_toplevel_image_capture_source_manager_v1"
+IMAGE_COPY_CAPTURE_MANAGER_V1_INTERFACE :: "ext_image_copy_capture_manager_v1"
+IMAGE_COPY_CAPTURE_SESSION_V1_INTERFACE :: "ext_image_copy_capture_session_v1"
+IMAGE_COPY_CAPTURE_FRAME_V1_INTERFACE :: "ext_image_copy_capture_frame_v1"
+IMAGE_COPY_CAPTURE_CURSOR_SESSION_V1_INTERFACE :: "ext_image_copy_capture_cursor_session_v1"
+SESSION_LOCK_MANAGER_V1_INTERFACE :: "ext_session_lock_manager_v1"
+SESSION_LOCK_V1_INTERFACE :: "ext_session_lock_v1"
+SESSION_LOCK_SURFACE_V1_INTERFACE :: "ext_session_lock_surface_v1"
+TRANSIENT_SEAT_MANAGER_V1_INTERFACE :: "ext_transient_seat_manager_v1"
+TRANSIENT_SEAT_V1_INTERFACE :: "ext_transient_seat_v1"
+WORKSPACE_MANAGER_V1_INTERFACE :: "ext_workspace_manager_v1"
+WORKSPACE_GROUP_HANDLE_V1_INTERFACE :: "ext_workspace_group_handle_v1"
+WORKSPACE_HANDLE_V1_INTERFACE :: "ext_workspace_handle_v1"
+
 Background_Effect_Manager_V1_Error :: enum u32 {
 	// the surface already has a background effect object
 	Background_Effect_Exists = 0,
